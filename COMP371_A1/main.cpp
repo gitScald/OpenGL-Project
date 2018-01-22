@@ -139,7 +139,7 @@ void Camera::move(CAMERA_MOVEMENT direction) {
         position += up_world * move_speed_curr;
         break;
     case DOWNWARD:
-        position -= up_camera * move_speed_curr;
+        position -= up_world * move_speed_curr;
         break;
     }
 }
