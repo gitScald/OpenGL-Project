@@ -17,6 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 // constants
 const GLuint GL_VERSION_MAJOR = 3;
@@ -26,7 +27,7 @@ const GLuint SCREEN_HEIGHT = 800;
 const GLfloat ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT;
 const std::string WINDOW_TITLE = "COMP 371 Assignment 1";
 const GLfloat Z_NEAR = 0.1f;
-const GLfloat Z_FAR = 100.0f;
+const GLfloat Z_FAR = 1000.0f;
 const GLfloat MAX_PITCH = 89.0f;
 const GLfloat MAX_FOV = 45.0f;
 const GLfloat MIN_FOV = 1.0f;
@@ -95,7 +96,7 @@ private:
     GLfloat mouse_x{ SCREEN_WIDTH / 2.0f };
     GLfloat mouse_y{ SCREEN_HEIGHT / 2.0f };
     GLfloat mouse_yaw{ -180.0f };
-    GLfloat mouse_pitch{ 0.0f };
+    GLfloat mouse_pitch{ -89.0f };
     GLfloat move_speed_base{ 2.5f };
     GLfloat move_speed_curr{ move_speed_base };
     GLfloat mouse_sensitivity{ 0.1f };
@@ -106,7 +107,7 @@ private:
 void Camera::clamp_pitch() {
     // avoid the camera from looking upside down
     if (mouse_pitch < -89.0f)
-        mouse_pitch = 89.0f;
+        mouse_pitch = -89.0f;
     if (mouse_pitch > 89.0f)
         mouse_pitch = 89.0f;
 }
@@ -135,7 +136,7 @@ void Camera::move(CAMERA_MOVEMENT direction) {
         position += right * move_speed_curr;
         break;
     case UPWARD:
-        position += up_camera * move_speed_curr;
+        position += up_world * move_speed_curr;
         break;
     case DOWNWARD:
         position -= up_camera * move_speed_curr;
@@ -260,7 +261,7 @@ void Camera::synced(bool value) {
 }
 
 // camera object
-Camera camera(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 
 // -------------------------------------------------------------------------------------
 
@@ -270,11 +271,12 @@ public:
     ~Shader();
 
     void set_mat4(const std::string& uniform, const glm::mat4& value) const;
+    void set_vec4(const std::string& uniform, const glm::vec4& value) const;
     void use() const;
 
 private:
     void compile_shader(const std::string& shdr_type, GLuint shdr_id) const;
-    void link_program(GLuint shdr_vertex, GLuint shdr_fragment) const;
+    void link_program(GLuint shdr_vertex, GLuint shdr_fragment);
 
     GLuint id;
 };
@@ -294,16 +296,21 @@ Shader::Shader(const std::string& path_vertex, const std::string& path_fragment)
         ss_vertex << ifs_vertex.rdbuf();
         code_vertex = ss_vertex.str();
         ifs_vertex.close();
+    }
+    catch (std::ifstream::failure e) {
+        std::cout << "Failed to establish input stream with vertex shader file: " << path_vertex << std::endl << e.what() << std::endl;
+    }
+    const GLchar* src_vertex = code_vertex.c_str();
 
+    try {
         ifs_fragment.open(path_fragment);
         ss_fragment << ifs_fragment.rdbuf();
         code_fragment = ss_fragment.str();
         ifs_fragment.close();
     }
     catch (std::ifstream::failure e) {
-        std::cout << "Failed to establish input stream with shader file" << std::endl << e.what() << std::endl;
+        std::cout << "Failed to establish input stream with fragment shader file: " << path_fragment << std::endl << e.what() << std::endl;
     }
-    const GLchar* src_vertex = code_vertex.c_str();
     const GLchar* src_fragment = code_fragment.c_str();
 
     // id's for the two shaders
@@ -320,10 +327,7 @@ Shader::Shader(const std::string& path_vertex, const std::string& path_fragment)
     compile_shader("GL_FRAGMENT_SHADER", shdr_fragment);
 
     // create and link shader program
-    id = glCreateProgram();
-    glAttachShader(id, shdr_vertex);
-    glAttachShader(id, shdr_fragment);
-    glLinkProgram(id);
+    link_program(shdr_vertex, shdr_fragment);
 
     // free up memory from the two shaders
     glDeleteShader(shdr_vertex);
@@ -338,6 +342,11 @@ Shader::~Shader() {
 void Shader::set_mat4(const std::string& uniform, const glm::mat4& value) const {
     // sets a mat4 uniform
     glUniformMatrix4fv(glGetUniformLocation(id, uniform.c_str()), 1, GL_FALSE, &value[0][0]);
+}
+
+void Shader::set_vec4(const std::string& uniform, const glm::vec4& value) const {
+    // sets a vec4 uniform
+    glUniform4fv(glGetUniformLocation(id, uniform.c_str()), 1, &value[0]);
 }
 
 void Shader::use() const {
@@ -359,8 +368,9 @@ void Shader::compile_shader(const std::string& shdr_type, GLuint shdr_id) const 
         std::cout << "Shader compilation successful: " << shdr_type << std::endl;
 }
 
-void Shader::link_program(GLuint shdr_vertex, GLuint shdr_fragment) const {
+void Shader::link_program(GLuint shdr_vertex, GLuint shdr_fragment) {
     // attempt to link program and report any issues
+    id = glCreateProgram();
     glAttachShader(id, shdr_vertex);
     glAttachShader(id, shdr_fragment);
     glLinkProgram(id);
@@ -373,7 +383,7 @@ void Shader::link_program(GLuint shdr_vertex, GLuint shdr_fragment) const {
         std::cout << "Failed to link program" << std::endl << log << std::endl;
     }
     else
-        std::cout << "Shader program linking successful" << std::endl;
+        std::cout << "Shader program linking successful." << std::endl;
 }
 
 // -------------------------------------------------------------------------------------
@@ -445,6 +455,41 @@ void callback_window_resize(GLFWwindow* window, int width, int height) {
 
 // -------------------------------------------------------------------------------------
 
+void import_vertex_data(const std::string& path_data, GLfloat* vertices) {
+    // read vertex data from an external file and put it in vertices
+    //std::ifstream ifs_data;
+    //std::stringstream ss_data;
+    //std::string line_data;
+    //std::string token_data;
+
+    //// enable ifstream exceptions to be thrown
+    //ifs_data.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+    //// read vertex data file
+    //try {
+    //    ifs_data.open(path_data);
+
+    //    GLuint i{ 0 };
+
+    //    std::getline(ifs_data, line_data);
+    //    while (!line_data.empty()) {
+    //        ss_data.clear();
+    //        ss_data << line_data;
+    //        std::getline(ss_data, token_data, ',');
+    //        while (!token_data.empty()) {
+    //            GLfloat token = std::stof(token_data);
+    //            std::getline(ss_data, token_data, ',');
+    //            std::cout << token << ", ";
+    //        }
+    //    }
+
+    //    ifs_data.close();
+    //}
+    //catch (std::ifstream::failure e) {
+    //    std::cout << "Failed to establish input stream with vertex data file: " << path_data << std::endl << e.what() << std::endl;
+    //}
+}
+
 void process_input(GLFWwindow* window) {
     // process continuous user input
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -469,6 +514,7 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GL_DEPTH_BITS, 24);
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE.c_str(), NULL, NULL);
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -491,9 +537,16 @@ int main(int argc, char* argv[]) {
     // lock buffer swapping to screen refresh rate
     glfwSwapInterval(1);
 
+    // enable back face culling
+    glCullFace(GL_BACK);
+
     // enable depth test
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
+    // enable blending for transparency support
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // enable cursor capture
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -503,9 +556,11 @@ int main(int argc, char* argv[]) {
     glfwSetKeyCallback(window, callback_keyboard);
     glfwSetCursorPosCallback(window, callback_cursor_pos);
     glfwSetScrollCallback(window, callback_scroll);
+
+    // -------------------------------------------------------------------------------------
     
     // vertex positions for the cube
-    GLfloat vertices[] = {
+    GLfloat vertices_cube[] = {
         // front face
         -0.5f,  0.5f,  0.5f,    // top left
         -0.5f, -0.5f,  0.5f,    // bottom left
@@ -544,7 +599,7 @@ int main(int argc, char* argv[]) {
     };
 
     // indices for the element array buffer
-    GLuint indices[] = {
+    GLuint indices_cube[] = {
         // front face
          0,  1,  2,     // first triangle
          0,  2,  3,     // second triangle
@@ -571,42 +626,531 @@ int main(int argc, char* argv[]) {
     };
 
     // id's for the various objects
-    GLuint VAO, VBO, EBO;
+    GLuint VAO_cube, VBO_cube, EBO_cube;
 
-    // generate and bind vertex array object, buffer data
-    glCreateVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    // generate and bind vertex array object
+    glCreateVertexArrays(1, &VAO_cube);
+    glBindVertexArray(VAO_cube);
 
-    // generate and bind vertex buffect object
-    glCreateBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    // generate and bind vertex buffect object, buffer data
+    glCreateBuffers(1, &VBO_cube);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_cube);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
 
-    // generate and bind element array buffer
-    glCreateBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    // generate and bind element array buffer, buffer data
+    glCreateBuffers(1, &EBO_cube);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_cube);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_cube), indices_cube, GL_STATIC_DRAW);
 
     // vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
 
+    // initialize cube shader program
+    const std::string PATH_VERTEX_CUBE{ "shaders/cube/vertex.shdr" };
+    const std::string PATH_FRAGMENT_CUBE{ "shaders/cube/fragment.shdr" };
+    std::cout << "Initializing cube shader program..." << std::endl;
+    Shader shader_cube(PATH_VERTEX_CUBE, PATH_FRAGMENT_CUBE);
+
+    // -------------------------------------------------------------------------------------
+    
+    // vertex positions for the lines representing the axes
+    GLfloat vertices_axis[] = {
+        // position
+        0.0f, 0.0f, 0.0f,   // line origin
+        5.0f, 0.0f, 0.0f    // line end
+    };
+
+    // id's for the various objects
+    GLuint VAO_axis, VBO_axis;
+
+    // generate and bind vertex array object
+    glCreateVertexArrays(1, &VAO_axis);
+    glBindVertexArray(VAO_axis);
+
+    // generate and bind vertex buffer object, buffer data
+    glCreateBuffers(1, &VBO_axis);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_axis);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_axis), vertices_axis, GL_STATIC_DRAW);
+
+    // vertex attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // initialize axis shader program
+    const std::string PATH_VERTEX_AXIS{ "shaders/axis/vertex.shdr" };
+    const std::string PATH_FRAGMENT_AXIS{ "shaders/axis/fragment.shdr" };
+    std::cout << "Initializing axis shader program..." << std::endl;
+    Shader shader_axis{ PATH_VERTEX_AXIS, PATH_FRAGMENT_AXIS };
+
+    // -------------------------------------------------------------------------------------
+
+    // vertex positions for the lines representing the grid squares
+    GLfloat vertices_grid[] = {
+        // horizontal lines
+        -50.0f, 0.0f, -50.0f,
+         50.0f, 0.0f, -50.0f,
+        -50.0f, 0.0f, -49.0f,
+         50.0f, 0.0f, -49.0f,
+        -50.0f, 0.0f, -48.0f,
+         50.0f, 0.0f, -48.0f,
+        -50.0f, 0.0f, -47.0f,
+         50.0f, 0.0f, -47.0f,
+        -50.0f, 0.0f, -46.0f,
+         50.0f, 0.0f, -46.0f,
+        -50.0f, 0.0f, -45.0f,
+         50.0f, 0.0f, -45.0f,
+        -50.0f, 0.0f, -44.0f,
+         50.0f, 0.0f, -44.0f,
+        -50.0f, 0.0f, -43.0f,
+         50.0f, 0.0f, -43.0f,
+        -50.0f, 0.0f, -42.0f,
+         50.0f, 0.0f, -42.0f,
+        -50.0f, 0.0f, -41.0f,
+         50.0f, 0.0f, -41.0f,
+        -50.0f, 0.0f, -40.0f,
+         50.0f, 0.0f, -40.0f,
+        -50.0f, 0.0f, -39.0f,
+         50.0f, 0.0f, -39.0f,
+        -50.0f, 0.0f, -38.0f,
+         50.0f, 0.0f, -38.0f,
+        -50.0f, 0.0f, -37.0f,
+         50.0f, 0.0f, -37.0f,
+        -50.0f, 0.0f, -36.0f,
+         50.0f, 0.0f, -36.0f,
+        -50.0f, 0.0f, -35.0f,
+         50.0f, 0.0f, -35.0f,
+        -50.0f, 0.0f, -34.0f,
+         50.0f, 0.0f, -34.0f,
+        -50.0f, 0.0f, -33.0f,
+         50.0f, 0.0f, -33.0f,
+        -50.0f, 0.0f, -32.0f,
+         50.0f, 0.0f, -32.0f,
+        -50.0f, 0.0f, -31.0f,
+         50.0f, 0.0f, -31.0f,
+        -50.0f, 0.0f, -30.0f,
+         50.0f, 0.0f, -30.0f,
+        -50.0f, 0.0f, -29.0f,
+         50.0f, 0.0f, -29.0f,
+        -50.0f, 0.0f, -28.0f,
+         50.0f, 0.0f, -28.0f,
+        -50.0f, 0.0f, -27.0f,
+         50.0f, 0.0f, -27.0f,
+        -50.0f, 0.0f, -26.0f,
+         50.0f, 0.0f, -26.0f,
+        -50.0f, 0.0f, -25.0f,
+         50.0f, 0.0f, -25.0f,
+        -50.0f, 0.0f, -24.0f,
+         50.0f, 0.0f, -24.0f,
+        -50.0f, 0.0f, -23.0f,
+         50.0f, 0.0f, -23.0f,
+        -50.0f, 0.0f, -22.0f,
+         50.0f, 0.0f, -22.0f,
+        -50.0f, 0.0f, -21.0f,
+         50.0f, 0.0f, -21.0f,
+        -50.0f, 0.0f, -20.0f,
+         50.0f, 0.0f, -20.0f,
+        -50.0f, 0.0f, -19.0f,
+         50.0f, 0.0f, -19.0f,
+        -50.0f, 0.0f, -18.0f,
+         50.0f, 0.0f, -18.0f,
+        -50.0f, 0.0f, -17.0f,
+         50.0f, 0.0f, -17.0f,
+        -50.0f, 0.0f, -16.0f,
+         50.0f, 0.0f, -16.0f,
+        -50.0f, 0.0f, -15.0f,
+         50.0f, 0.0f, -15.0f,
+        -50.0f, 0.0f, -14.0f,
+         50.0f, 0.0f, -14.0f,
+        -50.0f, 0.0f, -13.0f,
+         50.0f, 0.0f, -13.0f,
+        -50.0f, 0.0f, -12.0f,
+         50.0f, 0.0f, -12.0f,
+        -50.0f, 0.0f, -11.0f,
+         50.0f, 0.0f, -11.0f,
+        -50.0f, 0.0f, -10.0f,
+         50.0f, 0.0f, -10.0f,
+        -50.0f, 0.0f, -9.0f,
+         50.0f, 0.0f, -9.0f,
+        -50.0f, 0.0f, -8.0f,
+         50.0f, 0.0f, -8.0f,
+        -50.0f, 0.0f, -7.0f,
+         50.0f, 0.0f, -7.0f,
+        -50.0f, 0.0f, -6.0f,
+         50.0f, 0.0f, -6.0f,
+        -50.0f, 0.0f, -5.0f,
+         50.0f, 0.0f, -5.0f,
+        -50.0f, 0.0f, -4.0f,
+         50.0f, 0.0f, -4.0f,
+        -50.0f, 0.0f, -3.0f,
+         50.0f, 0.0f, -3.0f,
+        -50.0f, 0.0f, -2.0f,
+         50.0f, 0.0f, -2.0f,
+        -50.0f, 0.0f, -1.0f,
+         50.0f, 0.0f, -1.0f,
+        -50.0f, 0.0f,  0.0f,
+         50.0f, 0.0f,  0.0f,
+        -50.0f, 0.0f,  1.0f,
+         50.0f, 0.0f,  1.0f,
+        -50.0f, 0.0f,  2.0f,
+         50.0f, 0.0f,  2.0f,
+        -50.0f, 0.0f,  3.0f,
+         50.0f, 0.0f,  3.0f,
+        -50.0f, 0.0f,  4.0f,
+         50.0f, 0.0f,  4.0f,
+        -50.0f, 0.0f,  5.0f,
+         50.0f, 0.0f,  5.0f,
+        -50.0f, 0.0f,  6.0f,
+         50.0f, 0.0f,  6.0f,
+        -50.0f, 0.0f,  7.0f,
+         50.0f, 0.0f,  7.0f,
+        -50.0f, 0.0f,  8.0f,
+         50.0f, 0.0f,  8.0f,
+        -50.0f, 0.0f,  9.0f,
+         50.0f, 0.0f,  9.0f,
+        -50.0f, 0.0f, 10.0f,
+         50.0f, 0.0f, 10.0f,
+        -50.0f, 0.0f, 11.0f,
+         50.0f, 0.0f, 11.0f,
+        -50.0f, 0.0f, 12.0f,
+         50.0f, 0.0f, 12.0f,
+        -50.0f, 0.0f, 13.0f,
+         50.0f, 0.0f, 13.0f,
+        -50.0f, 0.0f, 14.0f,
+         50.0f, 0.0f, 14.0f,
+        -50.0f, 0.0f, 15.0f,
+         50.0f, 0.0f, 15.0f,
+        -50.0f, 0.0f, 16.0f,
+         50.0f, 0.0f, 16.0f,
+        -50.0f, 0.0f, 17.0f,
+         50.0f, 0.0f, 17.0f,
+        -50.0f, 0.0f, 18.0f,
+         50.0f, 0.0f, 18.0f,
+        -50.0f, 0.0f, 19.0f,
+         50.0f, 0.0f, 19.0f,
+        -50.0f, 0.0f, 20.0f,
+         50.0f, 0.0f, 20.0f,
+        -50.0f, 0.0f, 21.0f,
+         50.0f, 0.0f, 21.0f,
+        -50.0f, 0.0f, 22.0f,
+         50.0f, 0.0f, 22.0f,
+        -50.0f, 0.0f, 23.0f,
+         50.0f, 0.0f, 23.0f,
+        -50.0f, 0.0f, 24.0f,
+         50.0f, 0.0f, 24.0f,
+        -50.0f, 0.0f, 25.0f,
+         50.0f, 0.0f, 25.0f,
+        -50.0f, 0.0f, 26.0f,
+         50.0f, 0.0f, 26.0f,
+        -50.0f, 0.0f, 27.0f,
+         50.0f, 0.0f, 27.0f,
+        -50.0f, 0.0f, 28.0f,
+         50.0f, 0.0f, 28.0f,
+        -50.0f, 0.0f, 29.0f,
+         50.0f, 0.0f, 29.0f,
+        -50.0f, 0.0f, 30.0f,
+         50.0f, 0.0f, 30.0f,
+        -50.0f, 0.0f, 31.0f,
+         50.0f, 0.0f, 31.0f,
+        -50.0f, 0.0f, 32.0f,
+         50.0f, 0.0f, 32.0f,
+        -50.0f, 0.0f, 33.0f,
+         50.0f, 0.0f, 33.0f,
+        -50.0f, 0.0f, 34.0f,
+         50.0f, 0.0f, 34.0f,
+        -50.0f, 0.0f, 35.0f,
+         50.0f, 0.0f, 35.0f,
+        -50.0f, 0.0f, 36.0f,
+         50.0f, 0.0f, 36.0f,
+        -50.0f, 0.0f, 37.0f,
+         50.0f, 0.0f, 37.0f,
+        -50.0f, 0.0f, 38.0f,
+         50.0f, 0.0f, 38.0f,
+        -50.0f, 0.0f, 39.0f,
+         50.0f, 0.0f, 39.0f,
+        -50.0f, 0.0f, 40.0f,
+         50.0f, 0.0f, 40.0f,
+        -50.0f, 0.0f, 41.0f,
+         50.0f, 0.0f, 41.0f,
+        -50.0f, 0.0f, 42.0f,
+         50.0f, 0.0f, 42.0f,
+        -50.0f, 0.0f, 43.0f,
+         50.0f, 0.0f, 43.0f,
+        -50.0f, 0.0f, 44.0f,
+         50.0f, 0.0f, 44.0f,
+        -50.0f, 0.0f, 45.0f,
+         50.0f, 0.0f, 45.0f,
+        -50.0f, 0.0f, 46.0f,
+         50.0f, 0.0f, 46.0f,
+        -50.0f, 0.0f, 47.0f,
+         50.0f, 0.0f, 47.0f,
+        -50.0f, 0.0f, 48.0f,
+         50.0f, 0.0f, 48.0f,
+        -50.0f, 0.0f, 49.0f,
+         50.0f, 0.0f, 49.0f,
+        -50.0f, 0.0f, 50.0f,
+         50.0f, 0.0f, 50.0f,
+
+        // vertical lines
+        -50.0f, 0.0f, -50.0f,
+        -50.0f, 0.0f,  50.0f,
+        -49.0f, 0.0f, -50.0f,
+        -49.0f, 0.0f,  50.0f,
+        -48.0f, 0.0f, -50.0f,
+        -48.0f, 0.0f,  50.0f,
+        -47.0f, 0.0f, -50.0f,
+        -47.0f, 0.0f,  50.0f,
+        -46.0f, 0.0f, -50.0f,
+        -46.0f, 0.0f,  50.0f,
+        -45.0f, 0.0f, -50.0f,
+        -45.0f, 0.0f,  50.0f,
+        -44.0f, 0.0f, -50.0f,
+        -44.0f, 0.0f,  50.0f,
+        -43.0f, 0.0f, -50.0f,
+        -43.0f, 0.0f,  50.0f,
+        -42.0f, 0.0f, -50.0f,
+        -42.0f, 0.0f,  50.0f,
+        -41.0f, 0.0f, -50.0f,
+        -41.0f, 0.0f,  50.0f,
+        -40.0f, 0.0f, -50.0f,
+        -40.0f, 0.0f,  50.0f,
+        -39.0f, 0.0f, -50.0f,
+        -39.0f, 0.0f,  50.0f,
+        -38.0f, 0.0f, -50.0f,
+        -38.0f, 0.0f,  50.0f,
+        -37.0f, 0.0f, -50.0f,
+        -37.0f, 0.0f,  50.0f,
+        -36.0f, 0.0f, -50.0f,
+        -36.0f, 0.0f,  50.0f,
+        -35.0f, 0.0f, -50.0f,
+        -35.0f, 0.0f,  50.0f,
+        -34.0f, 0.0f, -50.0f,
+        -34.0f, 0.0f,  50.0f,
+        -33.0f, 0.0f, -50.0f,
+        -33.0f, 0.0f,  50.0f,
+        -32.0f, 0.0f, -50.0f,
+        -32.0f, 0.0f,  50.0f,
+        -31.0f, 0.0f, -50.0f,
+        -31.0f, 0.0f,  50.0f,
+        -30.0f, 0.0f, -50.0f,
+        -30.0f, 0.0f,  50.0f,
+        -29.0f, 0.0f, -50.0f,
+        -29.0f, 0.0f,  50.0f,
+        -28.0f, 0.0f, -50.0f,
+        -28.0f, 0.0f,  50.0f,
+        -27.0f, 0.0f, -50.0f,
+        -27.0f, 0.0f,  50.0f,
+        -26.0f, 0.0f, -50.0f,
+        -26.0f, 0.0f,  50.0f,
+        -25.0f, 0.0f, -50.0f,
+        -25.0f, 0.0f,  50.0f,
+        -24.0f, 0.0f, -50.0f,
+        -24.0f, 0.0f,  50.0f,
+        -23.0f, 0.0f, -50.0f,
+        -23.0f, 0.0f,  50.0f,
+        -22.0f, 0.0f, -50.0f,
+        -22.0f, 0.0f,  50.0f,
+        -21.0f, 0.0f, -50.0f,
+        -21.0f, 0.0f,  50.0f,
+        -20.0f, 0.0f, -50.0f,
+        -20.0f, 0.0f,  50.0f,
+        -19.0f, 0.0f, -50.0f,
+        -19.0f, 0.0f,  50.0f,
+        -18.0f, 0.0f, -50.0f,
+        -18.0f, 0.0f,  50.0f,
+        -17.0f, 0.0f, -50.0f,
+        -17.0f, 0.0f,  50.0f,
+        -16.0f, 0.0f, -50.0f,
+        -16.0f, 0.0f,  50.0f,
+        -15.0f, 0.0f, -50.0f,
+        -15.0f, 0.0f,  50.0f,
+        -14.0f, 0.0f, -50.0f,
+        -14.0f, 0.0f,  50.0f,
+        -13.0f, 0.0f, -50.0f,
+        -13.0f, 0.0f,  50.0f,
+        -12.0f, 0.0f, -50.0f,
+        -12.0f, 0.0f,  50.0f,
+        -11.0f, 0.0f, -50.0f,
+        -11.0f, 0.0f,  50.0f,
+        -10.0f, 0.0f, -50.0f,
+        -10.0f, 0.0f,  50.0f,
+         -9.0f, 0.0f, -50.0f,
+         -9.0f, 0.0f,  50.0f,
+         -8.0f, 0.0f, -50.0f,
+         -8.0f, 0.0f,  50.0f,
+         -7.0f, 0.0f, -50.0f,
+         -7.0f, 0.0f,  50.0f,
+         -6.0f, 0.0f, -50.0f,
+         -6.0f, 0.0f,  50.0f,
+         -5.0f, 0.0f, -50.0f,
+         -5.0f, 0.0f,  50.0f,
+         -4.0f, 0.0f, -50.0f,
+         -4.0f, 0.0f,  50.0f,
+         -3.0f, 0.0f, -50.0f,
+         -3.0f, 0.0f,  50.0f,
+         -2.0f, 0.0f, -50.0f,
+         -2.0f, 0.0f,  50.0f,
+         -1.0f, 0.0f, -50.0f,
+         -1.0f, 0.0f,  50.0f,
+          0.0f, 0.0f, -50.0f,
+          0.0f, 0.0f,  50.0f,
+          1.0f, 0.0f, -50.0f,
+          1.0f, 0.0f,  50.0f,
+          2.0f, 0.0f, -50.0f,
+          2.0f, 0.0f,  50.0f,
+          3.0f, 0.0f, -50.0f,
+          3.0f, 0.0f,  50.0f,
+          4.0f, 0.0f, -50.0f,
+          4.0f, 0.0f,  50.0f,
+          5.0f, 0.0f, -50.0f,
+          5.0f, 0.0f,  50.0f,
+          6.0f, 0.0f, -50.0f,
+          6.0f, 0.0f,  50.0f,
+          7.0f, 0.0f, -50.0f,
+          7.0f, 0.0f,  50.0f,
+          8.0f, 0.0f, -50.0f,
+          8.0f, 0.0f,  50.0f,
+          9.0f, 0.0f, -50.0f,
+          9.0f, 0.0f,  50.0f,
+         10.0f, 0.0f, -50.0f,
+         10.0f, 0.0f,  50.0f,
+         11.0f, 0.0f, -50.0f,
+         11.0f, 0.0f,  50.0f,
+         12.0f, 0.0f, -50.0f,
+         12.0f, 0.0f,  50.0f,
+         13.0f, 0.0f, -50.0f,
+         13.0f, 0.0f,  50.0f,
+         14.0f, 0.0f, -50.0f,
+         14.0f, 0.0f,  50.0f,
+         15.0f, 0.0f, -50.0f,
+         15.0f, 0.0f,  50.0f,
+         16.0f, 0.0f, -50.0f,
+         16.0f, 0.0f,  50.0f,
+         17.0f, 0.0f, -50.0f,
+         17.0f, 0.0f,  50.0f,
+         18.0f, 0.0f, -50.0f,
+         18.0f, 0.0f,  50.0f,
+         19.0f, 0.0f, -50.0f,
+         19.0f, 0.0f,  50.0f,
+         20.0f, 0.0f, -50.0f,
+         20.0f, 0.0f,  50.0f,
+         21.0f, 0.0f, -50.0f,
+         21.0f, 0.0f,  50.0f,
+         22.0f, 0.0f, -50.0f,
+         22.0f, 0.0f,  50.0f,
+         23.0f, 0.0f, -50.0f,
+         23.0f, 0.0f,  50.0f,
+         24.0f, 0.0f, -50.0f,
+         24.0f, 0.0f,  50.0f,
+         25.0f, 0.0f, -50.0f,
+         25.0f, 0.0f,  50.0f,
+         26.0f, 0.0f, -50.0f,
+         26.0f, 0.0f,  50.0f,
+         27.0f, 0.0f, -50.0f,
+         27.0f, 0.0f,  50.0f,
+         28.0f, 0.0f, -50.0f,
+         28.0f, 0.0f,  50.0f,
+         29.0f, 0.0f, -50.0f,
+         29.0f, 0.0f,  50.0f,
+         30.0f, 0.0f, -50.0f,
+         30.0f, 0.0f,  50.0f,
+         31.0f, 0.0f, -50.0f,
+         31.0f, 0.0f,  50.0f,
+         32.0f, 0.0f, -50.0f,
+         32.0f, 0.0f,  50.0f,
+         33.0f, 0.0f, -50.0f,
+         33.0f, 0.0f,  50.0f,
+         34.0f, 0.0f, -50.0f,
+         34.0f, 0.0f,  50.0f,
+         35.0f, 0.0f, -50.0f,
+         35.0f, 0.0f,  50.0f,
+         36.0f, 0.0f, -50.0f,
+         36.0f, 0.0f,  50.0f,
+         37.0f, 0.0f, -50.0f,
+         37.0f, 0.0f,  50.0f,
+         38.0f, 0.0f, -50.0f,
+         38.0f, 0.0f,  50.0f,
+         39.0f, 0.0f, -50.0f,
+         39.0f, 0.0f,  50.0f,
+         40.0f, 0.0f, -50.0f,
+         40.0f, 0.0f,  50.0f,
+         41.0f, 0.0f, -50.0f,
+         41.0f, 0.0f,  50.0f,
+         42.0f, 0.0f, -50.0f,
+         42.0f, 0.0f,  50.0f,
+         43.0f, 0.0f, -50.0f,
+         43.0f, 0.0f,  50.0f,
+         44.0f, 0.0f, -50.0f,
+         44.0f, 0.0f,  50.0f,
+         45.0f, 0.0f, -50.0f,
+         45.0f, 0.0f,  50.0f,
+         46.0f, 0.0f, -50.0f,
+         46.0f, 0.0f,  50.0f,
+         47.0f, 0.0f, -50.0f,
+         47.0f, 0.0f,  50.0f,
+         48.0f, 0.0f, -50.0f,
+         48.0f, 0.0f,  50.0f,
+         49.0f, 0.0f, -50.0f,
+         49.0f, 0.0f,  50.0f,
+         50.0f, 0.0f, -50.0f,
+         50.0f, 0.0f,  50.0f
+    };
+
+    // id's for the varius objects
+    GLuint VAO_grid, VBO_grid;
+
+    // generate and bind vertex array object
+    glCreateVertexArrays(1, &VAO_grid);
+    glBindVertexArray(VAO_grid);
+
+    // generate and bind vertex buffer object, buffer data
+    glCreateBuffers(1, &VBO_grid);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_grid);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_grid), vertices_grid, GL_STATIC_DRAW);
+
+    // vertex attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // initialize grid shader program
+    const std::string PATH_VERTEX_GRID{ "shaders/grid/vertex.shdr" };
+    const std::string PATH_FRAGMENT_GRID{ "shaders/grid/fragment.shdr" };
+    std::cout << "Initializing grid shader program..." << std::endl;
+    Shader shader_grid{ PATH_VERTEX_GRID, PATH_FRAGMENT_GRID };
+
+    // -------------------------------------------------------------------------------------
+
     // unbind vertex array object
-    glBindVertexArray(VAO);
+    glBindVertexArray(NULL);
 
-    // initialize model matrix and cube position
+    // initialize model matrix and object positions
     glm::mat4 model_matrix;
-    glm::vec3 cube_position{ glm::vec3(0.0f, 0.0f, 0.0f) };
+    glm::vec3 position_cube{ glm::vec3(0.0f, 0.5f, 0.0f) };
+    glm::vec3 position_axis{ glm::vec3(0.0f, 0.0f, 0.0f) };
+    glm::vec3 position_grid{ glm::vec3(0.0f, 0.0f, 0.0f) };
 
-    // initialize shader program
-    const std::string PATH_VERTEX{ "shaders/vertex.shdr" };
-    const std::string PATH_FRAGMENT{ "shaders/fragment.shdr" };
-    Shader shader(PATH_VERTEX, PATH_FRAGMENT);
+    // initialize axis colors
+    glm::vec4 axis_colors[] = {
+        glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),      // x-axis
+        glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),      // y-axis
+        glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)       // z-axis
+    };
+
+    // initialize axis rotations
+    std::pair<glm::vec3, GLfloat> axis_rotations[] = {
+        std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), 360.0f),    // x-axis
+        std::make_pair(glm::vec3(0.0f, 0.0f, 1.0f),  90.0f),    // y-axis
+        std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), -90.0f)     // z-axis
+    };
 
     // delta time
     GLfloat delta_time{ 0.0f };
     GLfloat frame_curr{ 0.0f };
     GLfloat frame_last{ 0.0f };
+
+    // test
+    //GLfloat test[1212];
+    //import_vertex_data("data/grid/vertex.csv", test);
 
     // main loop
     while (!glfwWindowShouldClose(window)) {
@@ -622,17 +1166,17 @@ int main(int argc, char* argv[]) {
         // clear screen and activate shader
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        shader.use();
 
-        // set shader uniforms (reset model matrix between each cube render)
+        // set cube shader uniforms
+        shader_cube.use();
         model_matrix = glm::mat4();
-        model_matrix = glm::translate(model_matrix, cube_position);
-        shader.set_mat4("model", model_matrix);
-        shader.set_mat4("view", camera.view_matrix());
-        shader.set_mat4("projection", camera.projection_matrix());
+        model_matrix = glm::translate(model_matrix, position_cube);
+        shader_cube.set_mat4("model", model_matrix);
+        shader_cube.set_mat4("view", camera.view_matrix());
+        shader_cube.set_mat4("projection", camera.projection_matrix());
 
         // render cube using current primitive
-        glBindVertexArray(VAO);
+        glBindVertexArray(VAO_cube);
         switch (current_primitive) {
         case POINTS:
             glDrawElements(GL_POINTS, 36, GL_UNSIGNED_INT, 0);
@@ -644,7 +1188,35 @@ int main(int argc, char* argv[]) {
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
             break;
         }
-        glBindVertexArray(NULL);
+
+        // set axis shader uniforms
+        shader_axis.use();
+        shader_axis.set_mat4("view", camera.view_matrix());
+        shader_axis.set_mat4("projection", camera.projection_matrix());
+
+        // render axes
+        glBindVertexArray(VAO_axis);
+        for (GLuint i = 0; i != 3; ++i) {
+            model_matrix = glm::mat4();
+            model_matrix = glm::translate(model_matrix, position_axis);
+            model_matrix = glm::rotate(model_matrix, glm::radians(axis_rotations[i].second), axis_rotations[i].first);
+            shader_axis.set_mat4("model", model_matrix);
+            shader_axis.set_vec4("axis_color", axis_colors[i]);
+            glDrawArrays(GL_LINES, 0, 2);
+        }
+
+        // set grid shader uniforms
+        shader_grid.use();
+        model_matrix = glm::mat4();
+        model_matrix = glm::translate(model_matrix, position_grid);
+        shader_grid.set_mat4("model", model_matrix);
+        shader_grid.set_mat4("view", camera.view_matrix());
+        shader_grid.set_mat4("projection", camera.projection_matrix());
+        glDrawArrays(GL_LINES, 0, 2);
+
+        // render grid
+        glBindVertexArray(VAO_grid);
+        glDrawArrays(GL_LINES, 0, 404);
 
         // swap buffers and poll for events
         glfwSwapBuffers(window);
@@ -652,9 +1224,13 @@ int main(int argc, char* argv[]) {
     }
 
     // free up memory and terminate GLFW
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO_cube);
+    glDeleteVertexArrays(1, &VAO_axis);
+    glDeleteVertexArrays(1, &VAO_grid);
+    glDeleteBuffers(1, &VBO_cube);
+    glDeleteBuffers(1, &VBO_axis);
+    glDeleteBuffers(1, &VBO_grid);
+    glDeleteBuffers(1, &EBO_cube);
     glfwTerminate();
 
     return 0;
