@@ -1,0 +1,13 @@
+#version 330 core
+
+in vec2 i_position;
+in vec2 i_texture;
+
+out vec2 o_textureCoordinate;
+
+void main() {
+    // fragment texture coordinates
+    o_textureCoordinate = i_texture;
+
+    gl_Position = vec4(i_position, 0.0f, 1.0f);
+}

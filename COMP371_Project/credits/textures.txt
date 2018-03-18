@@ -1,0 +1,11 @@
+FUR TEXTURE:
+Bart Kelsey ("bart")
+Retrieved from [https://opengameart.org/content/2048x2048-tiling-beast-fur-texture]
+
+ZEBRA TEXTURE:
+Petr Kratochvil
+Retrieved from [https://opengameart.org/node/10638]
+
+GRASS TEXTURE:
+Lamoot @ Blender Foundation | apricot.blender.org (uploaded by qubodup) 
+Retrieved from [https://opengameart.org/content/grass-texture]

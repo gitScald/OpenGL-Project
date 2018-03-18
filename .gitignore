@@ -1,0 +1,11 @@
+# Ignore project-specific folders
+COMP371_A2/!new/
+
+# Ignore debug folder
+Debug/
+
+# Ignore VS-specific project files and folders
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.*

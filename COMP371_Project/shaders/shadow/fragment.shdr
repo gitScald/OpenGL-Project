@@ -1,0 +1,18 @@
+#version 330 core
+
+in vec4 o_fragPosition;
+
+struct Light {
+    vec3 position;
+    vec2 planeNearFar;
+};
+
+uniform Light u_light;
+
+void main() {
+    // distance between light and fragment clamped to (0, 1)
+    float fragToLight = length(o_fragPosition.xyz - u_light.position);
+    fragToLight /= u_light.planeNearFar.y;
+
+    gl_FragDepth = fragToLight;
+}

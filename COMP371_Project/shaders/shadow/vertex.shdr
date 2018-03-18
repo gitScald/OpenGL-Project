@@ -1,0 +1,9 @@
+#version 330 core
+
+in vec3 i_position;
+
+uniform mat4 u_modelMat;
+
+void main() {
+    gl_Position = u_modelMat * vec4(i_position, 1.0f);
+}

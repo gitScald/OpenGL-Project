@@ -1,0 +1,17 @@
+#version 330 core
+
+out vec4 o_fragColor;
+
+in vec2 o_textureCoordinate;
+
+uniform samplerCube u_depthTexture;
+
+void main() {
+    // texture coordinates, normalized to NDC
+    vec2 textureCoord = 2.0f * o_textureCoordinate - 1.0f;
+
+    // depth value sampled from texture
+    float fragDepth = texture(u_depthTexture, vec3(textureCoord.x, -1.0f, textureCoord.y)).r;
+
+    o_fragColor = vec4(vec3(fragDepth), 1.0f);
+}
