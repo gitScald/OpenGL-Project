@@ -12,6 +12,7 @@
 #include "rendered_entity.h"
 #include "shader.h"
 #include "shadow_map.h"
+#include "skybox.h"
 #include "texture.h"
 
 // GLEW
@@ -69,7 +70,10 @@ private:
             PATH_FRAGMENT_FRAME },
         m_shaderShadow{ PATH_VERTEX_SHADOW,
             PATH_FRAGMENT_SHADOW,
-            PATH_GEOMETRY_SHADOW } {
+            PATH_GEOMETRY_SHADOW },
+        m_skybox{ PATH_VERTEX_SKYBOX,
+            PATH_FRAGMENT_SKYBOX,
+            PATH_TEXTURE_SKYBOX } {
         initialize();
     }
 
@@ -114,6 +118,7 @@ private:
     Shader m_shaderFrame;
     Shader m_shaderShadow;
     ShadowMap m_shadowMap;
+    Skybox m_skybox;
     GLuint m_axesVAO;
     GLuint m_axesVBO;
     GLuint m_gridVAO;

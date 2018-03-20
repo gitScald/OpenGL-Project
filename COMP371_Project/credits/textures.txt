@@ -9,3 +9,7 @@ Retrieved from [https://opengameart.org/node/10638]
 GRASS TEXTURE:
 Lamoot @ Blender Foundation | apricot.blender.org (uploaded by qubodup) 
 Retrieved from [https://opengameart.org/content/grass-texture]
+
+SKYBOX TEXTURE:
+Emil Persson ("Humus")
+Retrieved from [http://www.humus.name/Textures/Meadow.zip]

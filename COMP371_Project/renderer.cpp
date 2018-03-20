@@ -1455,6 +1455,12 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // render skybox
+    m_skybox.render(Camera::get().getWorldOrientation(),
+        Camera::get().getViewMatrix(),
+        Camera::get().getProjectionMatrix(),
+        Camera::get().getPosition());
+
     // shader uniforms: transformations
     m_shaderEntity.use();
     m_shaderEntity.setUniformMat4(UNIFORM_MATRIX_VIEW,

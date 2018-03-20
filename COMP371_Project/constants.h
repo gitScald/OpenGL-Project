@@ -68,9 +68,8 @@ const std::string UNIFORM_LIGHT_KL{ "u_light.kl" };
 const std::string UNIFORM_LIGHT_KQ{ "u_light.kq" };
 const std::string UNIFORM_LIGHT_PLANES{ "u_light.planeNearFar" };
 
-// shader uniforms: shadow
+// shader uniforms: shadows
 const std::string UNIFORM_SHADOWS_ENABLED{ "u_shadowsEnabled" };
-const std::string UNIFORM_TEXTURES_ENABLED{ "u_texturesEnabled" };
 const std::string UNIFORM_SHADOW_BIAS_MIN{ "u_biasMin" };
 const std::string UNIFORM_SHADOW_BIAS_MAX{ "u_biasMax" };
 const std::string UNIFORM_SHADOW_DEPTH_TEXTURE{ "u_depthTexture" };
@@ -78,6 +77,10 @@ const std::string UNIFORM_SHADOW_TRANSFORMS{ "u_shadowTransforms" };
 const std::string UNIFORM_SHADOW_GRID_SAMPLES{ "u_gridSamples" };
 const std::string UNIFORM_SHADOW_GRID_OFFSET{ "u_gridOffset" };
 const std::string UNIFORM_SHADOW_GRID_FACTOR{ "u_gridFactor" };
+
+// shader uniforms: textures
+const std::string UNIFORM_TEXTURES_ENABLED{ "u_texturesEnabled" };
+const std::string UNIFORM_SKYBOX_TEXTURE{ "u_skybox" };
 
 // shader file paths
 const std::string PATH_VERTEX_ENTITY{ "shaders/entity/vertex.shdr" };
@@ -89,10 +92,20 @@ const std::string PATH_GEOMETRY_SHADOW{ "shaders/shadow/geometry.shdr" };
 const std::string PATH_FRAGMENT_SHADOW{ "shaders/shadow/fragment.shdr" };
 const std::string PATH_VERTEX_SHADOW_QUAD{ "shaders/shadow/quad/vertex.shdr" };
 const std::string PATH_FRAGMENT_SHADOW_QUAD{ "shaders/shadow/quad/fragment.shdr" };
+const std::string PATH_VERTEX_SKYBOX{ "shaders/skybox/vertex.shdr" };
+const std::string PATH_FRAGMENT_SKYBOX{ "shaders/skybox/fragment.shdr" };
 
 // texture file paths
 const std::string PATH_TEXTURE_GROUND{ "textures/ground/grass.png" };
 const std::string PATH_TEXTURE_HORSE{ "textures/horse/zebra.jpg" };
+const std::string PATH_TEXTURE_SKYBOX[] = {
+    "textures/skybox/posx.jpg",
+    "textures/skybox/negx.jpg",
+    "textures/skybox/posy.jpg",
+    "textures/skybox/negy.jpg",
+    "textures/skybox/posz.jpg",
+    "textures/skybox/negz.jpg"
+};
 
 // material-related constants
 const GLfloat MATERIAL_SHININESS_HORSE{ 8.0f };
@@ -185,9 +198,11 @@ const GLfloat LIGHT_KQ{ 0.0002f };
 const GLuint TEXTURE_INDEX_DIFFUSE{ 0 };
 const GLuint TEXTURE_INDEX_SPECULAR{ 1 };
 const GLuint TEXTURE_INDEX_DEPTH_MAP{ 2 };
+const GLuint TEXTURE_INDEX_SKYBOX{ 0 };
 const GLenum TEXTURE_UNIT_DIFFUSE{ GL_TEXTURE0 };
 const GLenum TEXTURE_UNIT_SPECULAR{ GL_TEXTURE1 };
 const GLenum TEXTURE_UNIT_DEPTH_MAP{ GL_TEXTURE2 };
+const GLenum TEXTURE_UNIT_SKYBOX{ GL_TEXTURE0 };
 
 // shadow-related constants
 const GLuint SHADOW_GRID_SAMPLES{ 32 };

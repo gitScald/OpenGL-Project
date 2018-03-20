@@ -1,0 +1,14 @@
+#version 330 core
+
+out vec4 o_fragColor;
+
+in vec3 o_textureCoordinate;
+
+uniform samplerCube u_skybox;
+
+void main() {
+    // sample cubemap texture
+    vec4 fragColor = texture(u_skybox, o_textureCoordinate);
+    
+    o_fragColor = fragColor;
+}

@@ -27,7 +27,8 @@ void Texture::initialize(const std::string& path,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
     // load image and generate mipmaps
-    std::cout << "Loading texture from file: \"" << path << "\"..." << std::endl;
+    std::cout << "Loading texture from file: \"" << path
+        << "\"..." << std::endl;
     int width, height, channels;
     stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (data) {
