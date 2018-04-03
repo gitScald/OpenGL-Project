@@ -121,55 +121,66 @@ void InputManager::processKeyboard(GLFWwindow* window,
     if (key == GLFW_KEY_U
         && (action == GLFW_PRESS
             || action == GLFW_REPEAT))
-        Renderer::get().scaleModel(Transform::Scale::INCREASE);
+        Renderer::get().scaleModel(0,
+            Transform::Scale::INCREASE);
     if (key == GLFW_KEY_J
         && (action == GLFW_PRESS
             || action == GLFW_REPEAT))
-        Renderer::get().scaleModel(Transform::Scale::DECREASE);
+        Renderer::get().scaleModel(0,
+            Transform::Scale::DECREASE);
 
     // model movement and rotation
     if (key == GLFW_KEY_END
         && action == GLFW_PRESS)
-        Renderer::get().resetModel();
+        Renderer::get().resetModel(0);
     if (key == GLFW_KEY_SPACE
         && (action == GLFW_PRESS
             || action == GLFW_REPEAT))
-        Renderer::get().moveModel(Transform::Displacement::RANDOM);
+        Renderer::get().moveModel(0,
+            Transform::Displacement::RANDOM);
     if (mods == GLFW_MOD_SHIFT) {
         if (key == GLFW_KEY_W
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().moveModel(Transform::Displacement::UP);
+            Renderer::get().moveModel(0,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_S
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().moveModel(Transform::Displacement::DOWN);
+            Renderer::get().moveModel(0,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_A
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().moveModel(Transform::Displacement::LEFT);
+            Renderer::get().moveModel(0,
+                Transform::Displacement::LEFT);
         if (key == GLFW_KEY_D
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().moveModel(Transform::Displacement::RIGHT);
+            Renderer::get().moveModel(0,
+                Transform::Displacement::RIGHT);
     }
     else {
         if (key == GLFW_KEY_W
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModel(Transform::Displacement::UP);
+            Renderer::get().rotateModel(0,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_S
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModel(Transform::Displacement::DOWN);
+            Renderer::get().rotateModel(0,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_A
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModel(Transform::Displacement::LEFT);
+            Renderer::get().rotateModel(0,
+                Transform::Displacement::LEFT);
         if (key == GLFW_KEY_D
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModel(Transform::Displacement::RIGHT);
+            Renderer::get().rotateModel(0,
+                Transform::Displacement::RIGHT);
     }
 
     // joint rotations
@@ -177,85 +188,125 @@ void InputManager::processKeyboard(GLFWwindow* window,
         if (key == GLFW_KEY_0
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(0, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                0,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_1
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(1, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                1,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_2
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(2, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                2,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_3
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(3, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                3,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_4
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(4, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                4,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_5
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(5, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                5,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_6
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(6, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                6,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_7
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(7, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                7,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_8
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(8, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                8,
+                Transform::Displacement::DOWN);
         if (key == GLFW_KEY_9
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(9, Transform::Displacement::DOWN);
+            Renderer::get().rotateModelJoint(0,
+                9,
+                Transform::Displacement::DOWN);
     }
     else {
         if (key == GLFW_KEY_0
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(0, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                0,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_1
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(1, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                1,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_2
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(2, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                2,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_3
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(3, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                3,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_4
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(4, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                4,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_5
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(5, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                5,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_6
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(6, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                6,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_7
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(7, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                7,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_8
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(8, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                8,
+                Transform::Displacement::UP);
         if (key == GLFW_KEY_9
             && (action == GLFW_PRESS
                 || action == GLFW_REPEAT))
-            Renderer::get().rotateModelJoint(9, Transform::Displacement::UP);
+            Renderer::get().rotateModelJoint(0,
+                9,
+                Transform::Displacement::UP);
     }
 
     // animations

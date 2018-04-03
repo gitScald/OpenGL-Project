@@ -25,6 +25,8 @@ const glm::vec3 AXIS_Z{ glm::vec3(0.0f, 0.0f, 1.0f) };
 const glm::vec3 POSITION_ORIGIN{ glm::vec3(0.0f, 0.0f, 0.0f) };
 const GLfloat POSITION_MAX{ 50.0f };
 const GLfloat POSITION_MIN{ -50.0f };
+const GLuint GRID_SIZE{ static_cast<GLuint>(POSITION_MAX - POSITION_MIN) };
+const GLuint TROOP_COUNT{ 20 };
 
 // camera initialization constants
 const glm::vec3 CAMERA_POSITION{ glm::vec3(0.0f, 15.0f, 0.0f) };
@@ -40,6 +42,15 @@ const GLfloat CAMERA_PLANE_NEAR{ 0.1f };
 const GLfloat CAMERA_PLANE_FAR{ 1000.0f };
 const GLfloat CAMERA_FOV_MIN{ 1.0f };
 const GLfloat CAMERA_FOV_MAX{ 89.0f };
+
+// data files
+const std::string DATA_ANIMATION_MODEL_RUN;
+const std::string DATA_INDICES_GROUND;
+const std::string DATA_VERTICES_AXES;
+const std::string DATA_VERTICES_CUBE;
+const std::string DATA_VERTICES_GRID;
+const std::string DATA_VERTICES_GROUND;
+const std::string DATA_VERTICES_MODEL;
 
 // shader attribute constants
 const std::string ATTRIBUTE_POSITION{ "i_position" };

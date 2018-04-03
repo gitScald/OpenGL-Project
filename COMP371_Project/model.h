@@ -6,6 +6,7 @@
 
 // C++ standard library headers
 #include <map>
+//#include <memory>
 #include <stack>
 
 class Model {
@@ -22,11 +23,13 @@ public:
     Model(const Model& model)
         : m_position{ model.m_position },
         m_hierarchyRoot{ model.m_hierarchyRoot },
-        m_hierarchy{ model.m_hierarchy } {}
+        m_hierarchy{ model.m_hierarchy },
+        m_joints{ model.m_joints } {}
     Model(Model&& model)
         : m_position{ std::move(model.m_position) },
         m_hierarchyRoot{ std::move(model.m_hierarchyRoot) },
-        m_hierarchy{ std::move(model.m_hierarchy) } {}
+        m_hierarchy{ std::move(model.m_hierarchy) },
+        m_joints{ std::move(model.m_joints) } {}
     Model& operator=(Model& model) = delete;
 
     // getters    

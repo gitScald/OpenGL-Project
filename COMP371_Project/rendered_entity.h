@@ -80,6 +80,8 @@ public:
     // setters
     void setColor(const glm::vec4& value);
     void setPosition(const glm::vec3& value);
+    void setRotation(bool toggle);
+    void setScaling(bool toggle);
 
     // transformations
     void move(Transform::Displacement direction);

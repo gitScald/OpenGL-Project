@@ -7,7 +7,7 @@
 struct AnimationStep {
 public:
     AnimationStep() = delete;
-    AnimationStep(Joint* joint,
+    AnimationStep(GLuint joint,
         const glm::vec3& rotationAxis,
         GLuint keyframe,
         GLfloat rotationAngle)
@@ -27,7 +27,7 @@ public:
         m_rotationAngle{ std::move(step.m_rotationAngle) } {}
     AnimationStep& operator=(AnimationStep& step) = delete;
 
-    Joint* m_joint;
+    GLuint m_joint;
     glm::vec3 m_rotationAxis;
     GLuint m_keyframe;
     GLfloat m_rotationAngle;

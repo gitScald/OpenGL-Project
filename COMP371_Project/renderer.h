@@ -7,8 +7,10 @@
 #include "constants.h"
 #include "enums.h"
 #include "light_source.h"
+//#include "loader.h"
 #include "material.h"
 #include "model.h"
+#include "path.h"
 #include "rendered_entity.h"
 #include "shader.h"
 #include "shadow_map.h"
@@ -25,6 +27,7 @@
 
 // C++ standard library headers
 #include <stdlib.h>
+#include <time.h>
 #include <vector>
 
 // singleton
@@ -46,12 +49,16 @@ public:
     void setAnimationSpeedCurrent(GLfloat value);
 
     // transformations
-    void moveModel(Transform::Displacement direction);
-    void resetModel();
-    void rotateModel(Transform::Displacement direction);
-    void rotateModelJoint(GLuint id,
+    void moveModel(GLuint model,
         Transform::Displacement direction);
-    void scaleModel(Transform::Scale value);
+    void resetModel(GLuint model);
+    void rotateModel(GLuint model,
+        Transform::Displacement direction);
+    void rotateModelJoint(GLuint model,
+        GLuint id,
+        Transform::Displacement direction);
+    void scaleModel(GLuint model,
+        Transform::Scale value);
 
     // utilities
     void render(GLfloat deltaTime);
@@ -83,7 +90,10 @@ private:
     void initializeFrame();
     void initializeGround();
     void initializeLight();
-    void initializeModel();
+    void initializeModels();
+    void initializePaths();
+    GLuint insertIntoEntitiesVector(RenderedEntity* entity);
+    GLuint insertIntoJointsVector(Joint* joint);
 
     // rendering passes
     void renderFirstPass(GLfloat deltaTime);
@@ -100,8 +110,8 @@ private:
     glm::vec3 getWorldAxis(const glm::vec3& axis) const;
 
     // transformations
-    void clampModelPosition();
-    void clampModelScale();
+    void clampModelPosition(GLuint model);
+    void clampModelScale(GLuint model);
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };
@@ -110,10 +120,11 @@ private:
     std::vector<LightSource> m_lights;
     std::vector<Material> m_materials;
     std::vector<Model> m_models;
+    std::vector<Path> m_paths;
     std::vector<RenderedEntity> m_entities;
     glm::mat4 m_modelMatrix;
-    glm::vec3 m_modelPosition{ MODEL_POSITION_RELATIVE_TORSO };
-    glm::vec3 m_modelScale{ glm::vec3(1.0f, 1.0f, 1.0f) };
+    glm::vec3 m_modelPositions[TROOP_COUNT];
+    glm::vec3 m_modelScales[TROOP_COUNT];
     Shader m_shaderEntity;
     Shader m_shaderFrame;
     Shader m_shaderShadow;

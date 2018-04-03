@@ -34,6 +34,18 @@ void RenderedEntity::setPosition(const glm::vec3& value) {
     m_position = value;
 }
 
+void RenderedEntity::setRotation(bool toggle) {
+    // set entity rotation
+    if (!m_rotationSet)
+        m_rotationSet = true;
+}
+
+void RenderedEntity::setScaling(bool toggle) {
+    // set entity scaling
+    if (!m_scaleSet)
+        m_scaleSet = true;
+}
+
 void RenderedEntity::move(Transform::Displacement direction) {
     // move entity around the grid
     switch (direction) {

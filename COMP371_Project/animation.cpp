@@ -12,7 +12,8 @@ void Animation::setSpeed(GLfloat speed) {
     m_speed = speed;
 }
 
-void Animation::play(GLfloat deltaTime) {
+void Animation::play(Model* model,
+    GLfloat deltaTime) {
     // update current frame
     m_frame += m_speed * deltaTime;
     m_keyframe = static_cast<GLuint>(m_frame) % (m_keyframeLast + 1);
@@ -22,7 +23,7 @@ void Animation::play(GLfloat deltaTime) {
         it != m_animationSequence.end();
         ++it) {
         if (it->m_keyframe == m_keyframe)
-            m_model->rotateJoint(it->m_joint,
+            model->rotateJoint(it->m_joint,
                 it->m_rotationAngle,
                 it->m_rotationAxis);
     }

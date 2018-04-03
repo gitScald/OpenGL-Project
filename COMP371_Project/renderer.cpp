@@ -52,98 +52,102 @@ void Renderer::setAnimationSpeedCurrent(GLfloat value) {
     m_animationSpeedCurrent = value;
 }
 
-void Renderer::moveModel(Transform::Displacement direction) {
+void Renderer::moveModel(GLuint model,
+    Transform::Displacement direction) {
     // move model around the grid
     switch (direction) {
     case Transform::Displacement::RANDOM:
-        m_modelPosition.x = static_cast<GLfloat>(rand()
-            % TRANSFORMATION_RANDOM_DISPLACEMENT);
-        m_modelPosition.z = static_cast<GLfloat>(rand()
-            % TRANSFORMATION_RANDOM_DISPLACEMENT);
+        m_modelPositions[model].x = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX);
+        m_modelPositions[model].z = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX);
         break;
     case Transform::Displacement::UP:
-        m_modelPosition.x += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::DOWN:
-        m_modelPosition.x -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::LEFT:
-        m_modelPosition.z -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::RIGHT:
-        m_modelPosition.z += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     }
 
     // clamp position between min and max values (the grid)
-    clampModelPosition();
+    clampModelPosition(model);
 
     // pass position value to model
-    m_models.at(0).setPosition(m_modelPosition);
+    m_models.at(model).setPosition(m_modelPositions[model]);
 }
 
-void Renderer::resetModel() {
+void Renderer::resetModel(GLuint model) {
     // reset model
-    m_modelPosition = MODEL_POSITION_RELATIVE_TORSO;
-    m_modelScale = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_models.at(0).reset();
+    m_modelPositions[model] = MODEL_POSITION_RELATIVE_TORSO;
+    m_modelScales[model] = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_models.at(model).reset();
 }
 
-void Renderer::rotateModel(Transform::Displacement direction) {
+void Renderer::rotateModel(GLuint model,
+    Transform::Displacement direction) {
     // rotate model
     switch (direction) {
     case Transform::Displacement::UP:
-        m_models.at(0).rotate(TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model).rotate(TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     case Transform::Displacement::DOWN:
-        m_models.at(0).rotate(-TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model).rotate(-TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     case Transform::Displacement::LEFT:
-        m_models.at(0).rotate(TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model).rotate(TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Y);
         break;
     case Transform::Displacement::RIGHT:
-        m_models.at(0).rotate(-TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model).rotate(-TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Y);
         break;
     }
 }
 
-void Renderer::rotateModelJoint(GLuint id,
+void Renderer::rotateModelJoint(GLuint model,
+    GLuint id,
     Transform::Displacement direction) {
     // rotate model joint
     switch (direction) {
     case Transform::Displacement::UP:
-        m_models.at(0).rotateJoint(id,
+        m_models.at(model).rotateJoint(id,
             TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     case Transform::Displacement::DOWN:
-        m_models.at(0).rotateJoint(id,
+        m_models.at(model).rotateJoint(id,
             -TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     }
 }
 
-void Renderer::scaleModel(Transform::Scale value) {
+void Renderer::scaleModel(GLuint model,
+    Transform::Scale value) {
     // scale model up or down
     switch (value) {
     case Transform::Scale::INCREASE:
-        m_modelScale += TRANSFORMATION_INCREMENT_SCALING;
+        m_modelScales[model] += TRANSFORMATION_INCREMENT_SCALING;
         break;
     case Transform::Scale::DECREASE:
-        m_modelScale -= TRANSFORMATION_INCREMENT_SCALING;
+        m_modelScales[model] -= TRANSFORMATION_INCREMENT_SCALING;
         break;
     }
 
     // clamp scale between min and max values
-    clampModelScale();
+    clampModelScale(model);
 
     // pass scale value to model
-    m_models.at(0).scale(m_modelScale);
+    m_models.at(model).scale(m_modelScales[model]);
 }
 
 void Renderer::render(GLfloat deltaTime) {
@@ -199,334 +203,347 @@ void Renderer::toggleTextures() {
 }
 
 void Renderer::initialize() {
+    // initialize random seed
+    srand(static_cast<GLuint>(time(NULL)));
+
+    // reserve capacity for entities vector
+    m_entities.reserve(1 + TROOP_COUNT * 11);
+
+    // reserve capacity for joints vector
+    m_joints.reserve(TROOP_COUNT * 10);
+
+    // reserve capacity for paths vector
+    m_paths.reserve(TROOP_COUNT);
+
     // call separate initialization methods
     initializeFrame();
     initializeGround();
-    initializeModel();
+    initializeModels();
+    initializePaths();
     initializeAnimation();
     initializeLight();
 }
 
 void Renderer::initializeAnimation() {
     // create animation
-    Animation animation(&m_models.at(0));
+    Animation animation;
 
     // animation step 0
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         0,
         2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         0,
         1.0f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         0,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(3),
+    animation.addStep(AnimationStep(3,
         AXIS_Z,
         0,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         0,
         7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(5),
+    animation.addStep(AnimationStep(5,
         AXIS_Z,
         0,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         0,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(7),
+    animation.addStep(AnimationStep(7,
         AXIS_Z,
         0,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         0,
         7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(9),
+    animation.addStep(AnimationStep(9,
         AXIS_Z,
         0,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         0,
         1.0f));
 
     // animation step 1
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         1,
         2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         1,
         1.0f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         1,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(3),
+    animation.addStep(AnimationStep(3,
         AXIS_Z,
         1,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         1,
         7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(5),
+    animation.addStep(AnimationStep(5,
         AXIS_Z,
         1,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         1,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(7),
+    animation.addStep(AnimationStep(7,
         AXIS_Z,
         1,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         1,
         7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(9),
+    animation.addStep(AnimationStep(9,
         AXIS_Z,
         1,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         1,
         1.0f));
 
     // animation step 2
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         2,
         -2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         2,
         -1.0f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         2,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(3),
+    animation.addStep(AnimationStep(3,
         AXIS_Z,
         2,
         15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         2,
         -7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(5),
+    animation.addStep(AnimationStep(5,
         AXIS_Z,
         2,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         2,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(7),
+    animation.addStep(AnimationStep(7,
         AXIS_Z,
         2,
         15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         2,
         -7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(9),
+    animation.addStep(AnimationStep(9,
         AXIS_Z,
         2,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         2,
         -1.0f));
 
     // animation step 3
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         3,
         -2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         3,
         0.0f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         3,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(3),
+    animation.addStep(AnimationStep(3,
         AXIS_Z,
         3,
         15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         3,
         -7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(5),
+    animation.addStep(AnimationStep(5,
         AXIS_Z,
         3,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         3,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(7),
+    animation.addStep(AnimationStep(7,
         AXIS_Z,
         3,
         15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         3,
         -7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(9),
+    animation.addStep(AnimationStep(9,
         AXIS_Z,
         3,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         3,
         -1.0f));
 
     // animation step 4
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         4,
         -2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         4,
         0.0f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         4,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(3),
+    animation.addStep(AnimationStep(3,
         AXIS_Z,
         4,
         15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         4,
         -7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(5),
+    animation.addStep(AnimationStep(5,
         AXIS_Z,
         4,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         4,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(7),
+    animation.addStep(AnimationStep(7,
         AXIS_Z,
         4,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         4,
         -7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(9),
+    animation.addStep(AnimationStep(9,
         AXIS_Z,
         4,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         4,
         -1.0f));
 
     // animation step 5
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         5,
         2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         5,
         0.5f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         5,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(3),
+    animation.addStep(AnimationStep(3,
         AXIS_Z,
         5,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         5,
         7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(5),
+    animation.addStep(AnimationStep(5,
         AXIS_Z,
         5,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         5,
         10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(7),
+    animation.addStep(AnimationStep(7,
         AXIS_Z,
         5,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         5,
         7.0f));
-    animation.addStep(AnimationStep(&m_joints.at(9),
+    animation.addStep(AnimationStep(9,
         AXIS_Z,
         5,
         -10.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         5,
         1.0f));
 
     // animation step 6
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         6,
         -2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         6,
         0.5f));
-    animation.addStep(AnimationStep(&m_joints.at(2),
+    animation.addStep(AnimationStep(2,
         AXIS_Z,
         6,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(8),
+    animation.addStep(AnimationStep(8,
         AXIS_Z,
         6,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         6,
         1.0f));
 
     // animation step 7
-    animation.addStep(AnimationStep(&m_joints.at(0),
+    animation.addStep(AnimationStep(0,
         AXIS_Z,
         7,
         -2.0f));
-    animation.addStep(AnimationStep(&m_joints.at(1),
+    animation.addStep(AnimationStep(1,
         AXIS_Z,
         7,
         -0.5f));
-    animation.addStep(AnimationStep(&m_joints.at(4),
+    animation.addStep(AnimationStep(4,
         AXIS_Z,
         7,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(6),
+    animation.addStep(AnimationStep(6,
         AXIS_Z,
         7,
         -15.0f));
-    animation.addStep(AnimationStep(&m_joints.at(10),
+    animation.addStep(AnimationStep(10,
         AXIS_Z,
         7,
         -1.0f));
@@ -1120,7 +1137,7 @@ void Renderer::initializeLight() {
     m_lights.emplace_back(LIGHT_POSITION);
 }
 
-void Renderer::initializeModel() {
+void Renderer::initializeModels() {
     // vertex data
     GLfloat vertices[] = {
         // back face
@@ -1177,6 +1194,12 @@ void Renderer::initializeModel() {
         -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
         -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
     };
+
+    // initialize model positions and scales
+    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
+        m_modelPositions[i] = MODEL_POSITION_RELATIVE_TORSO;
+        m_modelScales[i] = glm::vec3(1.0f, 1.0f, 1.0f);
+    }
 
     // initialize model material
     m_materials.emplace_back(Texture(PATH_TEXTURE_HORSE,
@@ -1240,118 +1263,171 @@ void Renderer::initializeModel() {
     neck.translate(MODEL_POSITION_RELATIVE_NECK);
     torso.translate(MODEL_POSITION_RELATIVE_TORSO);
 
-    // rotate head and neck
+    // rotate head and neck, set torso rotation
     head.rotate(MODEL_ORIENTATION_RELATIVE_HEAD.first,
         MODEL_ORIENTATION_RELATIVE_HEAD.second);
     neck.rotate(MODEL_ORIENTATION_RELATIVE_NECK.first,
         MODEL_ORIENTATION_RELATIVE_NECK.second);
+    torso.setRotation(true);
 
-    // add body parts to entities vector
-    m_entities.emplace_back(std::move(head));
-    m_entities.emplace_back(std::move(legLowerFrontRight));
-    m_entities.emplace_back(std::move(legLowerFrontLeft));
-    m_entities.emplace_back(std::move(legLowerBackRight));
-    m_entities.emplace_back(std::move(legLowerBackLeft));
-    m_entities.emplace_back(std::move(legUpperFrontRight));
-    m_entities.emplace_back(std::move(legUpperFrontLeft));
-    m_entities.emplace_back(std::move(legUpperBackRight));
-    m_entities.emplace_back(std::move(legUpperBackLeft));
-    m_entities.emplace_back(std::move(neck));
-    m_entities.emplace_back(std::move(torso));
+    // create troop of horses
+    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
+        // add body parts to entities vector
+        std::vector<GLuint> indicesEntities;
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&head));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legLowerFrontRight));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legLowerFrontLeft));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legLowerBackRight));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legLowerBackLeft));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legUpperFrontRight));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legUpperFrontLeft));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legUpperBackRight));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&legUpperBackLeft));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&neck));
+        indicesEntities.push_back(
+            insertIntoEntitiesVector(&torso));
 
-    // set up model hierarchy
-    m_models.emplace_back(Model());
-    m_models.at(0).add(&m_entities.at(11));
-    m_models.at(0).attach(&m_entities.at(10), &m_entities.at(11));
-    m_models.at(0).attach(&m_entities.at(1), &m_entities.at(10));
-    m_models.at(0).attach(&m_entities.at(6), &m_entities.at(11));
-    m_models.at(0).attach(&m_entities.at(7), &m_entities.at(11));
-    m_models.at(0).attach(&m_entities.at(8), &m_entities.at(11));
-    m_models.at(0).attach(&m_entities.at(9), &m_entities.at(11));
-    m_models.at(0).attach(&m_entities.at(2), &m_entities.at(6));
-    m_models.at(0).attach(&m_entities.at(3), &m_entities.at(7));
-    m_models.at(0).attach(&m_entities.at(4), &m_entities.at(8));
-    m_models.at(0).attach(&m_entities.at(5), &m_entities.at(9));
+        // set up model hierarchy
+        m_models.emplace_back(Model());
+        m_models.at(i).add(&m_entities.at(indicesEntities.at(10)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(9)),
+            &m_entities.at(indicesEntities.at(10)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(0)),
+            &m_entities.at(indicesEntities.at(9)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(5)),
+            &m_entities.at(indicesEntities.at(10)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(6)),
+            &m_entities.at(indicesEntities.at(10)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(7)),
+            &m_entities.at(indicesEntities.at(10)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(8)),
+            &m_entities.at(indicesEntities.at(10)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(1)),
+            &m_entities.at(indicesEntities.at(5)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(2)),
+            &m_entities.at(indicesEntities.at(6)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(3)),
+            &m_entities.at(indicesEntities.at(7)));
+        m_models.at(i).attach(&m_entities.at(indicesEntities.at(4)),
+            &m_entities.at(indicesEntities.at(8)));
 
-    // create model joints
-    Joint joint0(&m_entities.at(10),
-        &m_entities.at(1),
-        0.5f * MODEL_POSITION_RELATIVE_HEAD,
-        MODEL_ROTATION_HEAD_MAX,
-        MODEL_ROTATION_HEAD_MIN);
-    Joint joint1(&m_entities.at(11),
-        &m_entities.at(10),
-        0.5f * MODEL_POSITION_RELATIVE_NECK,
-        MODEL_ROTATION_NECK_MAX,
-        MODEL_ROTATION_NECK_MIN);
-    Joint joint2(&m_entities.at(11),
-        &m_entities.at(6),
-        0.5f * MODEL_SCALE_LEG_UPPER
-             * MODEL_POSITION_RELATIVE_LEG_UPPER_FR,
-        MODEL_ROTATION_LEG_UPPER_MAX,
-        MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint3(&m_entities.at(6),
-        &m_entities.at(2),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR,
-        MODEL_ROTATION_LEG_LOWER_MAX,
-        MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint4(&m_entities.at(11),
-        &m_entities.at(8),
-        0.5f * MODEL_SCALE_LEG_UPPER
-             * MODEL_POSITION_RELATIVE_LEG_UPPER_BR,
-        MODEL_ROTATION_LEG_UPPER_MAX,
-        MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint5(&m_entities.at(8),
-        &m_entities.at(4),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR,
-        MODEL_ROTATION_LEG_LOWER_MAX,
-        MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint6(&m_entities.at(11),
-        &m_entities.at(7),
-        0.5f * MODEL_SCALE_LEG_UPPER
-             * MODEL_POSITION_RELATIVE_LEG_UPPER_FL,
-        MODEL_ROTATION_LEG_UPPER_MAX,
-        MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint7(&m_entities.at(7),
-        &m_entities.at(3),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL,
-        MODEL_ROTATION_LEG_LOWER_MAX,
-        MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint8(&m_entities.at(11),
-        &m_entities.at(9),
-        0.5f * MODEL_SCALE_LEG_UPPER
-             * MODEL_POSITION_RELATIVE_LEG_UPPER_BL,
-        MODEL_ROTATION_LEG_UPPER_MAX,
-        MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint9(&m_entities.at(9),
-        &m_entities.at(5),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL,
-        MODEL_ROTATION_LEG_LOWER_MAX,
-        MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint10(nullptr,
-        &m_entities.at(11),
-        POSITION_ORIGIN,
-        MODEL_ROTATION_TORSO_MAX,
-        MODEL_ROTATION_TORSO_MIN);
+        // create model joints
+        Joint joint0(&m_entities.at(indicesEntities.at(9)),
+            &m_entities.at(indicesEntities.at(0)),
+            0.5f * MODEL_POSITION_RELATIVE_HEAD,
+            MODEL_ROTATION_HEAD_MAX,
+            MODEL_ROTATION_HEAD_MIN);
+        Joint joint1(&m_entities.at(indicesEntities.at(10)),
+            &m_entities.at(indicesEntities.at(9)),
+            0.5f * MODEL_POSITION_RELATIVE_NECK,
+            MODEL_ROTATION_NECK_MAX,
+            MODEL_ROTATION_NECK_MIN);
+        Joint joint2(&m_entities.at(indicesEntities.at(10)),
+            &m_entities.at(indicesEntities.at(5)),
+            0.5f * MODEL_SCALE_LEG_UPPER
+            * MODEL_POSITION_RELATIVE_LEG_UPPER_FR,
+            MODEL_ROTATION_LEG_UPPER_MAX,
+            MODEL_ROTATION_LEG_UPPER_MIN);
+        Joint joint3(&m_entities.at(indicesEntities.at(5)),
+            &m_entities.at(indicesEntities.at(1)),
+            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR,
+            MODEL_ROTATION_LEG_LOWER_MAX,
+            MODEL_ROTATION_LEG_LOWER_MIN);
+        Joint joint4(&m_entities.at(indicesEntities.at(10)),
+            &m_entities.at(indicesEntities.at(7)),
+            0.5f * MODEL_SCALE_LEG_UPPER
+            * MODEL_POSITION_RELATIVE_LEG_UPPER_BR,
+            MODEL_ROTATION_LEG_UPPER_MAX,
+            MODEL_ROTATION_LEG_UPPER_MIN);
+        Joint joint5(&m_entities.at(indicesEntities.at(7)),
+            &m_entities.at(indicesEntities.at(3)),
+            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR,
+            MODEL_ROTATION_LEG_LOWER_MAX,
+            MODEL_ROTATION_LEG_LOWER_MIN);
+        Joint joint6(&m_entities.at(indicesEntities.at(10)),
+            &m_entities.at(indicesEntities.at(6)),
+            0.5f * MODEL_SCALE_LEG_UPPER
+            * MODEL_POSITION_RELATIVE_LEG_UPPER_FL,
+            MODEL_ROTATION_LEG_UPPER_MAX,
+            MODEL_ROTATION_LEG_UPPER_MIN);
+        Joint joint7(&m_entities.at(indicesEntities.at(6)),
+            &m_entities.at(indicesEntities.at(2)),
+            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL,
+            MODEL_ROTATION_LEG_LOWER_MAX,
+            MODEL_ROTATION_LEG_LOWER_MIN);
+        Joint joint8(&m_entities.at(indicesEntities.at(10)),
+            &m_entities.at(indicesEntities.at(8)),
+            0.5f * MODEL_SCALE_LEG_UPPER
+            * MODEL_POSITION_RELATIVE_LEG_UPPER_BL,
+            MODEL_ROTATION_LEG_UPPER_MAX,
+            MODEL_ROTATION_LEG_UPPER_MIN);
+        Joint joint9(&m_entities.at(indicesEntities.at(8)),
+            &m_entities.at(indicesEntities.at(4)),
+            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL,
+            MODEL_ROTATION_LEG_LOWER_MAX,
+            MODEL_ROTATION_LEG_LOWER_MIN);
+        Joint joint10(nullptr,
+            &m_entities.at(indicesEntities.at(10)),
+            POSITION_ORIGIN,
+            MODEL_ROTATION_TORSO_MAX,
+            MODEL_ROTATION_TORSO_MIN);
 
-    // add model joints to joints vector
-    m_joints.emplace_back(std::move(joint0));
-    m_joints.emplace_back(std::move(joint1));
-    m_joints.emplace_back(std::move(joint2));
-    m_joints.emplace_back(std::move(joint3));
-    m_joints.emplace_back(std::move(joint4));
-    m_joints.emplace_back(std::move(joint5));
-    m_joints.emplace_back(std::move(joint6));
-    m_joints.emplace_back(std::move(joint7));
-    m_joints.emplace_back(std::move(joint8));
-    m_joints.emplace_back(std::move(joint9));
-    m_joints.emplace_back(std::move(joint10));
+        // add model joints to joints vector
+        std::vector<GLuint> indicesJoints;
+        indicesJoints.push_back(insertIntoJointsVector(&joint0));
+        indicesJoints.push_back(insertIntoJointsVector(&joint1));
+        indicesJoints.push_back(insertIntoJointsVector(&joint2));
+        indicesJoints.push_back(insertIntoJointsVector(&joint3));
+        indicesJoints.push_back(insertIntoJointsVector(&joint4));
+        indicesJoints.push_back(insertIntoJointsVector(&joint5));
+        indicesJoints.push_back(insertIntoJointsVector(&joint6));
+        indicesJoints.push_back(insertIntoJointsVector(&joint7));
+        indicesJoints.push_back(insertIntoJointsVector(&joint8));
+        indicesJoints.push_back(insertIntoJointsVector(&joint9));
+        indicesJoints.push_back(insertIntoJointsVector(&joint10));
 
-    // add joints to model
-    for (std::vector<Joint>::iterator it{ m_joints.begin() };
-        it != m_joints.end();
-        ++it)
-        m_models.at(0).addJoint(&(*it));
+        // add joints to model
+        for (GLuint j{ 0 }; j != indicesJoints.size(); ++j)
+            m_models.at(i).addJoint(&m_joints.at(indicesJoints[j]));
+
+        // place horse at random location
+        if (i != 0)
+            moveModel(i, Transform::RANDOM);
+    }
+}
+
+void Renderer::initializePaths() {
+    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
+
+    }
+}
+
+GLuint Renderer::insertIntoEntitiesVector(RenderedEntity* entity) {
+    // insert entity into entities vector
+    GLuint index = m_entities.size();
+    m_entities.emplace_back(*entity);
+
+    // return index in vector
+    return index;
+}
+
+GLuint Renderer::insertIntoJointsVector(Joint* joint) {
+    // insert jont into joints vector
+    GLuint index = m_joints.size();
+    m_joints.emplace_back(std::move(*joint));
+
+    // return index in vector
+    return index;
 }
 
 void Renderer::renderFirstPass(GLfloat deltaTime) {
@@ -1415,9 +1491,6 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
     glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMap.getFBOID());
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    // set shader attributes
-    m_entities.at(0).setDepthShaderAttributes(&m_shaderShadow);
-
     // set shadow map shader uniforms
     m_shaderShadow.use();
     for (GLuint i{ 0 }; i != shadowTransforms.size(); ++i)
@@ -1433,9 +1506,6 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
 
     // render ground to depth texture
     renderGround(&m_shaderShadow);
-
-    // set shader attributes
-    m_models.at(0).setDepthShaderAttributes(&m_shaderShadow);
 
     // render models to depth texture
     renderModels(&m_shaderShadow, deltaTime);
@@ -1530,17 +1600,11 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     m_shaderEntity.setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
         TEXTURE_INDEX_DEPTH_MAP);
 
-    // set shader attributes
-    m_entities.at(0).setColorShaderAttributes(&m_shaderEntity);
-
     // render ground
     renderGround(&m_shaderEntity);
 
     // shader uniforms: entity material
     m_materials.at(1).use(&m_shaderEntity);
-
-    // set shader attributes
-    m_models.at(0).setColorShaderAttributes(&m_shaderEntity);
 
     // render models
     renderModels(&m_shaderEntity, deltaTime);
@@ -1600,6 +1664,12 @@ void Renderer::renderFrame() {
 }
 
 void Renderer::renderGround(Shader* shader) {
+    // set shader attributes
+    if (shader == &m_shaderShadow)
+        m_entities.at(0).setDepthShaderAttributes(shader);
+    else if (shader == &m_shaderEntity)
+        m_entities.at(0).setColorShaderAttributes(shader);
+
     // pass model matrix to shader and render
     glm::mat4 modelMatrix = m_entities.at(0).getModelMatrix(
         getWorldOrientation());
@@ -1636,10 +1706,16 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
         m_it != m_models.end();
         ++m_it) {
 
+        // set shader attributes
+        if (shader == &m_shaderShadow)
+            m_it->setDepthShaderAttributes(shader);
+        else if (shader == &m_shaderEntity)
+            m_it->setColorShaderAttributes(shader);
+
         // play animation sequence
         if (m_animationsEnabled) {
             m_animations.at(0).setSpeed(m_animationSpeedCurrent);
-            m_animations.at(0).play(deltaTime);
+            m_animations.at(0).play(&(*m_it), deltaTime);
         }
 
         // render model hierarchy
@@ -1680,23 +1756,23 @@ glm::vec3 Renderer::getWorldAxis(const glm::vec3& axis) const {
     return glm::vec3(getWorldOrientation() * glm::vec4(axis, 1.0f));
 }
 
-void Renderer::clampModelPosition() {
+void Renderer::clampModelPosition(GLuint model) {
     // clamp model position
-    if (m_modelPosition.x > POSITION_MAX)
-        m_modelPosition.x = POSITION_MAX;
-    else if (m_modelPosition.z > POSITION_MAX)
-        m_modelPosition.z = POSITION_MAX;
+    if (m_modelPositions[model].x > POSITION_MAX)
+        m_modelPositions[model].x = POSITION_MAX;
+    else if (m_modelPositions[model].z > POSITION_MAX)
+        m_modelPositions[model].z = POSITION_MAX;
 
-    if (m_modelPosition.x < POSITION_MIN)
-        m_modelPosition.x = POSITION_MIN;
-    else if (m_modelPosition.z < POSITION_MIN)
-        m_modelPosition.z = POSITION_MIN;
+    if (m_modelPositions[model].x < POSITION_MIN)
+        m_modelPositions[model].x = POSITION_MIN;
+    else if (m_modelPositions[model].z < POSITION_MIN)
+        m_modelPositions[model].z = POSITION_MIN;
 }
 
-void Renderer::clampModelScale() {
+void Renderer::clampModelScale(GLuint model) {
     // clamp model scale
-    if (m_modelScale.x > TRANSFORMATION_SCALE_MAX)
-        m_modelScale = glm::vec3(TRANSFORMATION_SCALE_MAX);
-    else if (m_modelScale.x < TRANSFORMATION_SCALE_MIN)
-        m_modelScale = glm::vec3(TRANSFORMATION_SCALE_MIN);
+    if (m_modelScales[model].x > TRANSFORMATION_SCALE_MAX)
+        m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MAX);
+    else if (m_modelScales[model].x < TRANSFORMATION_SCALE_MIN)
+        m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MIN);
 }
