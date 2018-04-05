@@ -2,13 +2,13 @@
 Author:      Benjamin Vial
 ID:          29590765
 Course:      COMP 371
-Assigment:   2
-Due:         Mar 15th, 2018
+Assigment:   Final Project
+Due:         Apr 12th, 2018
 ===========================
 
-C++/OpenGL assignment exploring lighting, shadows, textures, and simple animations.
+C++/OpenGL project exploring collision detection, simple AI, as well as other additions.
 
-Controls: As specified in the assignment guidelines, with a couple additions.
+Controls: As specified in the project guidelines, with a couple additions.
 
 - World orientation: Press the arrow keys (LEFT/RIGHT for Ry, UP/DOWN for Rx).
 - Camera panning: Holding right mouse button, drag the mouse to the left or right.
@@ -45,9 +45,12 @@ Archive contents:
     - input_manager.h/.cpp:     InputManager class (singleton)
     - joint.h/.cpp:             Model Joint class, used for animations
     - light_source.h/.cpp:      LightSource class
+    - loader.h/.cpp:            Loader class
     - main.cpp:                 Main application source file
     - material.h/.cpp:          Material class
     - model.h/.cpp:             Hierarchical Model class
+    - path.h/.cpp:              Path class
+    - path_step.h:              PathStep struct
     - rendered_entity.h/.cpp:   RenderedEntity class, part of Model objects
     - renderer.h/.cpp:          Renderer class (singleton)
     - shader.h/.cpp:            Shader class

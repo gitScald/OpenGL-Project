@@ -1,8 +1,9 @@
 # Ignore project-specific folders
 COMP371_A2/!new/
 
-# Ignore debug folder
+# Ignore configuration folders
 Debug/
+Release/
 
 # Ignore VS-specific project files and folders
 .vs/

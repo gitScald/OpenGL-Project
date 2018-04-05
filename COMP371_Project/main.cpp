@@ -104,6 +104,10 @@ int main(int argc, char* argv[]) {
     GLfloat frameCurrent{ 0.0f };
     GLfloat frameLast{ 0.0f };
 
+    // fps
+    GLfloat fpsUpdate{ static_cast<GLfloat>(glfwGetTime()) };
+    GLuint frames{ 0 };
+
     // initialize rand seed
     srand(static_cast<GLuint>(glfwGetTime()));
 
@@ -113,6 +117,14 @@ int main(int argc, char* argv[]) {
         frameCurrent = static_cast<GLfloat>(glfwGetTime());
         deltaTime = frameCurrent - frameLast;
         frameLast = frameCurrent;
+        ++frames;
+
+        if (frameCurrent - fpsUpdate >= 1.0f) {
+            GLfloat ms = (1000.0f / static_cast<GLfloat>(frames));
+            std::cout << "Elapsed: " << ms << " ms" << std::endl;
+            frames = 0;
+            fpsUpdate += 1.0f;
+        }
         
         // adjust camera move speed
         Camera::get().setSpeedCurrent(Camera::get().getSpeed()

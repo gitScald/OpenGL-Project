@@ -206,6 +206,12 @@ void Renderer::initialize() {
     // initialize random seed
     srand(static_cast<GLuint>(time(NULL)));
 
+    // initialize model positions and scales
+    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
+        m_modelPositions[i] = MODEL_POSITION_RELATIVE_TORSO;
+        m_modelScales[i] = glm::vec3(1.0f, 1.0f, 1.0f);
+    }
+
     // reserve capacity for entities vector
     m_entities.reserve(1 + TROOP_COUNT * 11);
 
@@ -218,7 +224,9 @@ void Renderer::initialize() {
     // call separate initialization methods
     initializeFrame();
     initializeGround();
-    initializeModels();
+    initializeMaterial();
+    for (GLuint i{ 0 }; i != 15; ++i)
+        initializeModel();
     initializePaths();
     initializeAnimation();
     initializeLight();
@@ -1137,7 +1145,16 @@ void Renderer::initializeLight() {
     m_lights.emplace_back(LIGHT_POSITION);
 }
 
-void Renderer::initializeModels() {
+void Renderer::initializeMaterial() {
+    // initialize model material
+    m_materials.emplace_back(Texture(PATH_TEXTURE_HORSE,
+        GL_RGB,
+        GL_CLAMP_TO_EDGE,
+        GL_LINEAR).getID(),
+        MATERIAL_SHININESS_HORSE);
+}
+
+void Renderer::initializeModel() {
     // vertex data
     GLfloat vertices[] = {
         // back face
@@ -1194,19 +1211,6 @@ void Renderer::initializeModels() {
         -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
         -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
     };
-
-    // initialize model positions and scales
-    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
-        m_modelPositions[i] = MODEL_POSITION_RELATIVE_TORSO;
-        m_modelScales[i] = glm::vec3(1.0f, 1.0f, 1.0f);
-    }
-
-    // initialize model material
-    m_materials.emplace_back(Texture(PATH_TEXTURE_HORSE,
-        GL_RGB,
-        GL_CLAMP_TO_EDGE,
-        GL_LINEAR).getID(),
-        MATERIAL_SHININESS_HORSE);
 
     // create model entities
     RenderedEntity head(&m_shaderEntity,
@@ -1270,164 +1274,148 @@ void Renderer::initializeModels() {
         MODEL_ORIENTATION_RELATIVE_NECK.second);
     torso.setRotation(true);
 
-    // create troop of horses
-    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
-        // add body parts to entities vector
-        std::vector<GLuint> indicesEntities;
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&head));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legLowerFrontRight));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legLowerFrontLeft));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legLowerBackRight));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legLowerBackLeft));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legUpperFrontRight));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legUpperFrontLeft));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legUpperBackRight));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&legUpperBackLeft));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&neck));
-        indicesEntities.push_back(
-            insertIntoEntitiesVector(&torso));
+    // add body parts to entities vector
+    m_entities.emplace_back(std::move(head));
+    m_entities.emplace_back(std::move(legLowerFrontRight));
+    m_entities.emplace_back(std::move(legLowerFrontLeft));
+    m_entities.emplace_back(std::move(legLowerBackRight));
+    m_entities.emplace_back(std::move(legLowerBackLeft));
+    m_entities.emplace_back(std::move(legUpperFrontRight));
+    m_entities.emplace_back(std::move(legUpperFrontLeft));
+    m_entities.emplace_back(std::move(legUpperBackRight));
+    m_entities.emplace_back(std::move(legUpperBackLeft));
+    m_entities.emplace_back(std::move(neck));
+    m_entities.emplace_back(std::move(torso));
 
-        // set up model hierarchy
-        m_models.emplace_back(Model());
-        m_models.at(i).add(&m_entities.at(indicesEntities.at(10)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(9)),
-            &m_entities.at(indicesEntities.at(10)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(0)),
-            &m_entities.at(indicesEntities.at(9)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(5)),
-            &m_entities.at(indicesEntities.at(10)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(6)),
-            &m_entities.at(indicesEntities.at(10)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(7)),
-            &m_entities.at(indicesEntities.at(10)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(8)),
-            &m_entities.at(indicesEntities.at(10)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(1)),
-            &m_entities.at(indicesEntities.at(5)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(2)),
-            &m_entities.at(indicesEntities.at(6)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(3)),
-            &m_entities.at(indicesEntities.at(7)));
-        m_models.at(i).attach(&m_entities.at(indicesEntities.at(4)),
-            &m_entities.at(indicesEntities.at(8)));
+    // create model object
+    m_models.emplace_back(Model());
+    GLuint modelIndex = m_models.size() - 1;
 
-        // create model joints
-        Joint joint0(&m_entities.at(indicesEntities.at(9)),
-            &m_entities.at(indicesEntities.at(0)),
-            0.5f * MODEL_POSITION_RELATIVE_HEAD,
-            MODEL_ROTATION_HEAD_MAX,
-            MODEL_ROTATION_HEAD_MIN);
-        Joint joint1(&m_entities.at(indicesEntities.at(10)),
-            &m_entities.at(indicesEntities.at(9)),
-            0.5f * MODEL_POSITION_RELATIVE_NECK,
-            MODEL_ROTATION_NECK_MAX,
-            MODEL_ROTATION_NECK_MIN);
-        Joint joint2(&m_entities.at(indicesEntities.at(10)),
-            &m_entities.at(indicesEntities.at(5)),
-            0.5f * MODEL_SCALE_LEG_UPPER
-            * MODEL_POSITION_RELATIVE_LEG_UPPER_FR,
-            MODEL_ROTATION_LEG_UPPER_MAX,
-            MODEL_ROTATION_LEG_UPPER_MIN);
-        Joint joint3(&m_entities.at(indicesEntities.at(5)),
-            &m_entities.at(indicesEntities.at(1)),
-            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR,
-            MODEL_ROTATION_LEG_LOWER_MAX,
-            MODEL_ROTATION_LEG_LOWER_MIN);
-        Joint joint4(&m_entities.at(indicesEntities.at(10)),
-            &m_entities.at(indicesEntities.at(7)),
-            0.5f * MODEL_SCALE_LEG_UPPER
-            * MODEL_POSITION_RELATIVE_LEG_UPPER_BR,
-            MODEL_ROTATION_LEG_UPPER_MAX,
-            MODEL_ROTATION_LEG_UPPER_MIN);
-        Joint joint5(&m_entities.at(indicesEntities.at(7)),
-            &m_entities.at(indicesEntities.at(3)),
-            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR,
-            MODEL_ROTATION_LEG_LOWER_MAX,
-            MODEL_ROTATION_LEG_LOWER_MIN);
-        Joint joint6(&m_entities.at(indicesEntities.at(10)),
-            &m_entities.at(indicesEntities.at(6)),
-            0.5f * MODEL_SCALE_LEG_UPPER
-            * MODEL_POSITION_RELATIVE_LEG_UPPER_FL,
-            MODEL_ROTATION_LEG_UPPER_MAX,
-            MODEL_ROTATION_LEG_UPPER_MIN);
-        Joint joint7(&m_entities.at(indicesEntities.at(6)),
-            &m_entities.at(indicesEntities.at(2)),
-            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL,
-            MODEL_ROTATION_LEG_LOWER_MAX,
-            MODEL_ROTATION_LEG_LOWER_MIN);
-        Joint joint8(&m_entities.at(indicesEntities.at(10)),
-            &m_entities.at(indicesEntities.at(8)),
-            0.5f * MODEL_SCALE_LEG_UPPER
-            * MODEL_POSITION_RELATIVE_LEG_UPPER_BL,
-            MODEL_ROTATION_LEG_UPPER_MAX,
-            MODEL_ROTATION_LEG_UPPER_MIN);
-        Joint joint9(&m_entities.at(indicesEntities.at(8)),
-            &m_entities.at(indicesEntities.at(4)),
-            0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL,
-            MODEL_ROTATION_LEG_LOWER_MAX,
-            MODEL_ROTATION_LEG_LOWER_MIN);
-        Joint joint10(nullptr,
-            &m_entities.at(indicesEntities.at(10)),
-            POSITION_ORIGIN,
-            MODEL_ROTATION_TORSO_MAX,
-            MODEL_ROTATION_TORSO_MIN);
+    // get indices of above entities
+    GLuint entitiesHead = modelIndex * 11 + 1;
+    GLuint entitiesLegLowerFrontRight = entitiesHead + 1;
+    GLuint entitiesLegLowerFrontLeft = entitiesHead + 2;
+    GLuint entitiesLegLowerBackRight = entitiesHead + 3;
+    GLuint entitiesLegLowerBackLeft = entitiesHead + 4;
+    GLuint entitiesLegUpperFrontRight = entitiesHead + 5;
+    GLuint entitiesLegUpperFrontLeft = entitiesHead + 6;
+    GLuint entitiesLegUpperBackRight = entitiesHead + 7;
+    GLuint entitiesLegUpperBackLeft = entitiesHead + 8;
+    GLuint entitiesNeck = entitiesHead + 9;
+    GLuint entitiesTorso = entitiesHead + 10;
 
-        // add model joints to joints vector
-        std::vector<GLuint> indicesJoints;
-        indicesJoints.push_back(insertIntoJointsVector(&joint0));
-        indicesJoints.push_back(insertIntoJointsVector(&joint1));
-        indicesJoints.push_back(insertIntoJointsVector(&joint2));
-        indicesJoints.push_back(insertIntoJointsVector(&joint3));
-        indicesJoints.push_back(insertIntoJointsVector(&joint4));
-        indicesJoints.push_back(insertIntoJointsVector(&joint5));
-        indicesJoints.push_back(insertIntoJointsVector(&joint6));
-        indicesJoints.push_back(insertIntoJointsVector(&joint7));
-        indicesJoints.push_back(insertIntoJointsVector(&joint8));
-        indicesJoints.push_back(insertIntoJointsVector(&joint9));
-        indicesJoints.push_back(insertIntoJointsVector(&joint10));
+    // set up model hierarchy
+    m_models.at(modelIndex).add(&m_entities.at(entitiesTorso));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesNeck),
+        &m_entities.at(entitiesTorso));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesHead),
+        &m_entities.at(entitiesNeck));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperFrontRight),
+        &m_entities.at(entitiesTorso));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperFrontLeft),
+        &m_entities.at(entitiesTorso));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperBackRight),
+        &m_entities.at(entitiesTorso));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperBackLeft),
+        &m_entities.at(entitiesTorso));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerFrontRight),
+        &m_entities.at(entitiesLegUpperFrontRight));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerFrontLeft),
+        &m_entities.at(entitiesLegUpperFrontLeft));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerBackRight),
+        &m_entities.at(entitiesLegUpperBackRight));
+    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerBackLeft),
+        &m_entities.at(entitiesLegUpperBackLeft));
 
-        // add joints to model
-        for (GLuint j{ 0 }; j != indicesJoints.size(); ++j)
-            m_models.at(i).addJoint(&m_joints.at(indicesJoints[j]));
+    // create model joints
+    Joint joint0(&m_entities.at(entitiesNeck),
+        &m_entities.at(entitiesHead),
+        0.5f * MODEL_POSITION_RELATIVE_HEAD,
+        MODEL_ROTATION_HEAD_MAX,
+        MODEL_ROTATION_HEAD_MIN);
+    Joint joint1(&m_entities.at(entitiesTorso),
+        &m_entities.at(entitiesNeck),
+        0.5f * MODEL_POSITION_RELATIVE_NECK,
+        MODEL_ROTATION_NECK_MAX,
+        MODEL_ROTATION_NECK_MIN);
+    Joint joint2(&m_entities.at(entitiesTorso),
+        &m_entities.at(entitiesLegUpperFrontRight),
+        0.5f * MODEL_SCALE_LEG_UPPER
+        * MODEL_POSITION_RELATIVE_LEG_UPPER_FR,
+        MODEL_ROTATION_LEG_UPPER_MAX,
+        MODEL_ROTATION_LEG_UPPER_MIN);
+    Joint joint3(&m_entities.at(entitiesLegUpperFrontRight),
+        &m_entities.at(entitiesLegLowerFrontRight),
+        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR,
+        MODEL_ROTATION_LEG_LOWER_MAX,
+        MODEL_ROTATION_LEG_LOWER_MIN);
+    Joint joint4(&m_entities.at(entitiesTorso),
+        &m_entities.at(entitiesLegUpperBackRight),
+        0.5f * MODEL_SCALE_LEG_UPPER
+        * MODEL_POSITION_RELATIVE_LEG_UPPER_BR,
+        MODEL_ROTATION_LEG_UPPER_MAX,
+        MODEL_ROTATION_LEG_UPPER_MIN);
+    Joint joint5(&m_entities.at(entitiesLegUpperBackRight),
+        &m_entities.at(entitiesLegLowerBackRight),
+        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR,
+        MODEL_ROTATION_LEG_LOWER_MAX,
+        MODEL_ROTATION_LEG_LOWER_MIN);
+    Joint joint6(&m_entities.at(entitiesTorso),
+        &m_entities.at(entitiesLegUpperFrontLeft),
+        0.5f * MODEL_SCALE_LEG_UPPER
+        * MODEL_POSITION_RELATIVE_LEG_UPPER_FL,
+        MODEL_ROTATION_LEG_UPPER_MAX,
+        MODEL_ROTATION_LEG_UPPER_MIN);
+    Joint joint7(&m_entities.at(entitiesLegUpperFrontLeft),
+        &m_entities.at(entitiesLegLowerFrontLeft),
+        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL,
+        MODEL_ROTATION_LEG_LOWER_MAX,
+        MODEL_ROTATION_LEG_LOWER_MIN);
+    Joint joint8(&m_entities.at(entitiesTorso),
+        &m_entities.at(entitiesLegUpperBackLeft),
+        0.5f * MODEL_SCALE_LEG_UPPER
+        * MODEL_POSITION_RELATIVE_LEG_UPPER_BL,
+        MODEL_ROTATION_LEG_UPPER_MAX,
+        MODEL_ROTATION_LEG_UPPER_MIN);
+    Joint joint9(&m_entities.at(entitiesLegUpperBackLeft),
+        &m_entities.at(entitiesLegLowerBackLeft),
+        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL,
+        MODEL_ROTATION_LEG_LOWER_MAX,
+        MODEL_ROTATION_LEG_LOWER_MIN);
+    Joint joint10(nullptr,
+        &m_entities.at(entitiesTorso),
+        POSITION_ORIGIN,
+        MODEL_ROTATION_TORSO_MAX,
+        MODEL_ROTATION_TORSO_MIN);
 
-        // place horse at random location
-        if (i != 0)
-            moveModel(i, Transform::RANDOM);
-    }
+    // add model joints to joints vector
+    m_joints.emplace_back(std::move(joint0));
+    m_joints.emplace_back(std::move(joint1));
+    m_joints.emplace_back(std::move(joint2));
+    m_joints.emplace_back(std::move(joint3));
+    m_joints.emplace_back(std::move(joint4));
+    m_joints.emplace_back(std::move(joint5));
+    m_joints.emplace_back(std::move(joint6));
+    m_joints.emplace_back(std::move(joint7));
+    m_joints.emplace_back(std::move(joint8));
+    m_joints.emplace_back(std::move(joint9));
+    m_joints.emplace_back(std::move(joint10));
+
+    // add joints to model
+    GLuint jointStart = modelIndex * 11;
+    GLuint jointEnd = jointStart + 11;
+    for (GLuint j{ jointStart }; j != jointEnd; ++j)
+        m_models.at(modelIndex).addJoint(&m_joints.at(j));
+
+    // place horse at random location
+    if (modelIndex != 0)
+        moveModel(modelIndex, Transform::RANDOM);
 }
 
 void Renderer::initializePaths() {
     for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
 
     }
-}
-
-GLuint Renderer::insertIntoEntitiesVector(RenderedEntity* entity) {
-    // insert entity into entities vector
-    GLuint index = m_entities.size();
-    m_entities.emplace_back(*entity);
-
-    // return index in vector
-    return index;
-}
-
-GLuint Renderer::insertIntoJointsVector(Joint* joint) {
-    // insert jont into joints vector
-    GLuint index = m_joints.size();
-    m_joints.emplace_back(std::move(*joint));
-
-    // return index in vector
-    return index;
 }
 
 void Renderer::renderFirstPass(GLfloat deltaTime) {

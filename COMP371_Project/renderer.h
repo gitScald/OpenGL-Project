@@ -90,10 +90,9 @@ private:
     void initializeFrame();
     void initializeGround();
     void initializeLight();
-    void initializeModels();
+    void initializeMaterial();
+    void initializeModel();
     void initializePaths();
-    GLuint insertIntoEntitiesVector(RenderedEntity* entity);
-    GLuint insertIntoJointsVector(Joint* joint);
 
     // rendering passes
     void renderFirstPass(GLfloat deltaTime);
