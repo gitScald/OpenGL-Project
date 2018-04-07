@@ -71,16 +71,17 @@ public:
 
 private:
     Renderer()
-        : m_shaderEntity{ PATH_VERTEX_ENTITY,
-            PATH_FRAGMENT_ENTITY },
-        m_shaderFrame{ PATH_VERTEX_FRAME,
-            PATH_FRAGMENT_FRAME },
-        m_shaderShadow{ PATH_VERTEX_SHADOW,
+        : m_shaderEntity{ new Shader(PATH_VERTEX_ENTITY,
+            PATH_FRAGMENT_ENTITY) },
+        m_shaderFrame{ new Shader(PATH_VERTEX_FRAME,
+            PATH_FRAGMENT_FRAME) },
+        m_shaderShadow{ new Shader(PATH_VERTEX_SHADOW,
             PATH_FRAGMENT_SHADOW,
-            PATH_GEOMETRY_SHADOW },
-        m_skybox{ PATH_VERTEX_SKYBOX,
+            PATH_GEOMETRY_SHADOW) },
+        m_shadowMap{ new ShadowMap() },
+        m_skybox{ new Skybox(PATH_VERTEX_SKYBOX,
             PATH_FRAGMENT_SKYBOX,
-            PATH_TEXTURE_SKYBOX } {
+            PATH_TEXTURE_SKYBOX) } {
         initialize();
     }
 
@@ -114,21 +115,21 @@ private:
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };
-    std::vector<Animation> m_animations;
-    std::vector<Joint> m_joints;
-    std::vector<LightSource> m_lights;
-    std::vector<Material> m_materials;
-    std::vector<Model> m_models;
-    std::vector<Path> m_paths;
-    std::vector<RenderedEntity> m_entities;
+    std::vector<Animation*> m_animations;
+    std::vector<Joint*> m_joints;
+    std::vector<LightSource*> m_lights;
+    std::vector<Material*> m_materials;
+    std::vector<Model*> m_models;
+    std::vector<Path*> m_paths;
+    std::vector<RenderedEntity*> m_entities;
     glm::mat4 m_modelMatrix;
     glm::vec3 m_modelPositions[TROOP_COUNT];
     glm::vec3 m_modelScales[TROOP_COUNT];
-    Shader m_shaderEntity;
-    Shader m_shaderFrame;
-    Shader m_shaderShadow;
-    ShadowMap m_shadowMap;
-    Skybox m_skybox;
+    Shader* m_shaderEntity;
+    Shader* m_shaderFrame;
+    Shader* m_shaderShadow;
+    ShadowMap* m_shadowMap;
+    Skybox* m_skybox;
     GLuint m_axesVAO;
     GLuint m_axesVBO;
     GLuint m_gridVAO;

@@ -20,6 +20,12 @@ void callbackCursorPos(GLFWwindow* window,
     InputManager::get().processCursor(window, posX, posY);
 }
 
+void callbackError(int error, const char* log) {
+    // error callback
+    std::cerr << ">>> Error " << error << ": " << log
+        << std::endl << std::endl;
+}
+
 void callbackKeyboard(GLFWwindow* window,
     int key,
     int scanCode,
@@ -45,12 +51,15 @@ void callbackWindowResize(GLFWwindow* window,
 }
 
 int main(int argc, char* argv[]) {
+    // set up error callback
+    glfwSetErrorCallback(callbackError);
+
     // initialize GLFW and create window
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GL_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH,
         SCREEN_HEIGHT,
         WINDOW_TITLE.c_str(),

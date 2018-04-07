@@ -2,11 +2,11 @@
 
 Renderer::~Renderer() {
     // free resources
-    for (std::vector<Material>::const_iterator it{ m_materials.begin() };
+    for (std::vector<Material*>::const_iterator it{ m_materials.begin() };
         it != m_materials.end();
         ++it)
-        it->free();
-    m_shadowMap.free();
+        (*it)->free();
+    m_shadowMap->free();
 
     glDeleteVertexArrays(1, &m_axesVAO);
     glDeleteBuffers(1, &m_axesVBO);
@@ -80,14 +80,14 @@ void Renderer::moveModel(GLuint model,
     clampModelPosition(model);
 
     // pass position value to model
-    m_models.at(model).setPosition(m_modelPositions[model]);
+    m_models.at(model)->setPosition(m_modelPositions[model]);
 }
 
 void Renderer::resetModel(GLuint model) {
     // reset model
     m_modelPositions[model] = MODEL_POSITION_RELATIVE_TORSO;
     m_modelScales[model] = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_models.at(model).reset();
+    m_models.at(model)->reset();
 }
 
 void Renderer::rotateModel(GLuint model,
@@ -95,19 +95,19 @@ void Renderer::rotateModel(GLuint model,
     // rotate model
     switch (direction) {
     case Transform::Displacement::UP:
-        m_models.at(model).rotate(TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     case Transform::Displacement::DOWN:
-        m_models.at(model).rotate(-TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(-TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     case Transform::Displacement::LEFT:
-        m_models.at(model).rotate(TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Y);
         break;
     case Transform::Displacement::RIGHT:
-        m_models.at(model).rotate(-TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(-TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Y);
         break;
     }
@@ -119,12 +119,12 @@ void Renderer::rotateModelJoint(GLuint model,
     // rotate model joint
     switch (direction) {
     case Transform::Displacement::UP:
-        m_models.at(model).rotateJoint(id,
+        m_models.at(model)->rotateJoint(id,
             TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
     case Transform::Displacement::DOWN:
-        m_models.at(model).rotateJoint(id,
+        m_models.at(model)->rotateJoint(id,
             -TRANSFORMATION_INCREMENT_ROTATION,
             AXIS_Z);
         break;
@@ -147,7 +147,7 @@ void Renderer::scaleModel(GLuint model,
     clampModelScale(model);
 
     // pass scale value to model
-    m_models.at(model).scale(m_modelScales[model]);
+    m_models.at(model)->scale(m_modelScales[model]);
 }
 
 void Renderer::render(GLfloat deltaTime) {
@@ -156,7 +156,7 @@ void Renderer::render(GLfloat deltaTime) {
 
     // optionally render shadow map debug quad
     if (m_debuggingEnabled)
-        m_shadowMap.render();
+        m_shadowMap->render();
 }
 
 void Renderer::toggleAnimations() {
@@ -234,324 +234,324 @@ void Renderer::initialize() {
 
 void Renderer::initializeAnimation() {
     // create animation
-    Animation animation;
+    Animation* animation = new Animation();
 
     // animation step 0
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         0,
         2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         0,
         1.0f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         0,
         10.0f));
-    animation.addStep(AnimationStep(3,
+    animation->addStep(AnimationStep(3,
         AXIS_Z,
         0,
         -15.0f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         0,
         7.0f));
-    animation.addStep(AnimationStep(5,
+    animation->addStep(AnimationStep(5,
         AXIS_Z,
         0,
         -10.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         0,
         10.0f));
-    animation.addStep(AnimationStep(7,
+    animation->addStep(AnimationStep(7,
         AXIS_Z,
         0,
         -15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         0,
         7.0f));
-    animation.addStep(AnimationStep(9,
+    animation->addStep(AnimationStep(9,
         AXIS_Z,
         0,
         -10.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         0,
         1.0f));
 
     // animation step 1
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         1,
         2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         1,
         1.0f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         1,
         10.0f));
-    animation.addStep(AnimationStep(3,
+    animation->addStep(AnimationStep(3,
         AXIS_Z,
         1,
         -15.0f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         1,
         7.0f));
-    animation.addStep(AnimationStep(5,
+    animation->addStep(AnimationStep(5,
         AXIS_Z,
         1,
         -10.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         1,
         10.0f));
-    animation.addStep(AnimationStep(7,
+    animation->addStep(AnimationStep(7,
         AXIS_Z,
         1,
         -15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         1,
         7.0f));
-    animation.addStep(AnimationStep(9,
+    animation->addStep(AnimationStep(9,
         AXIS_Z,
         1,
         -10.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         1,
         1.0f));
 
     // animation step 2
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         2,
         -2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         2,
         -1.0f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         2,
         -10.0f));
-    animation.addStep(AnimationStep(3,
+    animation->addStep(AnimationStep(3,
         AXIS_Z,
         2,
         15.0f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         2,
         -7.0f));
-    animation.addStep(AnimationStep(5,
+    animation->addStep(AnimationStep(5,
         AXIS_Z,
         2,
         10.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         2,
         -10.0f));
-    animation.addStep(AnimationStep(7,
+    animation->addStep(AnimationStep(7,
         AXIS_Z,
         2,
         15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         2,
         -7.0f));
-    animation.addStep(AnimationStep(9,
+    animation->addStep(AnimationStep(9,
         AXIS_Z,
         2,
         10.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         2,
         -1.0f));
 
     // animation step 3
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         3,
         -2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         3,
         0.0f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         3,
         -10.0f));
-    animation.addStep(AnimationStep(3,
+    animation->addStep(AnimationStep(3,
         AXIS_Z,
         3,
         15.0f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         3,
         -7.0f));
-    animation.addStep(AnimationStep(5,
+    animation->addStep(AnimationStep(5,
         AXIS_Z,
         3,
         10.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         3,
         -10.0f));
-    animation.addStep(AnimationStep(7,
+    animation->addStep(AnimationStep(7,
         AXIS_Z,
         3,
         15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         3,
         -7.0f));
-    animation.addStep(AnimationStep(9,
+    animation->addStep(AnimationStep(9,
         AXIS_Z,
         3,
         10.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         3,
         -1.0f));
 
     // animation step 4
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         4,
         -2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         4,
         0.0f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         4,
         -10.0f));
-    animation.addStep(AnimationStep(3,
+    animation->addStep(AnimationStep(3,
         AXIS_Z,
         4,
         15.0f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         4,
         -7.0f));
-    animation.addStep(AnimationStep(5,
+    animation->addStep(AnimationStep(5,
         AXIS_Z,
         4,
         10.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         4,
         -10.0f));
-    animation.addStep(AnimationStep(7,
+    animation->addStep(AnimationStep(7,
         AXIS_Z,
         4,
         -15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         4,
         -7.0f));
-    animation.addStep(AnimationStep(9,
+    animation->addStep(AnimationStep(9,
         AXIS_Z,
         4,
         10.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         4,
         -1.0f));
 
     // animation step 5
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         5,
         2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         5,
         0.5f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         5,
         10.0f));
-    animation.addStep(AnimationStep(3,
+    animation->addStep(AnimationStep(3,
         AXIS_Z,
         5,
         -15.0f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         5,
         7.0f));
-    animation.addStep(AnimationStep(5,
+    animation->addStep(AnimationStep(5,
         AXIS_Z,
         5,
         -10.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         5,
         10.0f));
-    animation.addStep(AnimationStep(7,
+    animation->addStep(AnimationStep(7,
         AXIS_Z,
         5,
         -15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         5,
         7.0f));
-    animation.addStep(AnimationStep(9,
+    animation->addStep(AnimationStep(9,
         AXIS_Z,
         5,
         -10.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         5,
         1.0f));
 
     // animation step 6
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         6,
         -2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         6,
         0.5f));
-    animation.addStep(AnimationStep(2,
+    animation->addStep(AnimationStep(2,
         AXIS_Z,
         6,
         -15.0f));
-    animation.addStep(AnimationStep(8,
+    animation->addStep(AnimationStep(8,
         AXIS_Z,
         6,
         -15.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         6,
         1.0f));
 
     // animation step 7
-    animation.addStep(AnimationStep(0,
+    animation->addStep(AnimationStep(0,
         AXIS_Z,
         7,
         -2.0f));
-    animation.addStep(AnimationStep(1,
+    animation->addStep(AnimationStep(1,
         AXIS_Z,
         7,
         -0.5f));
-    animation.addStep(AnimationStep(4,
+    animation->addStep(AnimationStep(4,
         AXIS_Z,
         7,
         -15.0f));
-    animation.addStep(AnimationStep(6,
+    animation->addStep(AnimationStep(6,
         AXIS_Z,
         7,
         -15.0f));
-    animation.addStep(AnimationStep(10,
+    animation->addStep(AnimationStep(10,
         AXIS_Z,
         7,
         -1.0f));
@@ -581,7 +581,7 @@ void Renderer::initializeFrame() {
         GL_STATIC_DRAW);
 
     // vertex attributes
-    GLuint positionLocation = glGetAttribLocation(m_shaderFrame.getProgramID(),
+    GLuint positionLocation = glGetAttribLocation(m_shaderFrame->getProgramID(),
         ATTRIBUTE_POSITION.c_str());
     glVertexAttribPointer(positionLocation,
         3,
@@ -1015,7 +1015,7 @@ void Renderer::initializeFrame() {
         GL_STATIC_DRAW);
 
     // vertex attributes
-    positionLocation = glGetAttribLocation(m_shaderFrame.getProgramID(),
+    positionLocation = glGetAttribLocation(m_shaderFrame->getProgramID(),
         ATTRIBUTE_POSITION.c_str());
     glVertexAttribPointer(positionLocation,
         3,
@@ -1042,22 +1042,24 @@ void Renderer::initializeGround() {
     };
 
     // initialize ground material
-    m_materials.emplace_back(Texture(PATH_TEXTURE_GROUND,
+    m_materials.push_back(new Material(
+        Texture(PATH_TEXTURE_GROUND,
         GL_RGBA,
         GL_REPEAT,
         GL_LINEAR).getID(),
-        MATERIAL_SHININESS_GROUND);
+        MATERIAL_SHININESS_GROUND));
 
     // add ground entity to entities vector
-    m_entities.emplace_back(&m_shaderEntity,
+    m_entities.push_back(new RenderedEntity(
+        m_shaderEntity,
         POSITION_ORIGIN,
         verticesGround,
         sizeof(verticesGround),
         indicesGround,
-        sizeof(indicesGround));
+        sizeof(indicesGround)));
 
     // set ground color
-    m_entities.at(0).setColor(COLOR_GROUND);
+    m_entities.at(0)->setColor(COLOR_GROUND);
 }
 
 void Renderer::initializeLight() {
@@ -1131,7 +1133,7 @@ void Renderer::initializeLight() {
         GL_STATIC_DRAW);
 
     // vertex attributes
-    GLuint positionLocation = glGetAttribLocation(m_shaderFrame.getProgramID(),
+    GLuint positionLocation = glGetAttribLocation(m_shaderFrame->getProgramID(),
         ATTRIBUTE_POSITION.c_str());
     glVertexAttribPointer(positionLocation,
         3,
@@ -1142,16 +1144,17 @@ void Renderer::initializeLight() {
     glEnableVertexAttribArray(positionLocation);
 
     // create light source and add it to lights vector
-    m_lights.emplace_back(LIGHT_POSITION);
+    m_lights.push_back(new LightSource(LIGHT_POSITION));
 }
 
 void Renderer::initializeMaterial() {
     // initialize model material
-    m_materials.emplace_back(Texture(PATH_TEXTURE_HORSE,
+    m_materials.push_back(new Material(
+        Texture(PATH_TEXTURE_HORSE,
         GL_RGB,
         GL_CLAMP_TO_EDGE,
         GL_LINEAR).getID(),
-        MATERIAL_SHININESS_HORSE);
+        MATERIAL_SHININESS_HORSE));
 }
 
 void Renderer::initializeModel() {
@@ -1213,82 +1216,82 @@ void Renderer::initializeModel() {
     };
 
     // create model entities
-    RenderedEntity head(&m_shaderEntity,
+    RenderedEntity* head = new RenderedEntity(m_shaderEntity,
         POSITION_ORIGIN,
         vertices,
         sizeof(vertices));
-    RenderedEntity legLowerFrontRight(head);
-    RenderedEntity legLowerFrontLeft(head);
-    RenderedEntity legLowerBackRight(head);
-    RenderedEntity legLowerBackLeft(head);
-    RenderedEntity legUpperFrontRight(head);
-    RenderedEntity legUpperFrontLeft(head);
-    RenderedEntity legUpperBackRight(head);
-    RenderedEntity legUpperBackLeft(head);
-    RenderedEntity neck(head);
-    RenderedEntity torso(head);
+    RenderedEntity* legLowerFrontRight = new RenderedEntity(*head);
+    RenderedEntity* legLowerFrontLeft = new RenderedEntity(*head);
+    RenderedEntity* legLowerBackRight = new RenderedEntity(*head);
+    RenderedEntity* legLowerBackLeft = new RenderedEntity(*head);
+    RenderedEntity* legUpperFrontRight = new RenderedEntity(*head);
+    RenderedEntity* legUpperFrontLeft = new RenderedEntity(*head);
+    RenderedEntity* legUpperBackRight = new RenderedEntity(*head);
+    RenderedEntity* legUpperBackLeft = new RenderedEntity(*head);
+    RenderedEntity* neck = new RenderedEntity(*head);
+    RenderedEntity* torso = new RenderedEntity(*head);
 
     // set body parts color
-    head.setColor(MODEL_COLOR_HEAD);
-    legLowerFrontRight.setColor(MODEL_COLOR_LEG_LOWER);
-    legLowerFrontLeft.setColor(MODEL_COLOR_LEG_LOWER);
-    legLowerBackRight.setColor(MODEL_COLOR_LEG_LOWER);
-    legLowerBackLeft.setColor(MODEL_COLOR_LEG_LOWER);
-    legUpperFrontRight.setColor(MODEL_COLOR_LEG_UPPER);
-    legUpperFrontLeft.setColor(MODEL_COLOR_LEG_UPPER);
-    legUpperBackRight.setColor(MODEL_COLOR_LEG_UPPER);
-    legUpperBackLeft.setColor(MODEL_COLOR_LEG_UPPER);
-    neck.setColor(MODEL_COLOR_NECK);
-    torso.setColor(MODEL_COLOR_TORSO);
+    head->setColor(MODEL_COLOR_HEAD);
+    legLowerFrontRight->setColor(MODEL_COLOR_LEG_LOWER);
+    legLowerFrontLeft->setColor(MODEL_COLOR_LEG_LOWER);
+    legLowerBackRight->setColor(MODEL_COLOR_LEG_LOWER);
+    legLowerBackLeft->setColor(MODEL_COLOR_LEG_LOWER);
+    legUpperFrontRight->setColor(MODEL_COLOR_LEG_UPPER);
+    legUpperFrontLeft->setColor(MODEL_COLOR_LEG_UPPER);
+    legUpperBackRight->setColor(MODEL_COLOR_LEG_UPPER);
+    legUpperBackLeft->setColor(MODEL_COLOR_LEG_UPPER);
+    neck->setColor(MODEL_COLOR_NECK);
+    torso->setColor(MODEL_COLOR_TORSO);
 
     // scale body parts
-    head.scale(MODEL_SCALE_HEAD);
-    legLowerFrontRight.scale(MODEL_SCALE_LEG_LOWER);
-    legLowerFrontLeft.scale(MODEL_SCALE_LEG_LOWER);
-    legLowerBackRight.scale(MODEL_SCALE_LEG_LOWER);
-    legLowerBackLeft.scale(MODEL_SCALE_LEG_LOWER);
-    legUpperFrontRight.scale(MODEL_SCALE_LEG_UPPER);
-    legUpperFrontLeft.scale(MODEL_SCALE_LEG_UPPER);
-    legUpperBackRight.scale(MODEL_SCALE_LEG_UPPER);
-    legUpperBackLeft.scale(MODEL_SCALE_LEG_UPPER);
-    neck.scale(MODEL_SCALE_NECK);
-    torso.scale(MODEL_SCALE_TORSO);
+    head->scale(MODEL_SCALE_HEAD);
+    legLowerFrontRight->scale(MODEL_SCALE_LEG_LOWER);
+    legLowerFrontLeft->scale(MODEL_SCALE_LEG_LOWER);
+    legLowerBackRight->scale(MODEL_SCALE_LEG_LOWER);
+    legLowerBackLeft->scale(MODEL_SCALE_LEG_LOWER);
+    legUpperFrontRight->scale(MODEL_SCALE_LEG_UPPER);
+    legUpperFrontLeft->scale(MODEL_SCALE_LEG_UPPER);
+    legUpperBackRight->scale(MODEL_SCALE_LEG_UPPER);
+    legUpperBackLeft->scale(MODEL_SCALE_LEG_UPPER);
+    neck->scale(MODEL_SCALE_NECK);
+    torso->scale(MODEL_SCALE_TORSO);
 
     // translate body parts to their appropriate locations
-    head.translate(MODEL_POSITION_RELATIVE_HEAD);
-    legLowerFrontRight.translate(MODEL_POSITION_RELATIVE_LEG_LOWER_FR);
-    legLowerFrontLeft.translate(MODEL_POSITION_RELATIVE_LEG_LOWER_FL);
-    legLowerBackRight.translate(MODEL_POSITION_RELATIVE_LEG_LOWER_BR);
-    legLowerBackLeft.translate(MODEL_POSITION_RELATIVE_LEG_LOWER_BL);
-    legUpperFrontRight.translate(MODEL_POSITION_RELATIVE_LEG_UPPER_FR);
-    legUpperFrontLeft.translate(MODEL_POSITION_RELATIVE_LEG_UPPER_FL);
-    legUpperBackRight.translate(MODEL_POSITION_RELATIVE_LEG_UPPER_BR);
-    legUpperBackLeft.translate(MODEL_POSITION_RELATIVE_LEG_UPPER_BL);
-    neck.translate(MODEL_POSITION_RELATIVE_NECK);
-    torso.translate(MODEL_POSITION_RELATIVE_TORSO);
+    head->translate(MODEL_POSITION_RELATIVE_HEAD);
+    legLowerFrontRight->translate(MODEL_POSITION_RELATIVE_LEG_LOWER_FR);
+    legLowerFrontLeft->translate(MODEL_POSITION_RELATIVE_LEG_LOWER_FL);
+    legLowerBackRight->translate(MODEL_POSITION_RELATIVE_LEG_LOWER_BR);
+    legLowerBackLeft->translate(MODEL_POSITION_RELATIVE_LEG_LOWER_BL);
+    legUpperFrontRight->translate(MODEL_POSITION_RELATIVE_LEG_UPPER_FR);
+    legUpperFrontLeft->translate(MODEL_POSITION_RELATIVE_LEG_UPPER_FL);
+    legUpperBackRight->translate(MODEL_POSITION_RELATIVE_LEG_UPPER_BR);
+    legUpperBackLeft->translate(MODEL_POSITION_RELATIVE_LEG_UPPER_BL);
+    neck->translate(MODEL_POSITION_RELATIVE_NECK);
+    torso->translate(MODEL_POSITION_RELATIVE_TORSO);
 
     // rotate head and neck, set torso rotation
-    head.rotate(MODEL_ORIENTATION_RELATIVE_HEAD.first,
+    head->rotate(MODEL_ORIENTATION_RELATIVE_HEAD.first,
         MODEL_ORIENTATION_RELATIVE_HEAD.second);
-    neck.rotate(MODEL_ORIENTATION_RELATIVE_NECK.first,
+    neck->rotate(MODEL_ORIENTATION_RELATIVE_NECK.first,
         MODEL_ORIENTATION_RELATIVE_NECK.second);
-    torso.setRotation(true);
+    torso->setRotation(true);
 
     // add body parts to entities vector
-    m_entities.emplace_back(std::move(head));
-    m_entities.emplace_back(std::move(legLowerFrontRight));
-    m_entities.emplace_back(std::move(legLowerFrontLeft));
-    m_entities.emplace_back(std::move(legLowerBackRight));
-    m_entities.emplace_back(std::move(legLowerBackLeft));
-    m_entities.emplace_back(std::move(legUpperFrontRight));
-    m_entities.emplace_back(std::move(legUpperFrontLeft));
-    m_entities.emplace_back(std::move(legUpperBackRight));
-    m_entities.emplace_back(std::move(legUpperBackLeft));
-    m_entities.emplace_back(std::move(neck));
-    m_entities.emplace_back(std::move(torso));
+    m_entities.push_back(head);
+    m_entities.push_back(legLowerFrontRight);
+    m_entities.push_back(legLowerFrontLeft);
+    m_entities.push_back(legLowerBackRight);
+    m_entities.push_back(legLowerBackLeft);
+    m_entities.push_back(legUpperFrontRight);
+    m_entities.push_back(legUpperFrontLeft);
+    m_entities.push_back(legUpperBackRight);
+    m_entities.push_back(legUpperBackLeft);
+    m_entities.push_back(neck);
+    m_entities.push_back(torso);
 
     // create model object
-    m_models.emplace_back(Model());
+    m_models.push_back(new Model());
     GLuint modelIndex = m_models.size() - 1;
 
     // get indices of above entities
@@ -1305,107 +1308,107 @@ void Renderer::initializeModel() {
     GLuint entitiesTorso = entitiesHead + 10;
 
     // set up model hierarchy
-    m_models.at(modelIndex).add(&m_entities.at(entitiesTorso));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesNeck),
-        &m_entities.at(entitiesTorso));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesHead),
-        &m_entities.at(entitiesNeck));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperFrontRight),
-        &m_entities.at(entitiesTorso));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperFrontLeft),
-        &m_entities.at(entitiesTorso));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperBackRight),
-        &m_entities.at(entitiesTorso));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegUpperBackLeft),
-        &m_entities.at(entitiesTorso));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerFrontRight),
-        &m_entities.at(entitiesLegUpperFrontRight));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerFrontLeft),
-        &m_entities.at(entitiesLegUpperFrontLeft));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerBackRight),
-        &m_entities.at(entitiesLegUpperBackRight));
-    m_models.at(modelIndex).attach(&m_entities.at(entitiesLegLowerBackLeft),
-        &m_entities.at(entitiesLegUpperBackLeft));
+    m_models.at(modelIndex)->add(m_entities.at(entitiesTorso));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesNeck),
+        m_entities.at(entitiesTorso));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesHead),
+        m_entities.at(entitiesNeck));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegUpperFrontRight),
+        m_entities.at(entitiesTorso));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegUpperFrontLeft),
+        m_entities.at(entitiesTorso));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegUpperBackRight),
+        m_entities.at(entitiesTorso));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegUpperBackLeft),
+        m_entities.at(entitiesTorso));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegLowerFrontRight),
+        m_entities.at(entitiesLegUpperFrontRight));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegLowerFrontLeft),
+        m_entities.at(entitiesLegUpperFrontLeft));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegLowerBackRight),
+        m_entities.at(entitiesLegUpperBackRight));
+    m_models.at(modelIndex)->attach(m_entities.at(entitiesLegLowerBackLeft),
+        m_entities.at(entitiesLegUpperBackLeft));
 
     // create model joints
-    Joint joint0(&m_entities.at(entitiesNeck),
-        &m_entities.at(entitiesHead),
+    Joint* joint0 = new Joint(m_entities.at(entitiesNeck),
+        m_entities.at(entitiesHead),
         0.5f * MODEL_POSITION_RELATIVE_HEAD,
         MODEL_ROTATION_HEAD_MAX,
         MODEL_ROTATION_HEAD_MIN);
-    Joint joint1(&m_entities.at(entitiesTorso),
-        &m_entities.at(entitiesNeck),
+    Joint* joint1 = new Joint(m_entities.at(entitiesTorso),
+        m_entities.at(entitiesNeck),
         0.5f * MODEL_POSITION_RELATIVE_NECK,
         MODEL_ROTATION_NECK_MAX,
         MODEL_ROTATION_NECK_MIN);
-    Joint joint2(&m_entities.at(entitiesTorso),
-        &m_entities.at(entitiesLegUpperFrontRight),
+    Joint* joint2 = new Joint(m_entities.at(entitiesTorso),
+        m_entities.at(entitiesLegUpperFrontRight),
         0.5f * MODEL_SCALE_LEG_UPPER
         * MODEL_POSITION_RELATIVE_LEG_UPPER_FR,
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint3(&m_entities.at(entitiesLegUpperFrontRight),
-        &m_entities.at(entitiesLegLowerFrontRight),
+    Joint* joint3 = new Joint(m_entities.at(entitiesLegUpperFrontRight),
+        m_entities.at(entitiesLegLowerFrontRight),
         0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR,
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint4(&m_entities.at(entitiesTorso),
-        &m_entities.at(entitiesLegUpperBackRight),
+    Joint* joint4 = new Joint(m_entities.at(entitiesTorso),
+        m_entities.at(entitiesLegUpperBackRight),
         0.5f * MODEL_SCALE_LEG_UPPER
         * MODEL_POSITION_RELATIVE_LEG_UPPER_BR,
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint5(&m_entities.at(entitiesLegUpperBackRight),
-        &m_entities.at(entitiesLegLowerBackRight),
+    Joint* joint5 = new Joint(m_entities.at(entitiesLegUpperBackRight),
+        m_entities.at(entitiesLegLowerBackRight),
         0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR,
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint6(&m_entities.at(entitiesTorso),
-        &m_entities.at(entitiesLegUpperFrontLeft),
+    Joint* joint6 = new Joint(m_entities.at(entitiesTorso),
+        m_entities.at(entitiesLegUpperFrontLeft),
         0.5f * MODEL_SCALE_LEG_UPPER
         * MODEL_POSITION_RELATIVE_LEG_UPPER_FL,
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint7(&m_entities.at(entitiesLegUpperFrontLeft),
-        &m_entities.at(entitiesLegLowerFrontLeft),
+    Joint* joint7 = new Joint(m_entities.at(entitiesLegUpperFrontLeft),
+        m_entities.at(entitiesLegLowerFrontLeft),
         0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL,
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint8(&m_entities.at(entitiesTorso),
-        &m_entities.at(entitiesLegUpperBackLeft),
+    Joint* joint8 = new Joint(m_entities.at(entitiesTorso),
+        m_entities.at(entitiesLegUpperBackLeft),
         0.5f * MODEL_SCALE_LEG_UPPER
         * MODEL_POSITION_RELATIVE_LEG_UPPER_BL,
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
-    Joint joint9(&m_entities.at(entitiesLegUpperBackLeft),
-        &m_entities.at(entitiesLegLowerBackLeft),
+    Joint* joint9 = new Joint(m_entities.at(entitiesLegUpperBackLeft),
+        m_entities.at(entitiesLegLowerBackLeft),
         0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL,
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
-    Joint joint10(nullptr,
-        &m_entities.at(entitiesTorso),
+    Joint* joint10 = new Joint(nullptr,
+        m_entities.at(entitiesTorso),
         POSITION_ORIGIN,
         MODEL_ROTATION_TORSO_MAX,
         MODEL_ROTATION_TORSO_MIN);
 
     // add model joints to joints vector
-    m_joints.emplace_back(std::move(joint0));
-    m_joints.emplace_back(std::move(joint1));
-    m_joints.emplace_back(std::move(joint2));
-    m_joints.emplace_back(std::move(joint3));
-    m_joints.emplace_back(std::move(joint4));
-    m_joints.emplace_back(std::move(joint5));
-    m_joints.emplace_back(std::move(joint6));
-    m_joints.emplace_back(std::move(joint7));
-    m_joints.emplace_back(std::move(joint8));
-    m_joints.emplace_back(std::move(joint9));
-    m_joints.emplace_back(std::move(joint10));
+    m_joints.push_back(joint0);
+    m_joints.push_back(joint1);
+    m_joints.push_back(joint2);
+    m_joints.push_back(joint3);
+    m_joints.push_back(joint4);
+    m_joints.push_back(joint5);
+    m_joints.push_back(joint6);
+    m_joints.push_back(joint7);
+    m_joints.push_back(joint8);
+    m_joints.push_back(joint9);
+    m_joints.push_back(joint10);
 
     // add joints to model
     GLuint jointStart = modelIndex * 11;
     GLuint jointEnd = jointStart + 11;
     for (GLuint j{ jointStart }; j != jointEnd; ++j)
-        m_models.at(modelIndex).addJoint(&m_joints.at(j));
+        m_models.at(modelIndex)->addJoint(m_joints.at(j));
 
     // place horse at random location
     if (modelIndex != 0)
@@ -1423,48 +1426,48 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
     glm::mat4 shadowProjection = glm::perspective(
         glm::radians(SHADOW_PROJECTION_FOV),
         SHADOW_ASPECT_RATIO,
-        m_lights.at(0).getPlaneNear(),
-        m_lights.at(0).getPlaneFar());
+        m_lights.at(0)->getPlaneNear(),
+        m_lights.at(0)->getPlaneFar());
     std::vector<glm::mat4> shadowTransforms;
     shadowTransforms.push_back(shadowProjection
-        * glm::lookAt(m_lights.at(0).getWorldPosition(
+        * glm::lookAt(m_lights.at(0)->getWorldPosition(
                 getWorldOrientation()),
-            m_lights.at(0).getWorldPosition(
+            m_lights.at(0)->getWorldPosition(
                 getWorldOrientation())
             + glm::vec3(1.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, -1.0f, 0.0f)));
     shadowTransforms.push_back(shadowProjection
-        * glm::lookAt(m_lights.at(0).getWorldPosition(
+        * glm::lookAt(m_lights.at(0)->getWorldPosition(
                 getWorldOrientation()),
-            m_lights.at(0).getWorldPosition(
+            m_lights.at(0)->getWorldPosition(
                 getWorldOrientation())
             + glm::vec3(-1.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, -1.0f, 0.0f)));
     shadowTransforms.push_back(shadowProjection
-        * glm::lookAt(m_lights.at(0).getWorldPosition(
+        * glm::lookAt(m_lights.at(0)->getWorldPosition(
                 getWorldOrientation()),
-            m_lights.at(0).getWorldPosition(
+            m_lights.at(0)->getWorldPosition(
                 getWorldOrientation())
             + glm::vec3(0.0f, 1.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 1.0f)));
     shadowTransforms.push_back(shadowProjection
-        * glm::lookAt(m_lights.at(0).getWorldPosition(
+        * glm::lookAt(m_lights.at(0)->getWorldPosition(
                 getWorldOrientation()),
-            m_lights.at(0).getWorldPosition(
+            m_lights.at(0)->getWorldPosition(
                 getWorldOrientation())
             + glm::vec3(0.0f, -1.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, -1.0f)));
     shadowTransforms.push_back(shadowProjection
-        * glm::lookAt(m_lights.at(0).getWorldPosition(
+        * glm::lookAt(m_lights.at(0)->getWorldPosition(
                 getWorldOrientation()),
-            m_lights.at(0).getWorldPosition(
+            m_lights.at(0)->getWorldPosition(
                 getWorldOrientation())
             + glm::vec3(0.0f, 0.0f, 1.0f),
             glm::vec3(0.0f, -1.0f, 0.0f)));
     shadowTransforms.push_back(shadowProjection
-        * glm::lookAt(m_lights.at(0).getWorldPosition(
+        * glm::lookAt(m_lights.at(0)->getWorldPosition(
                 getWorldOrientation()),
-            m_lights.at(0).getWorldPosition(
+            m_lights.at(0)->getWorldPosition(
                 getWorldOrientation())
             + glm::vec3(0.0f, 0.0f, -1.0f),
             glm::vec3(0.0f, -1.0f, 0.0f)));
@@ -1476,27 +1479,27 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
         SHADOW_DEPTH_TEXTURE_HEIGHT);
 
     // bind and clear shadow map framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMap.getFBOID());
+    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMap->getFBOID());
     glClear(GL_DEPTH_BUFFER_BIT);
 
     // set shadow map shader uniforms
-    m_shaderShadow.use();
+    m_shaderShadow->use();
     for (GLuint i{ 0 }; i != shadowTransforms.size(); ++i)
-        m_shaderShadow.setUniformMat4(UNIFORM_SHADOW_TRANSFORMS
+        m_shaderShadow->setUniformMat4(UNIFORM_SHADOW_TRANSFORMS
             + "[" + std::to_string(i) + "]",
             shadowTransforms[i]);
-    m_shaderShadow.setUniformVec3(UNIFORM_LIGHT_POSITION,
-        m_lights.at(0).getWorldPosition(
+    m_shaderShadow->setUniformVec3(UNIFORM_LIGHT_POSITION,
+        m_lights.at(0)->getWorldPosition(
             getWorldOrientation()));
-    m_shaderShadow.setUniformVec2(UNIFORM_LIGHT_PLANES,
-        glm::vec2(m_lights.at(0).getPlaneNear(),
-            m_lights.at(0).getPlaneFar()));
+    m_shaderShadow->setUniformVec2(UNIFORM_LIGHT_PLANES,
+        glm::vec2(m_lights.at(0)->getPlaneNear(),
+            m_lights.at(0)->getPlaneFar()));
 
     // render ground to depth texture
-    renderGround(&m_shaderShadow);
+    renderGround(m_shaderShadow);
 
     // render models to depth texture
-    renderModels(&m_shaderShadow, deltaTime);
+    renderModels(m_shaderShadow, deltaTime);
 
     // unbind shadow map framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, NULL);
@@ -1514,88 +1517,88 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // render skybox
-    m_skybox.render(Camera::get().getWorldOrientation(),
+    m_skybox->render(Camera::get().getWorldOrientation(),
         Camera::get().getViewMatrix(),
         Camera::get().getProjectionMatrix(),
         Camera::get().getPosition());
 
     // shader uniforms: transformations
-    m_shaderEntity.use();
-    m_shaderEntity.setUniformMat4(UNIFORM_MATRIX_VIEW,
+    m_shaderEntity->use();
+    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
-    m_shaderEntity.setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
         Camera::get().getProjectionMatrix());
 
     // shader uniforms: lighting
-    m_shaderEntity.setUniformVec2(UNIFORM_LIGHT_PLANES,
-        glm::vec2(m_lights.at(0).getPlaneNear(),
-            m_lights.at(0).getPlaneFar()));
-    m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_POSITION,
-        m_lights.at(0).getWorldPosition(
+    m_shaderEntity->setUniformVec2(UNIFORM_LIGHT_PLANES,
+        glm::vec2(m_lights.at(0)->getPlaneNear(),
+            m_lights.at(0)->getPlaneFar()));
+    m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
+        m_lights.at(0)->getWorldPosition(
             getWorldOrientation()));
-    m_shaderEntity.setUniformVec3(UNIFORM_CAMERA_POSITION,
+    m_shaderEntity->setUniformVec3(UNIFORM_CAMERA_POSITION,
         Camera::get().getPosition());
     if (m_lightsEnabled) {
-        m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_AMBIENT,
-            m_lights.at(0).getAmbient());
-        m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
-            m_lights.at(0).getDiffuse());
-        m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_SPECULAR,
-            m_lights.at(0).getSpecular());
-        m_shaderEntity.setUniformFloat(UNIFORM_LIGHT_KC,
-            m_lights.at(0).getKC());
-        m_shaderEntity.setUniformFloat(UNIFORM_LIGHT_KL,
-            m_lights.at(0).getKL());
-        m_shaderEntity.setUniformFloat(UNIFORM_LIGHT_KQ,
-            m_lights.at(0).getKQ());
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
+            m_lights.at(0)->getAmbient());
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
+            m_lights.at(0)->getDiffuse());
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
+            m_lights.at(0)->getSpecular());
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
+            m_lights.at(0)->getKC());
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
+            m_lights.at(0)->getKL());
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
+            m_lights.at(0)->getKQ());
     }
     else {
-        m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_AMBIENT,
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
             glm::vec3(1.0f, 1.0f, 1.0f));
-        m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
             glm::vec3(0.0f, 0.0f, 0.0f));
-        m_shaderEntity.setUniformVec3(UNIFORM_LIGHT_SPECULAR,
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
             glm::vec3(0.0f, 0.0f, 0.0f));
-        m_shaderEntity.setUniformFloat(UNIFORM_LIGHT_KC,
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
             1.0f);
-        m_shaderEntity.setUniformFloat(UNIFORM_LIGHT_KL,
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
             0.0f);
-        m_shaderEntity.setUniformFloat(UNIFORM_LIGHT_KQ,
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
             0.0f);
     }
 
     // shader uniforms: shadows
-    m_shaderEntity.setUniformBool(UNIFORM_SHADOWS_ENABLED,
+    m_shaderEntity->setUniformBool(UNIFORM_SHADOWS_ENABLED,
         m_shadowsEnabled);
-    m_shaderEntity.setUniformBool(UNIFORM_TEXTURES_ENABLED,
+    m_shaderEntity->setUniformBool(UNIFORM_TEXTURES_ENABLED,
         m_texturesEnabled);
-    m_shaderEntity.setUniformUInt(UNIFORM_SHADOW_GRID_SAMPLES,
+    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_GRID_SAMPLES,
         SHADOW_GRID_SAMPLES);
-    m_shaderEntity.setUniformFloat(UNIFORM_SHADOW_GRID_OFFSET,
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_OFFSET,
         SHADOW_GRID_OFFSET);
-    m_shaderEntity.setUniformFloat(UNIFORM_SHADOW_GRID_FACTOR,
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_FACTOR,
         SHADOW_GRID_FACTOR);
-    m_shaderEntity.setUniformFloat(UNIFORM_SHADOW_BIAS_MIN,
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MIN,
         SHADOW_BIAS_MIN);
-    m_shaderEntity.setUniformFloat(UNIFORM_SHADOW_BIAS_MAX,
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MAX,
         SHADOW_BIAS_MAX);
 
     // shader uniforms: depth texture and ground material
-    m_materials.at(0).use(&m_shaderEntity);
+    m_materials.at(0)->use(m_shaderEntity);
     glActiveTexture(TEXTURE_UNIT_DEPTH_MAP);
     glBindTexture(GL_TEXTURE_CUBE_MAP,
-        m_shadowMap.getDepthTextureID());
-    m_shaderEntity.setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
+        m_shadowMap->getDepthTextureID());
+    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
         TEXTURE_INDEX_DEPTH_MAP);
 
     // render ground
-    renderGround(&m_shaderEntity);
+    renderGround(m_shaderEntity);
 
     // shader uniforms: entity material
-    m_materials.at(1).use(&m_shaderEntity);
+    m_materials.at(1)->use(m_shaderEntity);
 
     // render models
-    renderModels(&m_shaderEntity, deltaTime);
+    renderModels(m_shaderEntity, deltaTime);
 
     // render light
     renderLight();
@@ -1610,10 +1613,10 @@ void Renderer::renderFrame() {
     glLineWidth(RENDERING_LINE_WIDTH);
 
     // set shader uniforms
-    m_shaderFrame.use();
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_VIEW,
+    m_shaderFrame->use();
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
         Camera::get().getProjectionMatrix());
 
     glBindVertexArray(m_axesVAO);
@@ -1624,9 +1627,9 @@ void Renderer::renderFrame() {
             * glm::rotate(modelMatrix,
                 glm::radians(ROTATION_AXES[i].first),
                 ROTATION_AXES[i].second);
-        m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_MODEL,
+        m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL,
             modelMatrix);
-        m_shaderFrame.setUniformVec4(UNIFORM_COLOR,
+        m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
             COLOR_AXES[i]);
 
         // render axes
@@ -1635,15 +1638,15 @@ void Renderer::renderFrame() {
 
     // set model uniforms
     glm::mat4 modelMatrix = getWorldOrientation();
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_MODEL,
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL,
         modelMatrix);
-    m_shaderFrame.setUniformVec4(UNIFORM_COLOR,
+    m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
         COLOR_GRID);
 
     // render grid
     glBindVertexArray(m_gridVAO);
     modelMatrix = getWorldOrientation();
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_MODEL,
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL,
         modelMatrix);
     glDrawArrays(GL_LINES, 0, 404);
 
@@ -1653,29 +1656,29 @@ void Renderer::renderFrame() {
 
 void Renderer::renderGround(Shader* shader) {
     // set shader attributes
-    if (shader == &m_shaderShadow)
-        m_entities.at(0).setDepthShaderAttributes(shader);
-    else if (shader == &m_shaderEntity)
-        m_entities.at(0).setColorShaderAttributes(shader);
+    if (shader == m_shaderShadow)
+        m_entities.at(0)->setDepthShaderAttributes(shader);
+    else if (shader == m_shaderEntity)
+        m_entities.at(0)->setColorShaderAttributes(shader);
 
     // pass model matrix to shader and render
-    glm::mat4 modelMatrix = m_entities.at(0).getModelMatrix(
+    glm::mat4 modelMatrix = m_entities.at(0)->getModelMatrix(
         getWorldOrientation());
     shader->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
-    m_entities.at(0).render(m_primitive);
+    m_entities.at(0)->render(m_primitive);
 }
 
 void Renderer::renderLight() {
     // set shader uniforms
-    m_shaderFrame.use();
+    m_shaderFrame->use();
     glm::mat4 modelMatrix = getWorldOrientation()
         * glm::translate(glm::mat4(), LIGHT_POSITION);
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_VIEW,
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
-    m_shaderFrame.setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
         Camera::get().getProjectionMatrix());
-    m_shaderFrame.setUniformVec4(UNIFORM_COLOR,
+    m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
         m_lightsEnabled
             ? COLOR_LIGHT_ON
             : COLOR_LIGHT_OFF);
@@ -1690,24 +1693,24 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
     glCullFace(GL_FRONT);
 
     // render models
-    for (std::vector<Model>::iterator m_it{ m_models.begin() };
+    for (std::vector<Model*>::iterator m_it{ m_models.begin() };
         m_it != m_models.end();
         ++m_it) {
 
         // set shader attributes
-        if (shader == &m_shaderShadow)
-            m_it->setDepthShaderAttributes(shader);
-        else if (shader == &m_shaderEntity)
-            m_it->setColorShaderAttributes(shader);
+        if (shader == m_shaderShadow)
+            (*m_it)->setDepthShaderAttributes(shader);
+        else if (shader == m_shaderEntity)
+            (*m_it)->setColorShaderAttributes(shader);
 
         // play animation sequence
         if (m_animationsEnabled) {
-            m_animations.at(0).setSpeed(m_animationSpeedCurrent);
-            m_animations.at(0).play(&(*m_it), deltaTime);
+            m_animations.at(0)->setSpeed(m_animationSpeedCurrent);
+            m_animations.at(0)->play(*m_it, deltaTime);
         }
 
         // render model hierarchy
-        Model::ModelHierarchy* hierarchy = m_it->getHierarchy();
+        Model::ModelHierarchy* hierarchy = (*m_it)->getHierarchy();
         for (Model::ModelHierarchy::const_iterator e_it{ hierarchy->begin() };
             e_it != hierarchy->end();
             ++e_it) {
@@ -1717,7 +1720,7 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
             modelMatrix *= glm::scale(modelMatrix,
                     e_it->first->getScalingRelative())
                 * getWorldOrientation()
-                * m_it->getModelMatrix(e_it->first)
+                * (*m_it)->getModelMatrix(e_it->first)
                 * e_it->first->getScalingMatrix();
 
             // set shader uniforms
