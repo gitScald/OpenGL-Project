@@ -225,7 +225,7 @@ void Renderer::initialize() {
     initializeFrame();
     initializeGround();
     initializeMaterial();
-    for (GLuint i{ 0 }; i != 15; ++i)
+    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i)
         initializeModel();
     initializePaths();
     initializeAnimation();
