@@ -601,11 +601,11 @@ void Renderer::initializeFrame() {
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_axesVAO);
-    glBindVertexArray(m_axesVAO);
+    Shader::bindVAO(m_axesVAO);
 
     // generate and bind vertex buffer object, buffer data
     glGenBuffers(1, &m_axesVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_axesVBO);
+    Shader::bindVBO(m_axesVBO);
     glBufferData(GL_ARRAY_BUFFER,
         sizeof(verticesAxes),
         verticesAxes,
@@ -1035,11 +1035,11 @@ void Renderer::initializeFrame() {
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_gridVAO);
-    glBindVertexArray(m_gridVAO);
+    Shader::bindVAO(m_gridVAO);
 
     // generate and bind vertex buffer object, buffer data
     glGenBuffers(1, &m_gridVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_gridVBO);
+    Shader::bindVBO(m_gridVBO);
     glBufferData(GL_ARRAY_BUFFER,
         sizeof(verticesGrid),
         verticesGrid,
@@ -1154,11 +1154,11 @@ void Renderer::initializeLight() {
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_lightVAO);
-    glBindVertexArray(m_lightVAO);
+    Shader::bindVAO(m_lightVAO);
 
     // generate and bind vertex buffer object, buffer data
     glGenBuffers(1, &m_lightVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_lightVBO);
+    Shader::bindVBO(m_lightVBO);
     glBufferData(GL_ARRAY_BUFFER,
         sizeof(vertices),
         vertices,
@@ -1556,7 +1556,7 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
     glClear(GL_DEPTH_BUFFER_BIT);
 
     // set shadow map shader uniforms
-    m_shaderShadow->use();
+    Shader::useProgram(m_shaderShadow->getProgramID());
     for (GLuint i{ 0 }; i != shadowTransforms.size(); ++i)
         m_shaderShadow->setUniformMat4(UNIFORM_SHADOW_TRANSFORMS
             + "[" + std::to_string(i) + "]",
@@ -1596,7 +1596,7 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
         Camera::get().getPosition());
 
     // shader uniforms: transformations
-    m_shaderEntity->use();
+    Shader::useProgram(m_shaderEntity->getProgramID());
     m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
     m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
@@ -1688,13 +1688,13 @@ void Renderer::renderFrame() {
     glLineWidth(RENDERING_LINE_WIDTH);
 
     // set shader uniforms
-    m_shaderFrame->use();
+    Shader::useProgram(m_shaderFrame->getProgramID());
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
         Camera::get().getProjectionMatrix());
 
-    glBindVertexArray(m_axesVAO);
+    Shader::bindVAO(m_axesVAO);
     for (GLuint i{ 0 }; i != 3; ++i) {
         // set model matrix and color
         glm::mat4 modelMatrix;
@@ -1719,7 +1719,7 @@ void Renderer::renderFrame() {
         COLOR_GRID);
 
     // render grid
-    glBindVertexArray(m_gridVAO);
+    Shader::bindVAO(m_gridVAO);
     modelMatrix = getWorldOrientation();
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL,
         modelMatrix);
@@ -1749,7 +1749,7 @@ void Renderer::renderLight(GLfloat deltaTime) {
         m_currentTime += deltaTime;
 
     // set shader uniforms
-    m_shaderFrame->use();
+    Shader::useProgram(m_shaderFrame->getProgramID());
     glm::mat4 modelMatrix = getWorldOrientation()
         * glm::translate(glm::mat4(), m_lights.at(0)->getPosition());
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
@@ -1763,7 +1763,7 @@ void Renderer::renderLight(GLfloat deltaTime) {
             : COLOR_LIGHT_OBJECT_OFF);
 
     // render light
-    glBindVertexArray(m_lightVAO);
+    Shader::bindVAO(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
@@ -1817,7 +1817,7 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
                 * e_it->first->getScalingMatrix();
 
             // set shader uniforms
-            shader->use();
+            Shader::useProgram(shader->getProgramID());
             shader->setUniformMat4(UNIFORM_MATRIX_MODEL,
                 modelMatrix);
 

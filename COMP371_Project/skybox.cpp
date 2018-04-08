@@ -21,7 +21,7 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
         * globalModelMatrix;
 
     // set shader uniforms
-    m_shader.use();
+    Shader::useProgram(m_shader.getProgramID());
     m_shader.setUniformMat4(UNIFORM_MATRIX_MODEL,
         modelMatrix);
     m_shader.setUniformMat4(UNIFORM_MATRIX_VIEW,
@@ -36,7 +36,7 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
         m_textureUnit);
 
     // bind vertex array object and render
-    glBindVertexArray(m_VAO);
+    Shader::bindVAO(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // reenable depth test
@@ -103,11 +103,11 @@ void Skybox::initialize(const std::string (&path_textures)[6]) {
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_VAO);
-    glBindVertexArray(m_VAO);
+    Shader::bindVAO(m_VAO);
 
     // generate and bind vertex buffer object, buffer data
     glGenBuffers(1, &m_VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    Shader::bindVBO(m_VBO);
     glBufferData(GL_ARRAY_BUFFER,
         sizeof(vertices),
         vertices,

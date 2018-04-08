@@ -18,20 +18,20 @@ void Material::free() const {
 
 void Material::use(Shader* shader) const {
     // binds textures and sets shader uniforms
-    shader->use();
+    Shader::useProgram(shader->getProgramID());
     shader->setUniformFloat(UNIFORM_MATERIAL_SHININESS, m_shininess);
 
     glActiveTexture(m_diffuseUnit);
     if (s_texturesEnabled)
-        glBindTexture(GL_TEXTURE_2D, m_diffuse);
+        Shader::bind2DTexture(m_diffuse);
     else
-        glBindTexture(GL_TEXTURE_2D, NULL);
+        Shader::bind2DTexture(NULL);
     shader->setUniformUInt(UNIFORM_MATERIAL_DIFFUSE, m_diffuseIndex);
 
     glActiveTexture(m_specularUnit);
     if (s_texturesEnabled)
-        glBindTexture(GL_TEXTURE_2D, m_specular);
+        Shader::bind2DTexture(m_specular);
     else
-        glBindTexture(GL_TEXTURE_2D, NULL);
+        Shader::bind2DTexture(NULL);
     shader->setUniformUInt(UNIFORM_MATERIAL_SPECULAR, m_specularIndex);
 }

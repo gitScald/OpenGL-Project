@@ -1,5 +1,16 @@
 #include "shader.h"
 
+// initially bound buffer objects
+GLuint Shader::s_VAO = NULL;
+GLuint Shader::s_VBO = NULL;
+GLuint Shader::s_EBO = NULL;
+
+// initially bound shader program
+GLuint Shader::s_program = NULL;
+
+// initially bound texture
+GLuint Shader::s_2Dtexture = NULL;
+
 Shader::Shader(const std::string& pathVertex,
     const std::string& pathFragment,
     const std::string& pathGeometry) {
@@ -161,9 +172,42 @@ void Shader::setUniformVec4(const std::string& uniform,
         &value[0]);
 }
 
+void Shader::bindVAO(GLuint VAO) {
+    // bind VAO if needed
+    if (VAO != s_VAO) {
+        glBindVertexArray(VAO);
+        s_VAO = VAO;
+    }
+}
+
+void Shader::bindVBO(GLuint VBO) {
+    // bind VBO if needed
+    if (VBO != s_VBO) {
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        s_VBO = VBO;
+    }
+}
+
+void Shader::bindEBO(GLuint EBO) {
+    // bind EBO if needed
+    if (EBO != s_EBO) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        s_EBO = EBO;
+    }
+}
+
+void Shader::bind2DTexture(GLuint texture) {
+    // bind texture if needed
+    if (texture != s_2Dtexture) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        s_2Dtexture = texture;
+    }
+}
+
 void Shader::useProgram(GLuint programID) {
-    // user given shader program
-    glUseProgram(programID);
+    // use given shader program if needed
+    if (programID != s_program)
+        glUseProgram(programID);
 }
 
 void Shader::validateProgram(GLuint programID) {
@@ -192,10 +236,10 @@ void Shader::setColorAttributes(GLuint VAO,
     GLuint VBO,
     GLuint EBO) {
     // bind buffers
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    bindVAO(VAO);
+    bindVBO(VBO);
     if (EBO != NULL)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        bindEBO(EBO);
 
     // vertex attributes
     GLuint positionLocation = glGetAttribLocation(m_programID,
@@ -231,10 +275,10 @@ void Shader::setDepthAttributes(GLuint VAO,
     GLuint VBO,
     GLuint EBO) {
     // bind buffers
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    bindVAO(VAO);
+    bindVBO(VBO);
     if (EBO != NULL)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        bindEBO(EBO);
 
     // vertex attributes
     GLuint positionLocation = glGetAttribLocation(m_programID,
@@ -246,28 +290,6 @@ void Shader::setDepthAttributes(GLuint VAO,
         8 * sizeof(GLfloat),
         (void*)0);
     glEnableVertexAttribArray(positionLocation);
-}
-
-void Shader::use() const {
-    // use shader program
-    glUseProgram(m_programID);
-}
-
-void Shader::validate() const {
-    // perform validation on given shader program
-    glValidateProgram(m_programID);
-
-    GLint status;
-    glGetProgramiv(m_programID, GL_VALIDATE_STATUS, &status);
-    if (!status) {
-        GLchar log[512];
-        glGetProgramInfoLog(m_programID, 512, NULL, log);
-        std::cerr << ">>> Shader validation failed:"
-            << std::endl << log << std::endl;
-    }
-    else
-        std::cout << "Shader validation passed." << std::endl;
-    std::cout << std::endl;
 }
 
 void Shader::compileShader(const std::string& shaderType,

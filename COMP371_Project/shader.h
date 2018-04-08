@@ -46,6 +46,10 @@ public:
         const glm::vec4& value) const;
 
     // utilities
+    static void bindVAO(GLuint VAO);
+    static void bindVBO(GLuint VBO);
+    static void bindEBO(GLuint EBO);
+    static void bind2DTexture(GLuint texture);
     static void useProgram(GLuint programID);
     static void validateProgram(GLuint programID);
     void free() const;
@@ -55,8 +59,6 @@ public:
     void setDepthAttributes(GLuint VAO,
         GLuint VBO,
         GLuint EBO = NULL);
-    void use() const;
-    void validate() const;
 
 private:
     void compileShader(const std::string& shaderType,
@@ -65,6 +67,11 @@ private:
         GLuint shaderFragment,
         GLuint shaderGeometry = NULL);
 
+    static GLuint s_VAO;
+    static GLuint s_VBO;
+    static GLuint s_EBO;
+    static GLuint s_program;
+    static GLuint s_2Dtexture;
     GLuint m_programID;
 };
 

@@ -160,7 +160,7 @@ void RenderedEntity::toggleSmoothMovement() {
 
 void RenderedEntity::render(Rendering::Primitive primitive) const {
     // bind vertex array object
-    glBindVertexArray(m_VAO);
+    Shader::bindVAO(m_VAO);
 
     // render
     switch (primitive) {
@@ -219,14 +219,14 @@ void RenderedEntity::initializeModelEntity(GLfloat vertices[],
     // generate and bind vertex array object
     if (!s_modelVAO) {
         glGenVertexArrays(1, &s_modelVAO);
-        glBindVertexArray(s_modelVAO);
+        Shader::bindVAO(s_modelVAO);
         m_VAO = s_modelVAO;
     }
 
     // generate and bind vertex buffect object, buffer data
     if (!s_modelVBO) {
         glGenBuffers(1, &s_modelVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, s_modelVBO);
+        Shader::bindVBO(s_modelVBO);
         glBufferData(GL_ARRAY_BUFFER,
             verticesSize,
             vertices,
@@ -244,11 +244,11 @@ void RenderedEntity::initializeRegularEntity(GLfloat vertices[],
     GLuint indicesSize) {
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_VAO);
-    glBindVertexArray(m_VAO);
+    Shader::bindVAO(m_VAO);
 
     // generate and bind vertex buffect object, buffer data
     glGenBuffers(1, &m_VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    Shader::bindVBO(m_VBO);
     glBufferData(GL_ARRAY_BUFFER,
         verticesSize,
         vertices,
@@ -257,7 +257,7 @@ void RenderedEntity::initializeRegularEntity(GLfloat vertices[],
     // generate and bind element array buffer, buffer data
     if (indices) {
         glGenBuffers(1, &m_EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+        Shader::bindEBO(m_EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
             indicesSize,
             indices,

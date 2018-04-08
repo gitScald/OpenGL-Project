@@ -21,14 +21,14 @@ void ShadowMap::free() const {
 
 void ShadowMap::render() const {
     // set shader uniforms
-    m_shaderDebug.use();
+    Shader::useProgram(m_shaderDebug.getProgramID());
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthTextureID);
     m_shaderDebug.setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
         0);
 
     // render depth texture on debug quad
-    glBindVertexArray(m_VAO);
+    Shader::bindVAO(m_VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -115,11 +115,11 @@ void ShadowMap::initializeDebugQuad() {
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_VAO);
-    glBindVertexArray(m_VAO);
+    Shader::bindVAO(m_VAO);
 
     // generate and bind vertex buffer object, buffer data
     glGenBuffers(1, &m_VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    Shader::bindVBO(m_VBO);
     glBufferData(GL_ARRAY_BUFFER,
         sizeof(vertices),
         vertices,
@@ -127,7 +127,7 @@ void ShadowMap::initializeDebugQuad() {
 
     // generate and bind element array buffer object, buffer data
     glGenBuffers(1, &m_EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    Shader::bindEBO(m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
         sizeof(indices),
         indices,
