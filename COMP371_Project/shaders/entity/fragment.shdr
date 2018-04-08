@@ -14,8 +14,8 @@ struct Material {
 };
 
 struct Light {
+    vec4 color;
     vec3 position;
-    vec3 color;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -47,22 +47,35 @@ vec3 g_gridDisk[20] = vec3[] (
     vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
-float texturesDisabled() {
-    return float(!u_texturesEnabled);
-}
-
 float texturesEnabled() {
     return float(u_texturesEnabled);
 }
 
+vec3 objectColorDiffuse() {
+    // object color to use
+    vec3 color = texturesEnabled()
+        * texture(u_material.diffuse, o_textureCoordinate).rgb
+        + (1.0f - texturesEnabled())
+        * u_color.rgb;
+
+    return color;
+}
+
+vec3 objectColorSpecular() {
+    // object color to use
+    vec3 color = texturesEnabled()
+        * texture(u_material.specular, o_textureCoordinate).rgb
+        + (1.0f - texturesEnabled())
+        * u_color.rgb;
+
+    return color;
+}
+
 vec3 lightingAmbient() {
     // ambient lighting
-    vec3 ambient = u_light.color
+    vec3 ambient = u_light.color.rgb
         * u_light.ambient
-        * texture(u_material.diffuse, o_textureCoordinate).rgb
-            * texturesEnabled()
-        * u_color.rgb
-            * texturesDisabled();
+        * objectColorDiffuse();
 
     return ambient;
 }
@@ -73,13 +86,10 @@ vec3 lightingDiffuse() {
     vec3 lightDirection = normalize(u_light.position - o_fragPosition);
 
     float diffusion = max(dot(fragNormal, lightDirection), 0.0f);
-    vec3 diffuse = u_light.color
+    vec3 diffuse = u_light.color.rgb
         * u_light.diffuse
         * diffusion
-        * texture(u_material.diffuse, o_textureCoordinate).rgb
-            * texturesEnabled()
-        * u_color.rgb
-            * texturesDisabled();
+        * objectColorDiffuse();
 
     return diffuse;
 }
@@ -92,13 +102,10 @@ vec3 lightingSpecular() {
     vec3 reflectionDirection = reflect(-lightDirection, fragNormal);
 
     float specularity = pow(max(dot(cameraDirection, reflectionDirection), 0.0f), u_material.shininess);
-    vec3 specular = u_light.color
+    vec3 specular = u_light.color.rgb
         * u_light.specular
         * specularity
-        * texture(u_material.diffuse, o_textureCoordinate).rgb
-            * texturesEnabled()
-        * u_color.rgb
-            * texturesDisabled();
+        * objectColorSpecular();
 
     return specular;
 }
@@ -160,6 +167,6 @@ void main() {
     vec3 fragColor = (lightingAmbient()
         + (1.0f - shadowFactor()) * (lightingDiffuse() + lightingSpecular()));
     fragColor *= attenuationFactor();
-
+    
     o_fragColor = vec4(fragColor, 1.0f);
 }

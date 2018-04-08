@@ -1606,13 +1606,13 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     m_shaderEntity->setUniformVec2(UNIFORM_LIGHT_PLANES,
         glm::vec2(m_lights.at(0)->getPlaneNear(),
             m_lights.at(0)->getPlaneFar()));
-    m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
-        m_lights.at(0)->getColor());
     m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
         m_lights.at(0)->getWorldPosition(
             getWorldOrientation()));
     m_shaderEntity->setUniformVec3(UNIFORM_CAMERA_POSITION,
         Camera::get().getPosition());
+    m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
+        m_lights.at(0)->getColor());
     if (m_lightsEnabled) {
         m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
             m_lights.at(0)->getAmbient());
