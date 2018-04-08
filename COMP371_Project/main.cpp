@@ -114,8 +114,9 @@ int main(int argc, char* argv[]) {
     GLfloat frameLast{ 0.0f };
 
     // fps
-    GLfloat fpsUpdate{ static_cast<GLfloat>(glfwGetTime()) };
-    GLuint frames{ 0 };
+    GLfloat fpsDelta{ 0.0 };
+    GLfloat fpsUpdate{ 0.0f };
+    GLuint framesRendered{ 0 };
 
     // initialize rand seed
     srand(static_cast<GLuint>(glfwGetTime()));
@@ -126,17 +127,28 @@ int main(int argc, char* argv[]) {
         frameCurrent = static_cast<GLfloat>(glfwGetTime());
         deltaTime = frameCurrent - frameLast;
         frameLast = frameCurrent;
-        ++frames;
 
-        if (frameCurrent - fpsUpdate >= 1.0f) {
-            GLfloat ms = (1000.0f / static_cast<GLfloat>(frames));
-            std::cout << "Elapsed: " << ms << " ms" << std::endl;
-            frames = 0;
-            fpsUpdate += 1.0f;
+        // display framerate in window title
+        ++framesRendered;
+        fpsDelta = frameCurrent - fpsUpdate;
+        if (fpsDelta >= 1.0f) {
+            GLuint fps = static_cast<GLuint>(
+                static_cast<GLfloat>(framesRendered) / fpsDelta);
+
+            std::stringstream ss;
+            ss << WINDOW_TITLE << " - FPS: " << fps;
+            glfwSetWindowTitle(window, ss.str().c_str());
+
+            fpsUpdate = frameCurrent;
+            framesRendered = 0;
         }
         
         // adjust camera move speed
         Camera::get().setSpeedCurrent(Camera::get().getSpeed()
+            * deltaTime);
+
+        // adjust movement speed
+        Model::setSpeedCurrent(Model::getSpeed()
             * deltaTime);
 
         // render

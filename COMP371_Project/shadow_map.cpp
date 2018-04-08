@@ -30,7 +30,6 @@ void ShadowMap::render() const {
     // render depth texture on debug quad
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(NULL);
 }
 
 void ShadowMap::initialize() {

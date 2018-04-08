@@ -7,6 +7,11 @@ glm::mat4 Joint::getModelMatrix() const {
         * glm::translate(glm::mat4(), m_position);
 }
 
+GLfloat Joint::getRotation() const {
+    // return current joint rotation
+    return m_rotationAngle;
+}
+
 void Joint::reset() {
     // reset rotation
     m_rotationMatrix = glm::mat4();

@@ -232,4 +232,13 @@ const GLfloat SHADOW_BORDER_COLOR[]{ 1.0f, 1.0f, 1.0f, 1.0f };
 // animation-related constants
 const GLfloat ANIMATION_SPEED{ 2.0f };
 
+// pathing-related constants
+const GLfloat MODEL_SPEED{ 1.0f };
+const GLfloat PATHING_DIRECTION_MIN{ 15.0f };
+const GLfloat PATHING_DIRECTION_MAX{ 65.0f };
+const GLfloat PATHING_DISTANCE_MIN{ 1.0f };
+const GLfloat PATHING_DISTANCE_MAX{ 3.0f };
+const GLfloat PATHING_SPEED{ 1.0f };
+const GLuint PATH_COUNT{ 15 };
+
 #endif // !CONSTANTS_H

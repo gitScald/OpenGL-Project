@@ -71,7 +71,7 @@ GLfloat Camera::getMouseY() const {
 }
 
 GLfloat Camera::getSpeed() const {
-    // get current camera base speed
+    // get camera base speed
     return m_speed;
 }
 

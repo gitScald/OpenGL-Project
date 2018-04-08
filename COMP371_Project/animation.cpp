@@ -1,10 +1,10 @@
 #include "animation.h"
 
-void Animation::addStep(AnimationStep step) {
+void Animation::addStep(AnimationStep* step) {
     // add animation step to sequence
-    m_animationSequence.emplace_back(std::move(step));
-    if (m_keyframeLast < step.m_keyframe)
-        m_keyframeLast = step.m_keyframe;
+    m_animationSequence.push_back(step);
+    if (m_keyframeLast < step->m_keyframe)
+        m_keyframeLast = step->m_keyframe;
 }
 
 void Animation::setSpeed(GLfloat speed) {
@@ -14,18 +14,24 @@ void Animation::setSpeed(GLfloat speed) {
 
 void Animation::play(Model* model,
     GLfloat deltaTime) {
-    // update current frame
-    m_frame += m_speed * deltaTime;
-    m_keyframe = static_cast<GLuint>(m_frame) % (m_keyframeLast + 1);
-
     // play current keyframe
+    bool keyframeUpdated{ false };
     for (AnimationSequence::const_iterator it{ m_animationSequence.begin() };
         it != m_animationSequence.end();
         ++it) {
-        if (it->m_keyframe == m_keyframe)
-            model->rotateJoint(it->m_joint,
-                it->m_rotationAngle,
-                it->m_rotationAxis);
+        if ((*it)->m_keyframe == m_keyframe) {
+            model->rotateJoint((*it)->m_joint,
+                (*it)->m_rotationAngle * deltaTime,
+                (*it)->m_rotationAxis);
+
+            // update current frame
+            if (!keyframeUpdated
+                && model->getJointRotation((*it)->m_joint)
+                    >= (*it)->m_rotationAngle) {
+                m_keyframe = (m_keyframe + 1) % (m_keyframeLast + 1);
+                keyframeUpdated = true;
+            }
+        }
     }
 }
 

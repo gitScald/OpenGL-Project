@@ -338,6 +338,11 @@ void InputManager::processKeyboard(GLFWwindow* window,
     if (key == GLFW_KEY_V
         && action == GLFW_PRESS)
         Renderer::get().toggleDebugging();
+
+    // toggle pathing
+    if (key == GLFW_KEY_H
+        && action == GLFW_PRESS)
+        Renderer::get().togglePathing();
 }
 
 void InputManager::processScroll(GLFWwindow* window,

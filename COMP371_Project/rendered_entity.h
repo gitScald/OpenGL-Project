@@ -25,13 +25,19 @@ public:
         GLfloat vertices[],
         GLuint verticesSize,
         GLuint indices[] = nullptr,
-        GLuint indicesSize = 0)
+        GLuint indicesSize = 0,
+        bool isModelEntity = false)
         : m_position { position },
-        m_positionOriginal{ position } {
-        initialize(vertices,
-            verticesSize,
-            indices,
-            indicesSize);
+        m_positionOriginal{ position },
+        m_modelEntity{ isModelEntity } {
+        if (isModelEntity)
+            initializeModelEntity(vertices,
+                verticesSize);
+        else
+            initializeRegularEntity(vertices,
+                verticesSize,
+                indices,
+                indicesSize);
     }
     RenderedEntity(const RenderedEntity& entity)
         : m_rotationMatrix{ entity.m_rotationMatrix },
@@ -43,11 +49,13 @@ public:
         m_positionOriginal{ entity.m_positionOriginal },
         m_scalingOriginal{ entity.m_scalingOriginal },
         m_scalingRelative{ entity.m_scalingRelative },
+        m_front{ entity.m_front },
         m_color{ entity.m_color },
         m_VAO{ entity.m_VAO },
         m_VBO{ entity.m_VBO },
         m_EBO{ entity.m_EBO },
         m_vertexCount{ entity.m_vertexCount },
+        m_modelEntity{ entity.m_modelEntity },
         m_rotationSet{ entity.m_rotationSet },
         m_scaleSet{ entity.m_scaleSet },
         m_translationSet{ entity.m_translationSet } {}
@@ -61,7 +69,9 @@ public:
         m_positionOriginal{ std::move(entity.m_positionOriginal) },
         m_scalingOriginal{ std::move(entity.m_scalingOriginal) },
         m_scalingRelative{ std::move(entity.m_scalingRelative) },
+        m_front{ std::move(entity.m_front) },
         m_color{ std::move(entity.m_color) },
+        m_modelEntity{ std::move(entity.m_modelEntity) },
         m_VAO{ std::move(entity.m_VAO) },
         m_VBO{ std::move(entity.m_VBO) },
         m_EBO{ std::move(entity.m_EBO) },
@@ -78,7 +88,9 @@ public:
     const glm::vec3& getScalingRelative() const;
 
     // setters
+    static void setSpeedCurrent(GLfloat value);
     void setColor(const glm::vec4& value);
+    void setFrontVector(const glm::vec3& value);
     void setPosition(const glm::vec3& value);
     void setRotation(bool toggle);
     void setScaling(bool toggle);
@@ -86,21 +98,29 @@ public:
     // transformations
     void move(Transform::Displacement direction);
     void reset();
-    void rotate(GLfloat angle, const glm::vec3& axis);
+    void rotate(GLfloat angle,
+        const glm::vec3& axis);
     void scale(const glm::vec3& value);
     void translate(const glm::vec3& value);
 
     // utilities
+    static void toggleSmoothMovement();
     void render(Rendering::Primitive primitive) const;
     void setColorShaderAttributes(Shader* shader) const;
     void setDepthShaderAttributes(Shader* shader) const;
 
 private:
-    void initialize(GLfloat vertices[],
+    void initializeModelEntity(GLfloat vertices[],
+        GLuint verticesSize);
+    void initializeRegularEntity(GLfloat vertices[],
         GLuint verticesSize,
         GLuint indices[] = nullptr,
         GLuint indicesSize = 0);
 
+    static bool s_smoothMovement;
+    static GLfloat s_speedCurrent;
+    static GLuint s_modelVAO;
+    static GLuint s_modelVBO;
     glm::mat4 m_rotationMatrix;
     glm::mat4 m_rotationMatrixOriginal;
     glm::mat4 m_scalingMatrix;
@@ -110,11 +130,13 @@ private:
     glm::vec3 m_positionOriginal;
     glm::vec3 m_scalingOriginal;
     glm::vec3 m_scalingRelative{ glm::vec3(1.0f, 1.0f, 1.0f) };
+    glm::vec3 m_front;
     glm::vec4 m_color;
     GLuint m_VAO;
     GLuint m_VBO;
     GLuint m_EBO{ NULL };
     GLuint m_vertexCount;
+    bool m_modelEntity;
     bool m_rotationSet{ false };
     bool m_scaleSet{ false };
     bool m_translationSet{ false };

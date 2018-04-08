@@ -1,5 +1,15 @@
 #include "rendered_entity.h"
 
+// model VAO and VBO initialized to NULL
+GLuint RenderedEntity::s_modelVAO = NULL;
+GLuint RenderedEntity::s_modelVBO = NULL;
+
+// smooth movement disabled by default
+bool RenderedEntity::s_smoothMovement = false;
+
+// base movement speed
+GLfloat RenderedEntity::s_speedCurrent = PATHING_SPEED;
+
 glm::mat4 RenderedEntity::getModelMatrix(const glm::mat4& globalModelMatrix) {
     // return model matrix
     return glm::scale(glm::mat4(), m_scalingRelative)
@@ -24,9 +34,19 @@ const glm::vec3& RenderedEntity::getScalingRelative() const {
     return m_scalingRelative;
 }
 
+void RenderedEntity::setSpeedCurrent(GLfloat value) {
+    // set movement speed
+    s_speedCurrent = value;
+}
+
 void RenderedEntity::setColor(const glm::vec4& value) {
     // set entity color
     m_color = value;
+}
+
+void RenderedEntity::setFrontVector(const glm::vec3& value) {
+    // update front vector
+    m_front = value;
 }
 
 void RenderedEntity::setPosition(const glm::vec3& value) {
@@ -54,6 +74,11 @@ void RenderedEntity::move(Transform::Displacement direction) {
             % TRANSFORMATION_RANDOM_DISPLACEMENT);
         m_position.z = static_cast<GLfloat>(rand()
             % TRANSFORMATION_RANDOM_DISPLACEMENT);
+        break;
+    case Transform::Displacement::FRONT:
+        m_position += m_front
+            * s_speedCurrent
+            * TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::UP:
         m_position.x += TRANSFORMATION_INCREMENT_TRANSLATION;
@@ -89,8 +114,8 @@ void RenderedEntity::rotate(GLfloat angle,
     }
 
     m_rotationMatrix *= glm::rotate(glm::mat4(),
-        glm::radians(angle),
-        axis);
+            glm::radians(angle),
+            axis);
 }
 
 void RenderedEntity::scale(const glm::vec3& value) {
@@ -113,9 +138,16 @@ void RenderedEntity::translate(const glm::vec3& value) {
     m_position += value;
 }
 
+void RenderedEntity::toggleSmoothMovement() {
+    // set whether smooth movement should be enabled or not
+    s_smoothMovement = !s_smoothMovement;
+}
+
 void RenderedEntity::render(Rendering::Primitive primitive) const {
-    // bind vertex array object and render
+    // bind vertex array object
     glBindVertexArray(m_VAO);
+
+    // render
     switch (primitive) {
     case Rendering::POINTS:
         glPointSize(RENDERING_POINT_SIZE);
@@ -153,9 +185,6 @@ void RenderedEntity::render(Rendering::Primitive primitive) const {
                 m_vertexCount);
         break;
     }
-
-    // unbind vertex array object
-    glBindVertexArray(NULL);
 }
 
 void RenderedEntity::setColorShaderAttributes(Shader* shader) const {
@@ -170,7 +199,31 @@ void RenderedEntity::setDepthShaderAttributes(Shader* shader) const {
     shader->setDepthAttributes(m_VAO, m_VBO, m_EBO);
 }
 
-void RenderedEntity::initialize(GLfloat vertices[],
+void RenderedEntity::initializeModelEntity(GLfloat vertices[],
+    GLuint verticesSize) {
+    // generate and bind vertex array object
+    if (!s_modelVAO) {
+        glGenVertexArrays(1, &s_modelVAO);
+        glBindVertexArray(s_modelVAO);
+        m_VAO = s_modelVAO;
+    }
+
+    // generate and bind vertex buffect object, buffer data
+    if (!s_modelVBO) {
+        glGenBuffers(1, &s_modelVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, s_modelVBO);
+        glBufferData(GL_ARRAY_BUFFER,
+            verticesSize,
+            vertices,
+            GL_STATIC_DRAW);
+        m_VBO = s_modelVBO;
+    }
+
+    // set vertex count
+   m_vertexCount = verticesSize / (6 * sizeof(GLfloat));
+}
+
+void RenderedEntity::initializeRegularEntity(GLfloat vertices[],
     GLuint verticesSize,
     GLuint indices[],
     GLuint indicesSize) {
@@ -195,9 +248,6 @@ void RenderedEntity::initialize(GLfloat vertices[],
             indices,
             GL_STATIC_DRAW);
     }
-
-    // unbind vertex array object
-    glBindVertexArray(NULL);
 
     // set vertex count
     if (m_EBO != NULL) {

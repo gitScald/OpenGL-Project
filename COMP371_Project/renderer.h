@@ -53,7 +53,8 @@ public:
         Transform::Displacement direction);
     void resetModel(GLuint model);
     void rotateModel(GLuint model,
-        Transform::Displacement direction);
+        Transform::Displacement direction,
+        GLfloat angle = TRANSFORMATION_INCREMENT_ROTATION);
     void rotateModelJoint(GLuint model,
         GLuint id,
         Transform::Displacement direction);
@@ -66,6 +67,7 @@ public:
     void toggleDebugging();
     void toggleFrame();
     void toggleLights();
+    void togglePathing();
     void toggleShadows();
     void toggleTextures();
 
@@ -142,6 +144,7 @@ private:
     bool m_debuggingEnabled{ false };
     bool m_frameEnabled{ true };
     bool m_lightsEnabled{ true };
+    bool m_pathingEnabled{ false };
     bool m_shadowsEnabled{ true };
     bool m_texturesEnabled{ true };
 };

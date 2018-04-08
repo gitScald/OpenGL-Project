@@ -1,12 +1,29 @@
 #include "model.h"
 
+// smooth movement disabled by default
+bool Model::s_smoothMovement = false;
+
+// base movement speed
+GLfloat Model::s_speed = MODEL_SPEED;
+GLfloat Model::s_speedCurrent = s_speed;
+
+GLfloat Model::getSpeed() {
+    // get base movement speed
+    return s_speed;
+}
+
+GLfloat Model::getSpeedCurrent() {
+    // get current movement speed
+    return s_speedCurrent;
+}
+
 Model::ModelHierarchy* Model::getHierarchy() {
-    // return model hierarchy
+    // get model hierarchy
     return &m_hierarchy;
 }
 
 glm::mat4 Model::getJointModelMatrix(RenderedEntity* entity) {
-    // return joint model matrix for entity
+    // get joint model matrix for entity
     glm::mat4 jointModelMatrix;
     for (Joints::iterator it{ m_joints.begin() };
         it != m_joints.end();
@@ -18,6 +35,11 @@ glm::mat4 Model::getJointModelMatrix(RenderedEntity* entity) {
     }
 
     return jointModelMatrix;
+}
+
+GLfloat Model::getJointRotation(GLuint joint) const {
+    // get current joint rotation
+    return m_joints.at(joint)->getRotation();
 }
 
 glm::mat4 Model::getModelMatrix(RenderedEntity* entity) {
@@ -43,6 +65,22 @@ glm::mat4 Model::getModelMatrix(RenderedEntity* entity) {
     return modelMatrix;
 }
 
+GLfloat Model::getOrientation() const {
+    // get current model orientation
+    return m_orientation;
+}
+
+GLfloat Model::getScale() const {
+    // get current model scale
+    return m_scale;
+}
+
+void Model::setSpeedCurrent(GLfloat value) {
+    // set movement speed
+    s_speedCurrent = value;
+    RenderedEntity::setSpeedCurrent(value);
+}
+
 void Model::setPosition(const glm::vec3& value) {
     // set model position
     m_hierarchyRoot->setPosition(value);
@@ -65,12 +103,18 @@ void Model::reset() {
         it != m_joints.end();
         ++it)
         (*it)->reset();
+
+    // reset model orientation
+    m_orientation = 0.0f;
+    updateFrontVector();
 }
 
 void Model::rotate(GLfloat angle,
     const glm::vec3& axis) {
     // rotate model
     m_hierarchyRoot->rotate(angle, axis);
+    m_orientation += angle;
+    updateFrontVector();
 }
 
 void Model::rotateJoint(GLuint id,
@@ -96,6 +140,8 @@ void Model::scale(const glm::vec3& value) {
         it != m_hierarchy.end();
         ++it)
         it->first->scale(value);
+    m_scale = value.x;
+    updateColliderRadius();
 }
 
 void Model::translate(const glm::vec3& value) {
@@ -103,13 +149,21 @@ void Model::translate(const glm::vec3& value) {
     m_hierarchyRoot->translate(value);
 }
 
+void Model::toggleSmoothMovement() {
+    // set whether smooth movement should be enabled or not
+    s_smoothMovement = !s_smoothMovement;
+    RenderedEntity::toggleSmoothMovement();
+}
+
 void Model::add(RenderedEntity* entity) {
     // add entity to hierarchy
     if (!m_hierarchyRoot)
         m_hierarchyRoot = entity;
 
-    if (!contains(entity))
+    if (!contains(entity)) {
         m_hierarchy.insert(std::make_pair(entity, nullptr));
+        updateColliderRadius();
+    }
 }
 
 void Model::addJoint(Joint* joint) {
@@ -165,4 +219,24 @@ void Model::setDepthShaderAttributes(Shader* shader) const {
         it != m_hierarchy.end();
         ++it)
         it->first->setDepthShaderAttributes(shader);
+}
+
+void Model::updateColliderRadius() {
+    // update radius of collider sphere
+}
+
+void Model::updateFrontVector() {
+    // calculate front vector using yaw angle
+    m_front.x = cos(glm::radians(m_orientation - 90.0f));
+    m_front.y = 0.0f;
+    m_front.z = sin(glm::radians(m_orientation - 90.0f));
+
+    // normalize front vector
+    m_front = glm::normalize(m_front);
+
+    // pass front vector to hierarchy
+    for (ModelHierarchy::iterator it{ m_hierarchy.begin() };
+        it != m_hierarchy.end();
+        ++it)
+        it->first->setFrontVector(m_front);
 }

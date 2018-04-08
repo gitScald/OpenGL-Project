@@ -58,21 +58,25 @@ void Renderer::moveModel(GLuint model,
     switch (direction) {
     case Transform::Displacement::RANDOM:
         m_modelPositions[model].x = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX);
+            % GRID_SIZE - POSITION_MAX) * m_models.at(0)->getScale();
         m_modelPositions[model].z = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX);
+            % GRID_SIZE - POSITION_MAX * m_models.at(0)->getScale());
         break;
     case Transform::Displacement::UP:
-        m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(0)->getScale();
         break;
     case Transform::Displacement::DOWN:
-        m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(0)->getScale();
         break;
     case Transform::Displacement::LEFT:
-        m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(0)->getScale();
         break;
     case Transform::Displacement::RIGHT:
-        m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(0)->getScale();
         break;
     }
 
@@ -91,23 +95,32 @@ void Renderer::resetModel(GLuint model) {
 }
 
 void Renderer::rotateModel(GLuint model,
-    Transform::Displacement direction) {
+    Transform::Displacement direction,
+    GLfloat angle) {
     // rotate model
     switch (direction) {
+    case Transform::Displacement::RANDOM: {
+        GLuint direction = (rand() % 2 == 0) ? -1 : 1;
+        GLfloat orientation = static_cast<GLfloat>(rand()
+            % static_cast<GLuint>((359.0f - 0.0f + 1.0f) - 0.0f));
+        m_models.at(model)->rotate(direction * orientation,
+            AXIS_Y);
+    }
+        break;
     case Transform::Displacement::UP:
-        m_models.at(model)->rotate(TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(angle,
             AXIS_Z);
         break;
     case Transform::Displacement::DOWN:
-        m_models.at(model)->rotate(-TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(-angle,
             AXIS_Z);
         break;
     case Transform::Displacement::LEFT:
-        m_models.at(model)->rotate(TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(angle,
             AXIS_Y);
         break;
     case Transform::Displacement::RIGHT:
-        m_models.at(model)->rotate(-TRANSFORMATION_INCREMENT_ROTATION,
+        m_models.at(model)->rotate(-angle,
             AXIS_Y);
         break;
     }
@@ -187,6 +200,17 @@ void Renderer::toggleLights() {
         << (m_lightsEnabled ? "ENABLED" : "DISABLED") << std::endl;
 }
 
+void Renderer::togglePathing() {
+    // set whether pathing should be enabled or not
+    m_pathingEnabled = !m_pathingEnabled;
+    std::cout << "Pathing: "
+        << (m_pathingEnabled ? "ENABLED" : "DISABLED") << std::endl;
+    Model::toggleSmoothMovement();
+
+    // also toggle animations
+    toggleAnimations();
+}
+
 void Renderer::toggleShadows() {
     // set whether shadows should be enabled or not
     m_shadowsEnabled = !m_shadowsEnabled;
@@ -237,321 +261,321 @@ void Renderer::initializeAnimation() {
     Animation* animation = new Animation();
 
     // animation step 0
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         0,
         2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         0,
         1.0f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         0,
         10.0f));
-    animation->addStep(AnimationStep(3,
+    animation->addStep(new AnimationStep(3,
         AXIS_Z,
         0,
         -15.0f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         0,
         7.0f));
-    animation->addStep(AnimationStep(5,
+    animation->addStep(new AnimationStep(5,
         AXIS_Z,
         0,
         -10.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         0,
         10.0f));
-    animation->addStep(AnimationStep(7,
+    animation->addStep(new AnimationStep(7,
         AXIS_Z,
         0,
         -15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         0,
         7.0f));
-    animation->addStep(AnimationStep(9,
+    animation->addStep(new AnimationStep(9,
         AXIS_Z,
         0,
         -10.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         0,
         1.0f));
 
     // animation step 1
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         1,
         2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         1,
         1.0f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         1,
         10.0f));
-    animation->addStep(AnimationStep(3,
+    animation->addStep(new AnimationStep(3,
         AXIS_Z,
         1,
         -15.0f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         1,
         7.0f));
-    animation->addStep(AnimationStep(5,
+    animation->addStep(new AnimationStep(5,
         AXIS_Z,
         1,
         -10.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         1,
         10.0f));
-    animation->addStep(AnimationStep(7,
+    animation->addStep(new AnimationStep(7,
         AXIS_Z,
         1,
         -15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         1,
         7.0f));
-    animation->addStep(AnimationStep(9,
+    animation->addStep(new AnimationStep(9,
         AXIS_Z,
         1,
         -10.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         1,
         1.0f));
 
     // animation step 2
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         2,
         -2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         2,
         -1.0f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         2,
         -10.0f));
-    animation->addStep(AnimationStep(3,
+    animation->addStep(new AnimationStep(3,
         AXIS_Z,
         2,
         15.0f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         2,
         -7.0f));
-    animation->addStep(AnimationStep(5,
+    animation->addStep(new AnimationStep(5,
         AXIS_Z,
         2,
         10.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         2,
         -10.0f));
-    animation->addStep(AnimationStep(7,
+    animation->addStep(new AnimationStep(7,
         AXIS_Z,
         2,
         15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         2,
         -7.0f));
-    animation->addStep(AnimationStep(9,
+    animation->addStep(new AnimationStep(9,
         AXIS_Z,
         2,
         10.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         2,
         -1.0f));
 
     // animation step 3
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         3,
         -2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         3,
         0.0f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         3,
         -10.0f));
-    animation->addStep(AnimationStep(3,
+    animation->addStep(new AnimationStep(3,
         AXIS_Z,
         3,
         15.0f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         3,
         -7.0f));
-    animation->addStep(AnimationStep(5,
+    animation->addStep(new AnimationStep(5,
         AXIS_Z,
         3,
         10.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         3,
         -10.0f));
-    animation->addStep(AnimationStep(7,
+    animation->addStep(new AnimationStep(7,
         AXIS_Z,
         3,
         15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         3,
         -7.0f));
-    animation->addStep(AnimationStep(9,
+    animation->addStep(new AnimationStep(9,
         AXIS_Z,
         3,
         10.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         3,
         -1.0f));
 
     // animation step 4
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         4,
         -2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         4,
         0.0f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         4,
         -10.0f));
-    animation->addStep(AnimationStep(3,
+    animation->addStep(new AnimationStep(3,
         AXIS_Z,
         4,
         15.0f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         4,
         -7.0f));
-    animation->addStep(AnimationStep(5,
+    animation->addStep(new AnimationStep(5,
         AXIS_Z,
         4,
         10.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         4,
         -10.0f));
-    animation->addStep(AnimationStep(7,
+    animation->addStep(new AnimationStep(7,
         AXIS_Z,
         4,
         -15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         4,
         -7.0f));
-    animation->addStep(AnimationStep(9,
+    animation->addStep(new AnimationStep(9,
         AXIS_Z,
         4,
         10.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         4,
         -1.0f));
 
     // animation step 5
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         5,
         2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         5,
         0.5f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         5,
         10.0f));
-    animation->addStep(AnimationStep(3,
+    animation->addStep(new AnimationStep(3,
         AXIS_Z,
         5,
         -15.0f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         5,
         7.0f));
-    animation->addStep(AnimationStep(5,
+    animation->addStep(new AnimationStep(5,
         AXIS_Z,
         5,
         -10.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         5,
         10.0f));
-    animation->addStep(AnimationStep(7,
+    animation->addStep(new AnimationStep(7,
         AXIS_Z,
         5,
         -15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         5,
         7.0f));
-    animation->addStep(AnimationStep(9,
+    animation->addStep(new AnimationStep(9,
         AXIS_Z,
         5,
         -10.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         5,
         1.0f));
 
     // animation step 6
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         6,
         -2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         6,
         0.5f));
-    animation->addStep(AnimationStep(2,
+    animation->addStep(new AnimationStep(2,
         AXIS_Z,
         6,
         -15.0f));
-    animation->addStep(AnimationStep(8,
+    animation->addStep(new AnimationStep(8,
         AXIS_Z,
         6,
         -15.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         6,
         1.0f));
 
     // animation step 7
-    animation->addStep(AnimationStep(0,
+    animation->addStep(new AnimationStep(0,
         AXIS_Z,
         7,
         -2.0f));
-    animation->addStep(AnimationStep(1,
+    animation->addStep(new AnimationStep(1,
         AXIS_Z,
         7,
         -0.5f));
-    animation->addStep(AnimationStep(4,
+    animation->addStep(new AnimationStep(4,
         AXIS_Z,
         7,
         -15.0f));
-    animation->addStep(AnimationStep(6,
+    animation->addStep(new AnimationStep(6,
         AXIS_Z,
         7,
         -15.0f));
-    animation->addStep(AnimationStep(10,
+    animation->addStep(new AnimationStep(10,
         AXIS_Z,
         7,
         -1.0f));
@@ -1196,30 +1220,33 @@ void Renderer::initializeModel() {
          0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
          0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
 
-        // bottom face
-        // position           // normal             // texture
-        -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+         // bottom face
+         // position           // normal             // texture
+         -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+          0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+          0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+          0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+         -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
 
-        // top face
-        // position           // normal             // texture
-        -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
+         // top face
+         // position           // normal             // texture
+         -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+          0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+          0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+          0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
     };
 
     // create model entities
     RenderedEntity* head = new RenderedEntity(m_shaderEntity,
         POSITION_ORIGIN,
         vertices,
-        sizeof(vertices));
+        sizeof(vertices),
+        nullptr,
+        NULL,
+        true);
     RenderedEntity* legLowerFrontRight = new RenderedEntity(*head);
     RenderedEntity* legLowerFrontLeft = new RenderedEntity(*head);
     RenderedEntity* legLowerBackRight = new RenderedEntity(*head);
@@ -1410,14 +1437,38 @@ void Renderer::initializeModel() {
     for (GLuint j{ jointStart }; j != jointEnd; ++j)
         m_models.at(modelIndex)->addJoint(m_joints.at(j));
 
-    // place horse at random location
-    if (modelIndex != 0)
+    // scale model
+    for (GLuint i{ 0 }; i != 5; ++i)
+        scaleModel(modelIndex, Transform::INCREASE);
+
+    // place horse at random location and rotate it randomly
+    if (modelIndex != 0) {
         moveModel(modelIndex, Transform::RANDOM);
+        rotateModel(modelIndex, Transform::RANDOM);
+    }
 }
 
 void Renderer::initializePaths() {
+    // create a sequence of random paths for each horse to follow
     for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
+        m_paths.push_back(new Path());
 
+        for (GLuint j{ 0 }; j != PATH_COUNT; ++j) {
+            GLfloat orientation = ((rand() % 2 == 0) ? -1 : 1)
+                * (rand()
+                    % static_cast<GLuint>(
+                        (PATHING_DIRECTION_MAX - PATHING_DIRECTION_MIN + 1))
+                    + PATHING_DIRECTION_MIN);
+            //GLfloat orientation = 45.0f;
+            GLfloat travelTime = (rand()
+                % static_cast<GLuint>(
+                    (PATHING_DISTANCE_MAX - PATHING_DISTANCE_MIN + 1))
+                + PATHING_DISTANCE_MIN);
+
+            m_paths.at(i)->addStep(new PathStep(j,
+                orientation,
+                travelTime));
+        }
     }
 }
 
@@ -1693,21 +1744,26 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
     glCullFace(GL_FRONT);
 
     // render models
+    GLuint path{ 0 };
     for (std::vector<Model*>::iterator m_it{ m_models.begin() };
         m_it != m_models.end();
         ++m_it) {
 
-        // set shader attributes
-        if (shader == m_shaderShadow)
-            (*m_it)->setDepthShaderAttributes(shader);
-        else if (shader == m_shaderEntity)
-            (*m_it)->setColorShaderAttributes(shader);
+        // follow path sequence
+        if (m_pathingEnabled)
+            m_paths.at(path)->traverse((*m_it), deltaTime);
 
         // play animation sequence
         if (m_animationsEnabled) {
             m_animations.at(0)->setSpeed(m_animationSpeedCurrent);
             m_animations.at(0)->play(*m_it, deltaTime);
         }
+
+        // set shader attributes
+        if (shader == m_shaderShadow)
+            (*m_it)->setDepthShaderAttributes(shader);
+        else if (shader == m_shaderEntity)
+            (*m_it)->setColorShaderAttributes(shader);
 
         // render model hierarchy
         Model::ModelHierarchy* hierarchy = (*m_it)->getHierarchy();
@@ -1731,6 +1787,9 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
             // render entity
             e_it->first->render(m_primitive);
         }
+
+        // update path index
+        ++path;
     }
 
     // go back to culling back faces

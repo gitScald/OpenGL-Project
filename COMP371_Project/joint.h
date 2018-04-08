@@ -38,6 +38,7 @@ public:
 
     // getters
     glm::mat4 getModelMatrix() const;
+    GLfloat getRotation() const;
 
     // transformations
     void reset();

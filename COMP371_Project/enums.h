@@ -39,6 +39,7 @@ namespace Transform {
     // movement and rotation
     enum Displacement {
         RANDOM,
+        FRONT,
         UP,
         DOWN,
         LEFT,

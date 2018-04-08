@@ -8,7 +8,7 @@
 class Animation {
 public:
     // sequence of animation steps
-    typedef std::vector<AnimationStep> AnimationSequence;
+    typedef std::vector<AnimationStep*> AnimationSequence;
 
     Animation() {}
     Animation(const Animation& animation)
@@ -26,7 +26,7 @@ public:
     Animation& operator=(Animation& animation) = delete;
 
     // setters
-    void addStep(AnimationStep step);
+    void addStep(AnimationStep* step);
     void setSpeed(GLfloat speed);
 
     // utilities
