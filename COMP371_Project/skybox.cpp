@@ -9,8 +9,6 @@ void Skybox::free() const {
 }
 
 void Skybox::render(const glm::mat4& globalModelMatrix,
-    const glm::mat4& viewMatrix,
-    const glm::mat4& projectionMatrix,
     const glm::vec3& cameraPosition) const {
     // disable depth test
     glDisable(GL_DEPTH_TEST);
@@ -24,10 +22,6 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
     Shader::useProgram(m_shader.getProgramID());
     m_shader.setUniformMat4(UNIFORM_MATRIX_MODEL,
         modelMatrix);
-    m_shader.setUniformMat4(UNIFORM_MATRIX_VIEW,
-        viewMatrix);
-    m_shader.setUniformMat4(UNIFORM_MATRIX_PROJECTION,
-        projectionMatrix);
 
     // activate and bind cubemap texture
     glActiveTexture(m_textureIndex);
@@ -41,6 +35,20 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
 
     // reenable depth test
     glEnable(GL_DEPTH_TEST);
+}
+
+void Skybox::updateViewMatrix(const glm::mat4& viewMatrix) const {
+    // update view matrix
+    Shader::useProgram(m_shader.getProgramID());
+    m_shader.setUniformMat4(UNIFORM_MATRIX_VIEW,
+        viewMatrix);
+}
+
+void Skybox::updateProjectionMatrix(const glm::mat4& projectionMatrix) const {
+    // update projection matrix
+    Shader::useProgram(m_shader.getProgramID());
+    m_shader.setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+        projectionMatrix);
 }
 
 void Skybox::initialize(const std::string (&path_textures)[6]) {

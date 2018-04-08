@@ -71,6 +71,8 @@ public:
     void togglePathing();
     void toggleShadows();
     void toggleTextures();
+    void updateProjectionMatrix() const;
+    void updateViewMatrix() const;
 
 private:
     Renderer()

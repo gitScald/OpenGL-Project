@@ -53,6 +53,10 @@ void InputManager::processCursor(GLFWwindow* window,
         // update camera vectors
         Camera::get().updateVectors();
     }
+
+    // update renderer view and projection matrices
+    Renderer::get().updateViewMatrix();
+    Renderer::get().updateProjectionMatrix();
 }
 
 void InputManager::processKeyboard(GLFWwindow* window,
@@ -114,8 +118,11 @@ void InputManager::processKeyboard(GLFWwindow* window,
 
     // camera reset
     if (key == GLFW_KEY_HOME
-        && action == GLFW_PRESS)
+        && action == GLFW_PRESS) {
         Camera::get().reset();
+        Renderer::get().updateViewMatrix();
+        Renderer::get().updateProjectionMatrix();
+    }
 
     // model scaling
     if (key == GLFW_KEY_U

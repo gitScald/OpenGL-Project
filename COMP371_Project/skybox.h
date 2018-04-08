@@ -42,9 +42,9 @@ public:
     // utilities
     void free() const;
     void render(const glm::mat4& globalModelMatrix,
-        const glm::mat4& viewMatrix,
-        const glm::mat4& projectionMatrix,
         const glm::vec3& cameraPosition) const;
+    void updateViewMatrix(const glm::mat4& viewMatrix) const;
+    void updateProjectionMatrix(const glm::mat4& projectionMatrix) const;
 
 private:
     void initialize(const std::string (&path_textures)[6]);

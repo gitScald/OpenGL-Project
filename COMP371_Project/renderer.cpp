@@ -234,6 +234,34 @@ void Renderer::toggleTextures() {
         << (m_texturesEnabled ? "ENABLED" : "DISABLED") << std::endl;
 }
 
+void Renderer::updateViewMatrix() const {
+    // update shaders view matrix
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
+        Camera::get().getViewMatrix());
+
+    Shader::useProgram(m_shaderFrame->getProgramID());
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
+        Camera::get().getViewMatrix());
+
+    // update skybox view matrix
+    m_skybox->updateViewMatrix(Camera::get().getViewMatrix());
+}
+
+void Renderer::updateProjectionMatrix() const {
+    // update shaders projection matrix
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+        Camera::get().getProjectionMatrix());
+
+    Shader::useProgram(m_shaderFrame->getProgramID());
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+        Camera::get().getProjectionMatrix());
+
+    // update skybox projection matrix
+    m_skybox->updateProjectionMatrix(Camera::get().getProjectionMatrix());
+}
+
 void Renderer::initialize() {
     // initialize random seed
     srand(static_cast<GLuint>(time(NULL)));
@@ -262,6 +290,10 @@ void Renderer::initialize() {
     initializePaths();
     initializeAnimation();
     initializeLight();
+
+    // get initial view and projection matrices
+    updateViewMatrix();
+    updateProjectionMatrix();
 }
 
 void Renderer::initializeAnimation() {
@@ -1592,18 +1624,10 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
 
     // render skybox
     m_skybox->render(Camera::get().getWorldOrientation(),
-        Camera::get().getViewMatrix(),
-        Camera::get().getProjectionMatrix(),
         Camera::get().getPosition());
 
-    // shader uniforms: transformations
-    Shader::useProgram(m_shaderEntity->getProgramID());
-    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
-        Camera::get().getViewMatrix());
-    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
-        Camera::get().getProjectionMatrix());
-
     // shader uniforms: lighting
+    Shader::useProgram(m_shaderEntity->getProgramID());
     m_shaderEntity->setUniformVec2(UNIFORM_LIGHT_PLANES,
         glm::vec2(m_lights.at(0)->getPlaneNear(),
             m_lights.at(0)->getPlaneFar()));
@@ -1690,11 +1714,6 @@ void Renderer::renderFrame() {
 
     // set shader uniforms
     Shader::useProgram(m_shaderFrame->getProgramID());
-    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
-        Camera::get().getViewMatrix());
-    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
-        Camera::get().getProjectionMatrix());
-
     Shader::bindVAO(m_axesVAO);
     for (GLuint i{ 0 }; i != 3; ++i) {
         // set model matrix and color
@@ -1754,10 +1773,6 @@ void Renderer::renderLight(GLfloat deltaTime) {
     glm::mat4 modelMatrix = getWorldOrientation()
         * glm::translate(glm::mat4(), m_lights.at(0)->getPosition());
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
-    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
-        Camera::get().getViewMatrix());
-    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
-        Camera::get().getProjectionMatrix());
     m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
         m_lightsEnabled
             ? COLOR_LIGHT_OBJECT_ON
