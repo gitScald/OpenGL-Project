@@ -220,8 +220,8 @@ void RenderedEntity::initializeModelEntity(GLfloat vertices[],
     if (!s_modelVAO) {
         glGenVertexArrays(1, &s_modelVAO);
         Shader::bindVAO(s_modelVAO);
-        m_VAO = s_modelVAO;
     }
+    m_VAO = s_modelVAO;
 
     // generate and bind vertex buffect object, buffer data
     if (!s_modelVBO) {
@@ -231,8 +231,8 @@ void RenderedEntity::initializeModelEntity(GLfloat vertices[],
             verticesSize,
             vertices,
             GL_STATIC_DRAW);
-        m_VBO = s_modelVBO;
     }
+    m_VBO = s_modelVBO;
 
     // set vertex count
    m_vertexCount = verticesSize / (6 * sizeof(GLfloat));

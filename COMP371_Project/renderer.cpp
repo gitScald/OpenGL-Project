@@ -215,7 +215,8 @@ void Renderer::togglePathing() {
     Model::toggleSmoothMovement();
 
     // also toggle animations
-    toggleAnimations();
+    if (!m_animationsEnabled)
+        toggleAnimations();
 }
 
 void Renderer::toggleShadows() {
