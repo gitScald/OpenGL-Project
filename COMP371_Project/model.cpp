@@ -94,6 +94,7 @@ void Model::setSpeedCurrent(GLfloat value) {
 void Model::setPosition(const glm::vec3& value) {
     // set model position
     m_hierarchyRoot->setPosition(value);
+    m_position = value;
 }
 
 void Model::move(Transform::Displacement direction) {
@@ -245,14 +246,14 @@ void Model::updateColliderRadius() {
         ++it) {
         if (it->first != m_hierarchyRoot) {
             // entity position relative to the root
-            glm::vec3 position = rootPosition + it->first->getPosition();
-            glm::vec3 pivot = rootPosition
-                + m_scale * it->first->getPivot();
+            glm::vec3 extremity = rootPosition
+                + it->first->getPosition()
+                + it->first->getPivot();
 
             // entity dimensions
-            GLfloat x = position.x + pivot.x;
-            GLfloat y = position.y + pivot.y;
-            GLfloat z = position.z + pivot.z;
+            GLfloat x = rootPosition.x - extremity.x;
+            GLfloat y = rootPosition.y - extremity.y;
+            GLfloat z = rootPosition.z - extremity.z;
 
             maxX = std::max(maxX, x);
             maxY = std::max(maxY, y);

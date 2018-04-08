@@ -16,12 +16,15 @@
 class LightSource {
 public:
     LightSource() = delete;
-    LightSource(const glm::vec3& position)
+    LightSource(const glm::vec3& position,
+        const glm::vec4& color)
         : m_position{ position },
-        m_positionOriginal{ position } {}
+        m_positionOriginal{ position },
+        m_color{ color } {}
     LightSource(const LightSource& light)
         : m_position{ light.m_position },
         m_positionOriginal{ light.m_positionOriginal },
+        m_color{ light.m_color },
         m_ambient{ light.m_ambient },
         m_diffuse{ light.m_diffuse },
         m_specular{ light.m_specular },
@@ -33,6 +36,7 @@ public:
     LightSource(LightSource&& light)
         : m_position{ std::move(light.m_position) },
         m_positionOriginal{ std::move(light.m_positionOriginal) },
+        m_color{ std::move(light.m_color) },
         m_ambient{ std::move(light.m_ambient) },
         m_diffuse{ std::move(light.m_diffuse) },
         m_specular{ std::move(light.m_specular) },
@@ -48,6 +52,7 @@ public:
     const glm::vec3& getAmbient() const;
     const glm::vec3& getDiffuse() const;
     const glm::vec3& getSpecular() const;
+    const glm::vec4& getColor() const;
     glm::vec3 getWorldPosition(const glm::mat4& globalModelMatrix) const;
     GLfloat getKC() const;
     GLfloat getKL() const;
@@ -56,6 +61,7 @@ public:
     GLfloat getPlaneFar() const;
 
     // setters
+    void setColor(const glm::vec4& value);
     void setPosition(const glm::vec3& value);
 
     // movement
@@ -64,6 +70,7 @@ public:
     void translate(const glm::vec3& value);
 
 private:
+    glm::vec4 m_color;
     glm::vec3 m_position;
     glm::vec3 m_positionOriginal;
     glm::vec3 m_ambient{ LIGHT_AMBIENT };

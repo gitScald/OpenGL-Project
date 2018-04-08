@@ -70,6 +70,7 @@ const std::string UNIFORM_MATERIAL_SHININESS{ "u_material.shininess" };
 
 // shader uniforms: light and light-related properties
 const std::string UNIFORM_CAMERA_POSITION{ "u_cameraPosition" };
+const std::string UNIFORM_LIGHT_COLOR{ "u_light.color" };
 const std::string UNIFORM_LIGHT_AMBIENT{ "u_light.ambient" };
 const std::string UNIFORM_LIGHT_DIFFUSE{ "u_light.diffuse" };
 const std::string UNIFORM_LIGHT_SPECULAR{ "u_light.specular" };
@@ -197,10 +198,13 @@ const glm::vec3 LIGHT_SCALE{ glm::vec3(0.25f, 0.25f, 0.25f) };
 const glm::vec3 LIGHT_AMBIENT{ glm::vec3(0.2f, 0.2f, 0.2f) };
 const glm::vec3 LIGHT_DIFFUSE{ glm::vec3(0.7f, 0.7f, 0.7f) };
 const glm::vec3 LIGHT_SPECULAR{ glm::vec3(1.0f, 1.0f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
-const GLfloat LIGHT_PLANE_NEAR{ 8.0f };
-const GLfloat LIGHT_PLANE_FAR{ 45.0f };
+const glm::vec4 COLOR_LIGHT_DAY{ glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.0f, 0.0f, 0.1f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_TRANSITION{ glm::vec4(0.6f, 0.6f, 0.2f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_OBJECT_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_OBJECT_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
+const GLfloat LIGHT_PLANE_NEAR{ 15.0f };
+const GLfloat LIGHT_PLANE_FAR{ 75.0f };
 const GLfloat LIGHT_KC{ 1.0000f };
 const GLfloat LIGHT_KL{ 0.0070f };
 const GLfloat LIGHT_KQ{ 0.0002f };

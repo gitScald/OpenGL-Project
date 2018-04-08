@@ -20,6 +20,11 @@ const glm::vec3& LightSource::getSpecular() const {
     return m_specular;
 }
 
+const glm::vec4& LightSource::getColor() const {
+    // return light color
+    return m_color;
+}
+
 glm::vec3 LightSource::getWorldPosition(
     const glm::mat4& globalModelMatrix) const {
     // return light position in world space
@@ -50,6 +55,11 @@ GLfloat LightSource::getPlaneNear() const {
 GLfloat LightSource::getPlaneFar() const {
     // return light far plane depth
     return m_planeFar;
+}
+
+void LightSource::setColor(const glm::vec4& value) {
+    // set color
+    m_color = value;
 }
 
 void LightSource::setPosition(const glm::vec3& value) {

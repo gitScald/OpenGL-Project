@@ -58,25 +58,25 @@ void Renderer::moveModel(GLuint model,
     switch (direction) {
     case Transform::Displacement::RANDOM:
         m_modelPositions[model].x = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX) * m_models.at(0)->getScale();
+            % GRID_SIZE - POSITION_MAX) / m_models.at(0)->getScale();
         m_modelPositions[model].z = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX * m_models.at(0)->getScale());
+            % GRID_SIZE - POSITION_MAX / m_models.at(0)->getScale());
         break;
     case Transform::Displacement::UP:
         m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION
-            * m_models.at(0)->getScale();
+            / m_models.at(0)->getScale();
         break;
     case Transform::Displacement::DOWN:
         m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION
-            * m_models.at(0)->getScale();
+            / m_models.at(0)->getScale();
         break;
     case Transform::Displacement::LEFT:
         m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION
-            * m_models.at(0)->getScale();
+            / m_models.at(0)->getScale();
         break;
     case Transform::Displacement::RIGHT:
         m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION
-            * m_models.at(0)->getScale();
+            / m_models.at(0)->getScale();
         break;
     }
 
@@ -177,6 +177,13 @@ void Renderer::toggleAnimations() {
     m_animationsEnabled = !m_animationsEnabled;
     std::cout << "Animations: "
         << (m_animationsEnabled ? "ENABLED" : "DISABLED") << std::endl;
+}
+
+void Renderer::toggleDayNightCycle() {
+    // set whether day-night cycle should be enabled or not
+    m_dayNightCycleEnabled = !m_dayNightCycleEnabled;
+    std::cout << "Day/night cycle: "
+        << (m_dayNightCycleEnabled ? "ENABLED" : "DISABLED") << std::endl;
 }
 
 void Renderer::toggleDebugging() {
@@ -1169,7 +1176,7 @@ void Renderer::initializeLight() {
     glEnableVertexAttribArray(positionLocation);
 
     // create light source and add it to lights vector
-    m_lights.push_back(new LightSource(LIGHT_POSITION));
+    m_lights.push_back(new LightSource(LIGHT_POSITION, COLOR_LIGHT_DAY));
 }
 
 void Renderer::initializeMaterial() {
@@ -1599,6 +1606,8 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     m_shaderEntity->setUniformVec2(UNIFORM_LIGHT_PLANES,
         glm::vec2(m_lights.at(0)->getPlaneNear(),
             m_lights.at(0)->getPlaneFar()));
+    m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
+        m_lights.at(0)->getColor());
     m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
         m_lights.at(0)->getWorldPosition(
             getWorldOrientation()));
@@ -1667,7 +1676,7 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderModels(m_shaderEntity, deltaTime);
 
     // render light
-    renderLight();
+    renderLight(deltaTime);
 
     // render axes and grid
     if (m_frameEnabled)
@@ -1734,11 +1743,15 @@ void Renderer::renderGround(Shader* shader) {
     m_entities.at(0)->render(m_primitive);
 }
 
-void Renderer::renderLight() {
+void Renderer::renderLight(GLfloat deltaTime) {
+    // increment time of day
+    if (m_dayNightCycleEnabled)
+        m_currentTime += deltaTime;
+
     // set shader uniforms
     m_shaderFrame->use();
     glm::mat4 modelMatrix = getWorldOrientation()
-        * glm::translate(glm::mat4(), LIGHT_POSITION);
+        * glm::translate(glm::mat4(), m_lights.at(0)->getPosition());
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
@@ -1746,8 +1759,8 @@ void Renderer::renderLight() {
         Camera::get().getProjectionMatrix());
     m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
         m_lightsEnabled
-            ? COLOR_LIGHT_ON
-            : COLOR_LIGHT_OFF);
+            ? COLOR_LIGHT_OBJECT_ON
+            : COLOR_LIGHT_OBJECT_OFF);
 
     // render light
     glBindVertexArray(m_lightVAO);
@@ -1868,41 +1881,45 @@ void Renderer::detectCollisions() {
     for (GLuint i{ 0 }; i != m_models.size(); ++i) {
             glm::vec3 iPosition = m_models.at(i)->getPosition();
             GLfloat iColliderRadius = m_models.at(i)->getColliderRadius();
+            bool colliding{ false };
 
             for (GLuint j{ 0 }; j != m_models.size(); ++j) {
                 // check if two distinct models are being checked
-                if (j != i) {
+                if (j != i
+                    && !isInCollisionVector(m_models.at(j))) {
+                    glm::vec3 jPosition = m_models.at(j)->getPosition();
+                    GLfloat jCollidersRadius = m_models.at(j)->getColliderRadius();
 
-                        // evaluate metrics to determine if collision occurred
-                        glm::vec3 jPosition = m_models.at(j)->getPosition();
-                        GLfloat jCollidersRadius = m_models.at(j)->getColliderRadius();
+                    // evaluate metrics to determine if collision occurred
+                    glm::vec3 delta = iPosition - jPosition;
+                    GLfloat dist = glm::dot(delta, delta);
+                    GLfloat sumRadii = (iColliderRadius + jCollidersRadius)
+                        * (iColliderRadius + jCollidersRadius);
 
-                        GLfloat distX = (iPosition.x - jPosition.x)
-                            * (iPosition.x - jPosition.x);
-                        GLfloat distY = (iPosition.y - jPosition.y)
-                            * (iPosition.y - jPosition.y);
-                        GLfloat distZ = (iPosition.z - jPosition.z)
-                            * (iPosition.z - jPosition.z);
-                        GLfloat sumRadii = (iColliderRadius + jCollidersRadius)
-                            * (iColliderRadius + jCollidersRadius);
-
-                        // add a random model to collision vector if not already present
-                        if (distX + distY + distZ < sumRadii) {
-                            GLuint loser = rand() % 2;
-                            if (loser == 0)
-                                addToCollisionVector(m_models.at(i));
-                            else
-                                addToCollisionVector(m_models.at(j));
-                        }
-
-                        // otherwise, remove them from the collision vector
-                        else {
-                            removeFromCollisionVector(m_models.at(i));
-                            removeFromCollisionVector(m_models.at(j));
-                        }
+                    // check if model is colliding
+                    if (dist <= sumRadii) {
+                        colliding = true;
+                        break;
+                    }
                 }
             }
+
+            // update collision vector accordingly
+            if (colliding)
+                addToCollisionVector(m_models.at(i));
+            else
+                removeFromCollisionVector(m_models.at(i));
     }
+}
+
+bool Renderer::isInCollisionVector(Model* model) {
+    // get whether model is colliding
+    std::vector<Model*>::iterator it = std::find(
+        m_collidingModels.begin(),
+        m_collidingModels.end(),
+        model);
+
+    return it != m_collidingModels.end();
 }
 
 void Renderer::removeFromCollisionVector(Model* model) {
@@ -1912,7 +1929,7 @@ void Renderer::removeFromCollisionVector(Model* model) {
         m_collidingModels.end(),
         model);
 
-    // if not, remove it
+    // if so, remove it
     if (it != m_collidingModels.end())
         m_collidingModels.erase(it);
 }

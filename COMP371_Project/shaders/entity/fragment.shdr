@@ -15,6 +15,7 @@ struct Material {
 
 struct Light {
     vec3 position;
+    vec3 color;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -46,12 +47,22 @@ vec3 g_gridDisk[20] = vec3[] (
     vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
+float texturesDisabled() {
+    return float(!u_texturesEnabled);
+}
+
+float texturesEnabled() {
+    return float(u_texturesEnabled);
+}
+
 vec3 lightingAmbient() {
     // ambient lighting
-    vec3 ambient = u_light.ambient
-        * (u_texturesEnabled
-            ? texture(u_material.diffuse, o_textureCoordinate).rgb
-            : u_color.rgb);
+    vec3 ambient = u_light.color
+        * u_light.ambient
+        * texture(u_material.diffuse, o_textureCoordinate).rgb
+            * texturesEnabled()
+        * u_color.rgb
+            * texturesDisabled();
 
     return ambient;
 }
@@ -62,11 +73,13 @@ vec3 lightingDiffuse() {
     vec3 lightDirection = normalize(u_light.position - o_fragPosition);
 
     float diffusion = max(dot(fragNormal, lightDirection), 0.0f);
-    vec3 diffuse = u_light.diffuse
+    vec3 diffuse = u_light.color
+        * u_light.diffuse
         * diffusion
-        * (u_texturesEnabled
-            ? texture(u_material.diffuse, o_textureCoordinate).rgb
-            : u_color.rgb);
+        * texture(u_material.diffuse, o_textureCoordinate).rgb
+            * texturesEnabled()
+        * u_color.rgb
+            * texturesDisabled();
 
     return diffuse;
 }
@@ -79,11 +92,13 @@ vec3 lightingSpecular() {
     vec3 reflectionDirection = reflect(-lightDirection, fragNormal);
 
     float specularity = pow(max(dot(cameraDirection, reflectionDirection), 0.0f), u_material.shininess);
-    vec3 specular = u_light.specular
+    vec3 specular = u_light.color
+        * u_light.specular
         * specularity
-        * (u_texturesEnabled
-            ? texture(u_material.specular, o_textureCoordinate).rgb
-            : u_color.rgb);
+        * texture(u_material.diffuse, o_textureCoordinate).rgb
+            * texturesEnabled()
+        * u_color.rgb
+            * texturesDisabled();
 
     return specular;
 }
@@ -94,6 +109,14 @@ float attenuationFactor() {
     float attenuation = 1.0f / (u_light.kc + u_light.kl * distance + u_light.kq * distance * distance);
 
     return attenuation;
+}
+
+float inShadow(float minimumDepth, float bias, float rayLength) {
+    return max(sign(rayLength - (minimumDepth + bias)), 0.0f);
+}
+
+float shadowsEnabled() {
+    return float(u_shadowsEnabled);
 }
 
 float shadowFactor() {
@@ -119,23 +142,23 @@ float shadowFactor() {
         // add offset to limit z-fighting
         float bias = max(u_biasMax * (1.0f - dot(o_fragNormal, lightDirection)), u_biasMin);
 
-        if ((minimumDepth + bias) < rayLength)
-            shadow += 1.0f;
+        // increase shadow factor accordingly
+        shadow += inShadow(minimumDepth, bias, rayLength);
     }
 
     // average samples
     shadow /= u_gridSamples;
+
+    // check whether shadows are enabled
+    shadow *= shadowsEnabled();
 
     return shadow;
 }
 
 void main() {
     // calculate combined lighting
-    vec3 fragColor;    
-    if (u_shadowsEnabled)
-        fragColor = (lightingAmbient() + (1.0f - shadowFactor()) * (lightingDiffuse() + lightingSpecular()));
-    else
-        fragColor = lightingAmbient() + lightingDiffuse() + lightingSpecular();
+    vec3 fragColor = (lightingAmbient()
+        + (1.0f - shadowFactor()) * (lightingDiffuse() + lightingSpecular()));
     fragColor *= attenuationFactor();
 
     o_fragColor = vec4(fragColor, 1.0f);

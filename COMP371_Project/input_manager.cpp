@@ -343,6 +343,11 @@ void InputManager::processKeyboard(GLFWwindow* window,
     if (key == GLFW_KEY_H
         && action == GLFW_PRESS)
         Renderer::get().togglePathing();
+
+    // toggle day-night cycle
+    if (key == GLFW_KEY_F
+        && action == GLFW_PRESS)
+        Renderer::get().toggleDayNightCycle();
 }
 
 void InputManager::processScroll(GLFWwindow* window,

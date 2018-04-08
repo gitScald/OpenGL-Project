@@ -64,6 +64,7 @@ public:
     // utilities
     void render(GLfloat deltaTime);
     void toggleAnimations();
+    void toggleDayNightCycle();
     void toggleDebugging();
     void toggleFrame();
     void toggleLights();
@@ -104,7 +105,7 @@ private:
     // rendered elements
     void renderFrame();
     void renderGround(Shader* shader);
-    void renderLight();
+    void renderLight(GLfloat deltaTime);
     void renderModels(Shader* shader, GLfloat deltaTime);
 
     // rendering utilities
@@ -118,6 +119,7 @@ private:
     // collision detection
     void addToCollisionVector(Model* model);
     void detectCollisions();
+    bool isInCollisionVector(Model* model);
     void removeFromCollisionVector(Model* model);
     
     static Renderer& s_instance;
@@ -146,7 +148,9 @@ private:
     GLuint m_lightVBO;
     GLfloat m_animationSpeed{ ANIMATION_SPEED };
     GLfloat m_animationSpeedCurrent{ ANIMATION_SPEED };
+    GLfloat m_currentTime{ 0.0f };
     bool m_animationsEnabled{ false };
+    bool m_dayNightCycleEnabled{ false };
     bool m_debuggingEnabled{ false };
     bool m_frameEnabled{ true };
     bool m_lightsEnabled{ true };
