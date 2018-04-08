@@ -22,8 +22,8 @@ void ShadowMap::free() const {
 void ShadowMap::render() const {
     // set shader uniforms
     Shader::useProgram(m_shaderDebug.getProgramID());
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthTextureID);
+    Shader::activateTextureUnit(GL_TEXTURE0);
+    Shader::bindCubemapTexture(m_depthTextureID);
     m_shaderDebug.setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
         0);
 
@@ -39,7 +39,7 @@ void ShadowMap::initialize() {
     
     // generate cubemap texture
     glGenTextures(1, &m_depthTextureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthTextureID);
+    Shader::bindCubemapTexture(m_depthTextureID);
     for (GLuint face{ 0 }; face != 6; ++face)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
             0,

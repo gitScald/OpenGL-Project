@@ -24,8 +24,8 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
         modelMatrix);
 
     // activate and bind cubemap texture
-    glActiveTexture(m_textureIndex);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+    Shader::activateTextureUnit(m_textureIndex);
+    Shader::bindCubemapTexture(m_texture);
     m_shader.setUniformUInt(UNIFORM_SKYBOX_TEXTURE,
         m_textureUnit);
 
@@ -134,7 +134,7 @@ void Skybox::initialize(const std::string (&path_textures)[6]) {
 
     // generate and bind texture
     glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+    Shader::bindCubemapTexture(m_texture);
 
     // set texture wrapping parameters
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -150,7 +150,7 @@ void Skybox::initialize(const std::string (&path_textures)[6]) {
     int width, height, channels;
     stbi_uc* data;
     glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+    Shader::bindCubemapTexture(m_texture);
     for (GLuint i = 0; i != 6; ++i) {
         std::cout << "Loading texture from file: \"" << path_textures[i]
             << "\"..." << std::endl;

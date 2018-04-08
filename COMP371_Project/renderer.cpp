@@ -1731,9 +1731,8 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
 
     // shader uniforms: depth texture and ground material
     m_materials.at(0)->use(m_shaderEntity);
-    glActiveTexture(TEXTURE_UNIT_DEPTH_MAP);
-    glBindTexture(GL_TEXTURE_CUBE_MAP,
-        m_shadowMap->getDepthTextureID());
+    Shader::activateTextureUnit(TEXTURE_UNIT_DEPTH_MAP);
+    Shader::bindCubemapTexture(m_shadowMap->getDepthTextureID());
     m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
         TEXTURE_INDEX_DEPTH_MAP);
 

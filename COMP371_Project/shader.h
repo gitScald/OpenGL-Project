@@ -46,10 +46,12 @@ public:
         const glm::vec4& value) const;
 
     // utilities
+    static void activateTextureUnit(GLenum textureUnit);
     static void bindVAO(GLuint VAO);
     static void bindVBO(GLuint VBO);
     static void bindEBO(GLuint EBO);
     static void bind2DTexture(GLuint texture);
+    static void bindCubemapTexture(GLuint texture);
     static void useProgram(GLuint programID);
     static void validateProgram(GLuint programID);
     void free() const;
@@ -71,7 +73,9 @@ private:
     static GLuint s_VBO;
     static GLuint s_EBO;
     static GLuint s_program;
-    static GLuint s_2Dtexture;
+    static GLenum s_activeTextureUnit;
+    static GLuint s_bound2DTexture;
+    static GLuint s_boundCubemapTexture;
     GLuint m_programID;
 };
 

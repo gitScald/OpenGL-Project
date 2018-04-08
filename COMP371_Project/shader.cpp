@@ -8,8 +8,12 @@ GLuint Shader::s_EBO = NULL;
 // initially bound shader program
 GLuint Shader::s_program = NULL;
 
-// initially bound texture
-GLuint Shader::s_2Dtexture = NULL;
+// initially active texture unit
+GLenum Shader::s_activeTextureUnit = NULL;
+
+// initially bound textures
+GLuint Shader::s_bound2DTexture = NULL;
+GLuint Shader::s_boundCubemapTexture = NULL;
 
 Shader::Shader(const std::string& pathVertex,
     const std::string& pathFragment,
@@ -172,6 +176,14 @@ void Shader::setUniformVec4(const std::string& uniform,
         &value[0]);
 }
 
+void Shader::activateTextureUnit(GLenum textureUnit) {
+    // activate texture unit if needed
+    if (textureUnit != s_activeTextureUnit) {
+        glActiveTexture(textureUnit);
+        s_activeTextureUnit = textureUnit;
+    }
+}
+
 void Shader::bindVAO(GLuint VAO) {
     // bind VAO if needed
     if (VAO != s_VAO) {
@@ -197,10 +209,18 @@ void Shader::bindEBO(GLuint EBO) {
 }
 
 void Shader::bind2DTexture(GLuint texture) {
-    // bind texture if needed
-    if (texture != s_2Dtexture) {
+    // bind 2D texture if needed
+    if (texture != s_bound2DTexture) {
         glBindTexture(GL_TEXTURE_2D, texture);
-        s_2Dtexture = texture;
+        s_bound2DTexture = texture;
+    }
+}
+
+void Shader::bindCubemapTexture(GLuint texture) {
+    // bind cubemap texture if needed
+    if (texture != s_boundCubemapTexture) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+        s_boundCubemapTexture = texture;
     }
 }
 

@@ -21,14 +21,14 @@ void Material::use(Shader* shader) const {
     Shader::useProgram(shader->getProgramID());
     shader->setUniformFloat(UNIFORM_MATERIAL_SHININESS, m_shininess);
 
-    glActiveTexture(m_diffuseUnit);
+    Shader::activateTextureUnit(m_diffuseUnit);
     if (s_texturesEnabled)
         Shader::bind2DTexture(m_diffuse);
     else
         Shader::bind2DTexture(NULL);
     shader->setUniformUInt(UNIFORM_MATERIAL_DIFFUSE, m_diffuseIndex);
 
-    glActiveTexture(m_specularUnit);
+    Shader::activateTextureUnit(m_specularUnit);
     if (s_texturesEnabled)
         Shader::bind2DTexture(m_specular);
     else
