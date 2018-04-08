@@ -26,7 +26,7 @@ const glm::vec3 POSITION_ORIGIN{ glm::vec3(0.0f, 0.0f, 0.0f) };
 const GLfloat POSITION_MAX{ 50.0f };
 const GLfloat POSITION_MIN{ -50.0f };
 const GLuint GRID_SIZE{ static_cast<GLuint>(POSITION_MAX - POSITION_MIN) };
-const GLuint TROOP_COUNT{ 20 };
+const GLuint TROOP_COUNT{ 40 };
 
 // camera initialization constants
 const glm::vec3 CAMERA_POSITION{ glm::vec3(0.0f, 15.0f, 0.0f) };
@@ -193,7 +193,7 @@ const std::pair<GLfloat, glm::vec3> ROTATION_AXES[]{
     std::make_pair(-90.0f, AXIS_Y) };
 
 // light-related constants
-const glm::vec3 LIGHT_POSITION{ glm::vec3(0.0f, 20.0f, 0.0f) };
+const glm::vec3 LIGHT_POSITION{ glm::vec3(0.0f, 65.0f, 0.0f) };
 const glm::vec3 LIGHT_SCALE{ glm::vec3(0.25f, 0.25f, 0.25f) };
 const glm::vec3 LIGHT_AMBIENT{ glm::vec3(0.2f, 0.2f, 0.2f) };
 const glm::vec3 LIGHT_DIFFUSE{ glm::vec3(0.7f, 0.7f, 0.7f) };
@@ -203,11 +203,12 @@ const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.0f, 0.0f, 0.1f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_TRANSITION{ glm::vec4(0.6f, 0.6f, 0.2f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_OBJECT_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_OBJECT_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
-const GLfloat LIGHT_PLANE_NEAR{ 15.0f };
-const GLfloat LIGHT_PLANE_FAR{ 75.0f };
+const GLfloat LIGHT_PLANE_NEAR{ 1.0f };
+const GLfloat LIGHT_PLANE_FAR{ 100.0f };
 const GLfloat LIGHT_KC{ 1.000000f };
 const GLfloat LIGHT_KL{ 0.001400f };
 const GLfloat LIGHT_KQ{ 0.000007f };
+const GLfloat LIGHT_SPEED{ 0.5f };
 
 // texture-related constants
 const GLuint TEXTURE_INDEX_DIFFUSE{ 0 };

@@ -248,6 +248,8 @@ void Renderer::updateLightPositionAndColor() const {
             getWorldOrientation()));
     m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
         m_lights.at(0)->getColor());
+
+    m_skybox->updateLightColor(m_lights.at(0)->getColor());
 }
 
 void Renderer::updateLightProperties() const {
@@ -1813,6 +1815,22 @@ void Renderer::renderLight(GLfloat deltaTime) {
     if (m_dayNightCycleEnabled) {
         // increment time of day
         m_currentTime += deltaTime;
+
+        // update light position
+        glm::vec3 currentPosition = m_lights.at(0)->getPosition();
+        GLfloat y = LIGHT_POSITION.y * sin(LIGHT_SPEED * m_currentTime);
+        GLfloat z = LIGHT_POSITION.y * cos(LIGHT_SPEED * m_currentTime);
+        glm::vec3 newPosition{ currentPosition.x, y, z };
+        m_lights.at(0)->setPosition(newPosition);
+
+        // update light color
+        glm::vec4 currentColor = m_lights.at(0)->getColor();
+        GLfloat colorValue = sin(LIGHT_SPEED * m_currentTime);
+        GLfloat r = colorValue;
+        GLfloat g = colorValue;
+        GLfloat b = colorValue;
+        glm::vec4 newColor{ r, g, b, currentColor.a };
+        m_lights.at(0)->setColor(newColor);
 
         // update shader properties
         updateLightPositionAndColor();

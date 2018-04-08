@@ -37,6 +37,13 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
     glEnable(GL_DEPTH_TEST);
 }
 
+void Skybox::updateLightColor(const glm::vec4& value) const {
+    // update light color
+    Shader::useProgram(m_shader.getProgramID());
+    m_shader.setUniformVec4(UNIFORM_LIGHT_COLOR,
+        value);
+}
+
 void Skybox::updateViewMatrix(const glm::mat4& viewMatrix) const {
     // update view matrix
     Shader::useProgram(m_shader.getProgramID());

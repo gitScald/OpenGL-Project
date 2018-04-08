@@ -4,11 +4,17 @@ out vec4 o_fragColor;
 
 in vec3 o_textureCoordinate;
 
+struct Light {
+    vec4 color;
+};
+
 uniform samplerCube u_skybox;
+uniform Light u_light;
 
 void main() {
     // sample cubemap texture
-    vec4 fragColor = texture(u_skybox, o_textureCoordinate);
+    vec4 fragColor = u_light.color
+        * texture(u_skybox, o_textureCoordinate);
     
     o_fragColor = fragColor;
 }
