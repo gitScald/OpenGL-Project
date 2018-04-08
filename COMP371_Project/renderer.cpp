@@ -224,6 +224,9 @@ void Renderer::toggleShadows() {
     m_shadowsEnabled = !m_shadowsEnabled;
     std::cout << "Shadows: "
         << (m_shadowsEnabled ? "ENABLED" : "DISABLED") << std::endl;
+
+    // update shader properties
+    updateShadowProperties();
 }
 
 void Renderer::toggleTextures() {
@@ -232,20 +235,42 @@ void Renderer::toggleTextures() {
     Material::toggleTextures();
     std::cout << "Textures: "
         << (m_texturesEnabled ? "ENABLED" : "DISABLED") << std::endl;
+
+    // update shader properties
+    updateTextureProperties();
 }
 
-void Renderer::updateViewMatrix() const {
-    // update shaders view matrix
+void Renderer::updateLightProperties() const {
+    // update shaders light properties
     Shader::useProgram(m_shaderEntity->getProgramID());
-    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
-        Camera::get().getViewMatrix());
-
-    Shader::useProgram(m_shaderFrame->getProgramID());
-    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
-        Camera::get().getViewMatrix());
-
-    // update skybox view matrix
-    m_skybox->updateViewMatrix(Camera::get().getViewMatrix());
+    if (m_lightsEnabled) {
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
+            m_lights.at(0)->getAmbient());
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
+            m_lights.at(0)->getDiffuse());
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
+            m_lights.at(0)->getSpecular());
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
+            m_lights.at(0)->getKC());
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
+            m_lights.at(0)->getKL());
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
+            m_lights.at(0)->getKQ());
+    }
+    else {
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
+            glm::vec3(1.0f, 1.0f, 1.0f));
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
+            glm::vec3(0.0f, 0.0f, 0.0f));
+        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
+            glm::vec3(0.0f, 0.0f, 0.0f));
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
+            1.0f);
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
+            0.0f);
+        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
+            0.0f);
+    }
 }
 
 void Renderer::updateProjectionMatrix() const {
@@ -260,6 +285,34 @@ void Renderer::updateProjectionMatrix() const {
 
     // update skybox projection matrix
     m_skybox->updateProjectionMatrix(Camera::get().getProjectionMatrix());
+}
+
+void Renderer::updateShadowProperties() const {
+    // update shader properties
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformBool(UNIFORM_SHADOWS_ENABLED,
+        m_shadowsEnabled);
+}
+
+void Renderer::updateTextureProperties() const {
+    // update shader properties
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformBool(UNIFORM_TEXTURES_ENABLED,
+        m_texturesEnabled);
+}
+
+void Renderer::updateViewMatrix() const {
+    // update shaders view matrix
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
+        Camera::get().getViewMatrix());
+
+    Shader::useProgram(m_shaderFrame->getProgramID());
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
+        Camera::get().getViewMatrix());
+
+    // update skybox view matrix
+    m_skybox->updateViewMatrix(Camera::get().getViewMatrix());
 }
 
 void Renderer::initialize() {
@@ -291,9 +344,29 @@ void Renderer::initialize() {
     initializeAnimation();
     initializeLight();
 
-    // get initial view and projection matrices
+    // set initial view and projection matrices
     updateViewMatrix();
     updateProjectionMatrix();
+
+    // set initial light properties
+    updateLightProperties();
+
+    // set initial boolean states for shadows and textures
+    updateShadowProperties();
+    updateTextureProperties();
+
+    // set shadow map sampling and bias
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_GRID_SAMPLES,
+        SHADOW_GRID_SAMPLES);
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_OFFSET,
+        SHADOW_GRID_OFFSET);
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_FACTOR,
+        SHADOW_GRID_FACTOR);
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MIN,
+        SHADOW_BIAS_MIN);
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MAX,
+        SHADOW_BIAS_MAX);
 }
 
 void Renderer::initializeAnimation() {
@@ -1210,6 +1283,23 @@ void Renderer::initializeLight() {
 
     // create light source and add it to lights vector
     m_lights.push_back(new LightSource(LIGHT_POSITION, COLOR_LIGHT_DAY));
+
+    // set shader uniforms
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformVec2(UNIFORM_LIGHT_PLANES,
+        glm::vec2(m_lights.at(0)->getPlaneNear(),
+            m_lights.at(0)->getPlaneFar()));
+    m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
+        m_lights.at(0)->getKC());
+    m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
+        m_lights.at(0)->getKL());
+    m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
+        m_lights.at(0)->getKQ());
+
+    Shader::useProgram(m_shaderShadow->getProgramID());
+    m_shaderShadow->setUniformVec2(UNIFORM_LIGHT_PLANES,
+        glm::vec2(m_lights.at(0)->getPlaneNear(),
+            m_lights.at(0)->getPlaneFar()));
 }
 
 void Renderer::initializeMaterial() {
@@ -1597,9 +1687,6 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
     m_shaderShadow->setUniformVec3(UNIFORM_LIGHT_POSITION,
         m_lights.at(0)->getWorldPosition(
             getWorldOrientation()));
-    m_shaderShadow->setUniformVec2(UNIFORM_LIGHT_PLANES,
-        glm::vec2(m_lights.at(0)->getPlaneNear(),
-            m_lights.at(0)->getPlaneFar()));
 
     // render ground to depth texture
     renderGround(m_shaderShadow);
@@ -1628,9 +1715,6 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
 
     // shader uniforms: lighting
     Shader::useProgram(m_shaderEntity->getProgramID());
-    m_shaderEntity->setUniformVec2(UNIFORM_LIGHT_PLANES,
-        glm::vec2(m_lights.at(0)->getPlaneNear(),
-            m_lights.at(0)->getPlaneFar()));
     m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
         m_lights.at(0)->getWorldPosition(
             getWorldOrientation()));
@@ -1638,50 +1722,6 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
         Camera::get().getPosition());
     m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
         m_lights.at(0)->getColor());
-    if (m_lightsEnabled) {
-        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
-            m_lights.at(0)->getAmbient());
-        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
-            m_lights.at(0)->getDiffuse());
-        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
-            m_lights.at(0)->getSpecular());
-        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
-            m_lights.at(0)->getKC());
-        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
-            m_lights.at(0)->getKL());
-        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
-            m_lights.at(0)->getKQ());
-    }
-    else {
-        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
-            glm::vec3(1.0f, 1.0f, 1.0f));
-        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
-            glm::vec3(0.0f, 0.0f, 0.0f));
-        m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
-            glm::vec3(0.0f, 0.0f, 0.0f));
-        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KC,
-            1.0f);
-        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KL,
-            0.0f);
-        m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
-            0.0f);
-    }
-
-    // shader uniforms: shadows
-    m_shaderEntity->setUniformBool(UNIFORM_SHADOWS_ENABLED,
-        m_shadowsEnabled);
-    m_shaderEntity->setUniformBool(UNIFORM_TEXTURES_ENABLED,
-        m_texturesEnabled);
-    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_GRID_SAMPLES,
-        SHADOW_GRID_SAMPLES);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_OFFSET,
-        SHADOW_GRID_OFFSET);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_FACTOR,
-        SHADOW_GRID_FACTOR);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MIN,
-        SHADOW_BIAS_MIN);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MAX,
-        SHADOW_BIAS_MAX);
 
     // shader uniforms: depth texture and ground material
     m_materials.at(0)->use(m_shaderEntity);

@@ -328,8 +328,10 @@ void InputManager::processKeyboard(GLFWwindow* window,
 
     // toggle lights
     if (key == GLFW_KEY_Z
-        && action == GLFW_PRESS)
+        && action == GLFW_PRESS) {
         Renderer::get().toggleLights();
+        Renderer::get().updateLightProperties();
+    }
 
     // toggle shadows
     if (key == GLFW_KEY_B
