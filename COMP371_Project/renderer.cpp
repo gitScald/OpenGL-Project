@@ -240,6 +240,16 @@ void Renderer::toggleTextures() {
     updateTextureProperties();
 }
 
+void Renderer::updateLightPositionAndColor() const {
+    // update light position and color in shaders
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
+        m_lights.at(0)->getWorldPosition(
+            getWorldOrientation()));
+    m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
+        m_lights.at(0)->getColor());
+}
+
 void Renderer::updateLightProperties() const {
     // update shaders light properties
     Shader::useProgram(m_shaderEntity->getProgramID());
@@ -302,10 +312,12 @@ void Renderer::updateTextureProperties() const {
 }
 
 void Renderer::updateViewMatrix() const {
-    // update shaders view matrix
+    // update shaders view matrix and camera position
     Shader::useProgram(m_shaderEntity->getProgramID());
     m_shaderEntity->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
+    m_shaderEntity->setUniformVec3(UNIFORM_CAMERA_POSITION,
+        Camera::get().getPosition());
 
     Shader::useProgram(m_shaderFrame->getProgramID());
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_VIEW,
@@ -349,6 +361,7 @@ void Renderer::initialize() {
     updateProjectionMatrix();
 
     // set initial light properties
+    updateLightPositionAndColor();
     updateLightProperties();
 
     // set initial boolean states for shadows and textures
@@ -1715,13 +1728,6 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
 
     // shader uniforms: lighting
     Shader::useProgram(m_shaderEntity->getProgramID());
-    m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
-        m_lights.at(0)->getWorldPosition(
-            getWorldOrientation()));
-    m_shaderEntity->setUniformVec3(UNIFORM_CAMERA_POSITION,
-        Camera::get().getPosition());
-    m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
-        m_lights.at(0)->getColor());
 
     // shader uniforms: depth texture and ground material
     m_materials.at(0)->use(m_shaderEntity);
@@ -1804,9 +1810,14 @@ void Renderer::renderGround(Shader* shader) {
 }
 
 void Renderer::renderLight(GLfloat deltaTime) {
-    // increment time of day
-    if (m_dayNightCycleEnabled)
+    // handle day-night cycle
+    if (m_dayNightCycleEnabled) {
+        // increment time of day
         m_currentTime += deltaTime;
+
+        // update shader properties
+        updateLightPositionAndColor();
+    }
 
     // set shader uniforms
     Shader::useProgram(m_shaderFrame->getProgramID());
@@ -1815,8 +1826,8 @@ void Renderer::renderLight(GLfloat deltaTime) {
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
     m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
         m_lightsEnabled
-            ? COLOR_LIGHT_OBJECT_ON
-            : COLOR_LIGHT_OBJECT_OFF);
+        ? COLOR_LIGHT_OBJECT_ON
+        : COLOR_LIGHT_OBJECT_OFF);
 
     // render light
     Shader::bindVAO(m_lightVAO);

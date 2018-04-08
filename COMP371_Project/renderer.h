@@ -71,6 +71,7 @@ public:
     void togglePathing();
     void toggleShadows();
     void toggleTextures();
+    void updateLightPositionAndColor() const;
     void updateLightProperties() const;
     void updateProjectionMatrix() const;
     void updateShadowProperties() const;

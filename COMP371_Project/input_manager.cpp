@@ -97,24 +97,36 @@ void InputManager::processKeyboard(GLFWwindow* window,
     // world orientation
     if (key == GLFW_KEY_UP
         && (action == GLFW_PRESS
-            || action == GLFW_REPEAT))
+            || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::UP,
             TRANSFORMATION_INCREMENT_ROTATION);
+        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateViewMatrix();
+    }
     if (key == GLFW_KEY_DOWN
         && (action == GLFW_PRESS
-            || action == GLFW_REPEAT))
+            || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::DOWN,
             TRANSFORMATION_INCREMENT_ROTATION);
+        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateViewMatrix();
+    }
     if (key == GLFW_KEY_LEFT
         && (action == GLFW_PRESS
-            || action == GLFW_REPEAT))
+            || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::LEFT,
             TRANSFORMATION_INCREMENT_ROTATION);
+        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateViewMatrix();
+    }
     if (key == GLFW_KEY_RIGHT
         && (action == GLFW_PRESS
-            || action == GLFW_REPEAT))
+            || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::RIGHT,
             TRANSFORMATION_INCREMENT_ROTATION);
+        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateViewMatrix();
+    }
 
     // camera reset
     if (key == GLFW_KEY_HOME

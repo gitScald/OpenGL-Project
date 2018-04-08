@@ -121,7 +121,7 @@ const std::string PATH_TEXTURE_SKYBOX[] = {
 
 // material-related constants
 const GLfloat MATERIAL_SHININESS_HORSE{ 8.0f };
-const GLfloat MATERIAL_SHININESS_GROUND{ 4.0f };
+const GLfloat MATERIAL_SHININESS_GROUND{ 16.0f };
 
 // rendering constants
 const GLfloat RENDERING_LINE_WIDTH{ 2.0f };
@@ -205,9 +205,9 @@ const glm::vec4 COLOR_LIGHT_OBJECT_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_OBJECT_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
 const GLfloat LIGHT_PLANE_NEAR{ 15.0f };
 const GLfloat LIGHT_PLANE_FAR{ 75.0f };
-const GLfloat LIGHT_KC{ 1.0000f };
-const GLfloat LIGHT_KL{ 0.0070f };
-const GLfloat LIGHT_KQ{ 0.0002f };
+const GLfloat LIGHT_KC{ 1.000000f };
+const GLfloat LIGHT_KL{ 0.001400f };
+const GLfloat LIGHT_KQ{ 0.000007f };
 
 // texture-related constants
 const GLuint TEXTURE_INDEX_DIFFUSE{ 0 };
