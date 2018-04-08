@@ -1077,6 +1077,7 @@ void Renderer::initializeGround() {
     m_entities.push_back(new RenderedEntity(
         m_shaderEntity,
         POSITION_ORIGIN,
+        POSITION_ORIGIN,
         verticesGround,
         sizeof(verticesGround),
         indicesGround,
@@ -1242,6 +1243,7 @@ void Renderer::initializeModel() {
     // create model entities
     RenderedEntity* head = new RenderedEntity(m_shaderEntity,
         POSITION_ORIGIN,
+        0.5f * MODEL_POSITION_RELATIVE_HEAD,
         vertices,
         sizeof(vertices),
         nullptr,
@@ -1257,6 +1259,19 @@ void Renderer::initializeModel() {
     RenderedEntity* legUpperBackLeft = new RenderedEntity(*head);
     RenderedEntity* neck = new RenderedEntity(*head);
     RenderedEntity* torso = new RenderedEntity(*head);
+
+    // set body parts joint pivot points
+    head->setPivot(0.5f * MODEL_POSITION_RELATIVE_HEAD);
+    legLowerFrontRight->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR);
+    legLowerFrontLeft->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL);
+    legLowerBackRight->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR);
+    legLowerBackLeft->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL);
+    legUpperFrontRight->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_UPPER_FR);
+    legUpperFrontLeft->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_UPPER_FL);
+    legUpperBackRight->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_UPPER_BR);
+    legUpperBackLeft->setPivot(0.5f * MODEL_POSITION_RELATIVE_LEG_UPPER_BL);
+    neck->setPivot(0.5f * MODEL_POSITION_RELATIVE_NECK);
+    torso->setPivot(0.5f * MODEL_POSITION_RELATIVE_TORSO);
 
     // set body parts color
     head->setColor(MODEL_COLOR_HEAD);
@@ -1360,61 +1375,61 @@ void Renderer::initializeModel() {
     // create model joints
     Joint* joint0 = new Joint(m_entities.at(entitiesNeck),
         m_entities.at(entitiesHead),
-        0.5f * MODEL_POSITION_RELATIVE_HEAD,
+        m_entities.at(entitiesHead)->getPivot(),
         MODEL_ROTATION_HEAD_MAX,
         MODEL_ROTATION_HEAD_MIN);
     Joint* joint1 = new Joint(m_entities.at(entitiesTorso),
         m_entities.at(entitiesNeck),
-        0.5f * MODEL_POSITION_RELATIVE_NECK,
+        m_entities.at(entitiesNeck)->getPivot(),
         MODEL_ROTATION_NECK_MAX,
         MODEL_ROTATION_NECK_MIN);
     Joint* joint2 = new Joint(m_entities.at(entitiesTorso),
         m_entities.at(entitiesLegUpperFrontRight),
-        0.5f * MODEL_SCALE_LEG_UPPER
-        * MODEL_POSITION_RELATIVE_LEG_UPPER_FR,
+        MODEL_SCALE_LEG_UPPER
+        * m_entities.at(entitiesLegUpperFrontRight)->getPivot(),
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
     Joint* joint3 = new Joint(m_entities.at(entitiesLegUpperFrontRight),
         m_entities.at(entitiesLegLowerFrontRight),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FR,
+        m_entities.at(entitiesLegLowerFrontRight)->getPivot(),
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
     Joint* joint4 = new Joint(m_entities.at(entitiesTorso),
         m_entities.at(entitiesLegUpperBackRight),
-        0.5f * MODEL_SCALE_LEG_UPPER
-        * MODEL_POSITION_RELATIVE_LEG_UPPER_BR,
+        MODEL_SCALE_LEG_UPPER
+        * m_entities.at(entitiesLegUpperBackRight)->getPivot(),
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
     Joint* joint5 = new Joint(m_entities.at(entitiesLegUpperBackRight),
         m_entities.at(entitiesLegLowerBackRight),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BR,
+        m_entities.at(entitiesLegLowerBackRight)->getPivot(),
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
     Joint* joint6 = new Joint(m_entities.at(entitiesTorso),
         m_entities.at(entitiesLegUpperFrontLeft),
-        0.5f * MODEL_SCALE_LEG_UPPER
-        * MODEL_POSITION_RELATIVE_LEG_UPPER_FL,
+        MODEL_SCALE_LEG_UPPER
+        * m_entities.at(entitiesLegUpperFrontLeft)->getPivot(),
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
     Joint* joint7 = new Joint(m_entities.at(entitiesLegUpperFrontLeft),
         m_entities.at(entitiesLegLowerFrontLeft),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_FL,
+        m_entities.at(entitiesLegLowerFrontLeft)->getPivot(),
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
     Joint* joint8 = new Joint(m_entities.at(entitiesTorso),
         m_entities.at(entitiesLegUpperBackLeft),
-        0.5f * MODEL_SCALE_LEG_UPPER
-        * MODEL_POSITION_RELATIVE_LEG_UPPER_BL,
+        MODEL_SCALE_LEG_UPPER
+        * m_entities.at(entitiesLegUpperBackLeft)->getPivot(),
         MODEL_ROTATION_LEG_UPPER_MAX,
         MODEL_ROTATION_LEG_UPPER_MIN);
     Joint* joint9 = new Joint(m_entities.at(entitiesLegUpperBackLeft),
         m_entities.at(entitiesLegLowerBackLeft),
-        0.5f * MODEL_POSITION_RELATIVE_LEG_LOWER_BL,
+        m_entities.at(entitiesLegLowerBackLeft)->getPivot(),
         MODEL_ROTATION_LEG_LOWER_MAX,
         MODEL_ROTATION_LEG_LOWER_MIN);
     Joint* joint10 = new Joint(nullptr,
         m_entities.at(entitiesTorso),
-        POSITION_ORIGIN,
+        m_entities.at(entitiesTorso)->getPivot(),
         MODEL_ROTATION_TORSO_MAX,
         MODEL_ROTATION_TORSO_MIN);
 
@@ -1743,15 +1758,24 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
     // cull front faces to limit peter panning
     glCullFace(GL_FRONT);
 
+    // collision detection
+    detectCollisions();
+
     // render models
     GLuint path{ 0 };
     for (std::vector<Model*>::iterator m_it{ m_models.begin() };
         m_it != m_models.end();
         ++m_it) {
 
-        // follow path sequence
-        if (m_pathingEnabled)
-            m_paths.at(path)->traverse((*m_it), deltaTime);
+        // follow path sequence if model is not currently colliding
+        if (m_pathingEnabled) {
+            std::vector<Model*>::iterator it{ std::find(
+                m_collidingModels.begin(),
+                m_collidingModels.end(),
+                (*m_it)) };
+            if (it == m_collidingModels.end())
+                m_paths.at(path)->traverse((*m_it), deltaTime);
+        }
 
         // play animation sequence
         if (m_animationsEnabled) {
@@ -1825,4 +1849,70 @@ void Renderer::clampModelScale(GLuint model) {
         m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MAX);
     else if (m_modelScales[model].x < TRANSFORMATION_SCALE_MIN)
         m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MIN);
+}
+
+void Renderer::addToCollisionVector(Model* model) {
+    // check whether model is already colliding
+    std::vector<Model*>::iterator it = std::find(
+        m_collidingModels.begin(),
+        m_collidingModels.end(),
+        model);
+
+    // if not, add it
+    if (it == m_collidingModels.end())
+        m_collidingModels.push_back(model);
+}
+
+void Renderer::detectCollisions() {
+    // check for collision between pairs of models
+    for (GLuint i{ 0 }; i != m_models.size(); ++i) {
+            glm::vec3 iPosition = m_models.at(i)->getPosition();
+            GLfloat iColliderRadius = m_models.at(i)->getColliderRadius();
+
+            for (GLuint j{ 0 }; j != m_models.size(); ++j) {
+                // check if two distinct models are being checked
+                if (j != i) {
+
+                        // evaluate metrics to determine if collision occurred
+                        glm::vec3 jPosition = m_models.at(j)->getPosition();
+                        GLfloat jCollidersRadius = m_models.at(j)->getColliderRadius();
+
+                        GLfloat distX = (iPosition.x - jPosition.x)
+                            * (iPosition.x - jPosition.x);
+                        GLfloat distY = (iPosition.y - jPosition.y)
+                            * (iPosition.y - jPosition.y);
+                        GLfloat distZ = (iPosition.z - jPosition.z)
+                            * (iPosition.z - jPosition.z);
+                        GLfloat sumRadii = (iColliderRadius + jCollidersRadius)
+                            * (iColliderRadius + jCollidersRadius);
+
+                        // add a random model to collision vector if not already present
+                        if (distX + distY + distZ < sumRadii) {
+                            GLuint loser = rand() % 2;
+                            if (loser == 0)
+                                addToCollisionVector(m_models.at(i));
+                            else
+                                addToCollisionVector(m_models.at(j));
+                        }
+
+                        // otherwise, remove them from the collision vector
+                        else {
+                            removeFromCollisionVector(m_models.at(i));
+                            removeFromCollisionVector(m_models.at(j));
+                        }
+                }
+            }
+    }
+}
+
+void Renderer::removeFromCollisionVector(Model* model) {
+    // check whether model is already colliding
+    std::vector<Model*>::iterator it = std::find(
+        m_collidingModels.begin(),
+        m_collidingModels.end(),
+        model);
+
+    // if not, remove it
+    if (it != m_collidingModels.end())
+        m_collidingModels.erase(it);
 }

@@ -5,8 +5,8 @@
 #include "joint.h"
 
 // C++ standard library headers
+#include <algorithm>
 #include <map>
-//#include <memory>
 #include <stack>
 
 class Model {
@@ -45,6 +45,8 @@ public:
     glm::mat4 getModelMatrix(RenderedEntity* entity);
     GLfloat getOrientation() const;
     GLfloat getScale() const;
+    GLfloat getColliderRadius() const;
+    const glm::vec3& getPosition() const;
 
     // setters
     static void setSpeedCurrent(GLfloat value);

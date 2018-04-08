@@ -34,6 +34,16 @@ const glm::vec3& RenderedEntity::getScalingRelative() const {
     return m_scalingRelative;
 }
 
+const glm::vec3& RenderedEntity::getPivot() const {
+    // return entity joint pivot point
+    return m_pivot;
+}
+
+const glm::vec3& RenderedEntity::getPosition() const {
+    // return entity position
+    return m_position;
+}
+
 void RenderedEntity::setSpeedCurrent(GLfloat value) {
     // set movement speed
     s_speedCurrent = value;
@@ -47,6 +57,11 @@ void RenderedEntity::setColor(const glm::vec4& value) {
 void RenderedEntity::setFrontVector(const glm::vec3& value) {
     // update front vector
     m_front = value;
+}
+
+void RenderedEntity::setPivot(const glm::vec3& value) {
+    // set entity joint pivot point
+    m_pivot = value;
 }
 
 void RenderedEntity::setPosition(const glm::vec3& value) {

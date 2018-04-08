@@ -22,6 +22,7 @@ public:
     RenderedEntity() = delete;
     RenderedEntity(Shader* shader,
         const glm::vec3& position,
+        const glm::vec3& pivot,
         GLfloat vertices[],
         GLuint verticesSize,
         GLuint indices[] = nullptr,
@@ -29,6 +30,7 @@ public:
         bool isModelEntity = false)
         : m_position { position },
         m_positionOriginal{ position },
+        m_pivot{ pivot },
         m_modelEntity{ isModelEntity } {
         if (isModelEntity)
             initializeModelEntity(vertices,
@@ -49,6 +51,7 @@ public:
         m_positionOriginal{ entity.m_positionOriginal },
         m_scalingOriginal{ entity.m_scalingOriginal },
         m_scalingRelative{ entity.m_scalingRelative },
+        m_pivot{ entity.m_pivot },
         m_front{ entity.m_front },
         m_color{ entity.m_color },
         m_VAO{ entity.m_VAO },
@@ -69,6 +72,7 @@ public:
         m_positionOriginal{ std::move(entity.m_positionOriginal) },
         m_scalingOriginal{ std::move(entity.m_scalingOriginal) },
         m_scalingRelative{ std::move(entity.m_scalingRelative) },
+        m_pivot{ std::move(entity.m_pivot) },
         m_front{ std::move(entity.m_front) },
         m_color{ std::move(entity.m_color) },
         m_modelEntity{ std::move(entity.m_modelEntity) },
@@ -86,11 +90,14 @@ public:
     glm::mat4 getModelMatrixExclScaling(const glm::mat4& jointModelMatrix);
     const glm::mat4& getScalingMatrix() const;
     const glm::vec3& getScalingRelative() const;
+    const glm::vec3& getPivot() const;
+    const glm::vec3& getPosition() const;
 
     // setters
     static void setSpeedCurrent(GLfloat value);
     void setColor(const glm::vec4& value);
     void setFrontVector(const glm::vec3& value);
+    void setPivot(const glm::vec3& value);
     void setPosition(const glm::vec3& value);
     void setRotation(bool toggle);
     void setScaling(bool toggle);
@@ -130,6 +137,7 @@ private:
     glm::vec3 m_positionOriginal;
     glm::vec3 m_scalingOriginal;
     glm::vec3 m_scalingRelative{ glm::vec3(1.0f, 1.0f, 1.0f) };
+    glm::vec3 m_pivot;
     glm::vec3 m_front;
     glm::vec4 m_color;
     GLuint m_VAO;

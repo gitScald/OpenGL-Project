@@ -75,6 +75,16 @@ GLfloat Model::getScale() const {
     return m_scale;
 }
 
+GLfloat Model::getColliderRadius() const {
+    // return model collider radius
+    return m_colliderRadius;
+}
+
+const glm::vec3& Model::getPosition() const {
+    // return hierarchy root position
+    return m_hierarchyRoot->getPosition();
+}
+
 void Model::setSpeedCurrent(GLfloat value) {
     // set movement speed
     s_speedCurrent = value;
@@ -122,6 +132,7 @@ void Model::rotateJoint(GLuint id,
     const glm::vec3& axis) {
     // rotate joint
     m_joints.at(id)->rotate(angle, axis);
+    updateColliderRadius();
 }
 
 void Model::rotateJoint(Joint* joint,
@@ -132,6 +143,7 @@ void Model::rotateJoint(Joint* joint,
         m_joints.end(),
         joint) };
     (*it)->rotate(angle, axis);
+    updateColliderRadius();
 }
 
 void Model::scale(const glm::vec3& value) {
@@ -223,6 +235,33 @@ void Model::setDepthShaderAttributes(Shader* shader) const {
 
 void Model::updateColliderRadius() {
     // update radius of collider sphere
+    glm::vec3 rootPosition = m_hierarchyRoot->getPosition();
+    GLfloat maxX = 0;
+    GLfloat maxY = 0;
+    GLfloat maxZ = 0;
+
+    for (ModelHierarchy::const_iterator it{ m_hierarchy.begin() };
+        it != m_hierarchy.end();
+        ++it) {
+        if (it->first != m_hierarchyRoot) {
+            // entity position relative to the root
+            glm::vec3 position = rootPosition + it->first->getPosition();
+            glm::vec3 pivot = rootPosition
+                + m_scale * it->first->getPivot();
+
+            // entity dimensions
+            GLfloat x = position.x + pivot.x;
+            GLfloat y = position.y + pivot.y;
+            GLfloat z = position.z + pivot.z;
+
+            maxX = std::max(maxX, x);
+            maxY = std::max(maxY, y);
+            maxZ = std::max(maxZ, z);
+        }
+    }
+
+    m_colliderRadius = std::max(maxX, maxY);
+    m_colliderRadius = std::max(m_colliderRadius, maxZ);
 }
 
 void Model::updateFrontVector() {

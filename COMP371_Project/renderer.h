@@ -114,6 +114,11 @@ private:
     // transformations
     void clampModelPosition(GLuint model);
     void clampModelScale(GLuint model);
+
+    // collision detection
+    void addToCollisionVector(Model* model);
+    void detectCollisions();
+    void removeFromCollisionVector(Model* model);
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };
@@ -121,6 +126,7 @@ private:
     std::vector<Joint*> m_joints;
     std::vector<LightSource*> m_lights;
     std::vector<Material*> m_materials;
+    std::vector<Model*> m_collidingModels;
     std::vector<Model*> m_models;
     std::vector<Path*> m_paths;
     std::vector<RenderedEntity*> m_entities;
