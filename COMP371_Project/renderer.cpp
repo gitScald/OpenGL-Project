@@ -1814,26 +1814,44 @@ void Renderer::renderLight(GLfloat deltaTime) {
     // handle day-night cycle
     if (m_dayNightCycleEnabled) {
         // increment time of day
-        m_currentTime += deltaTime;
+        m_currentTime += LIGHT_SPEED * deltaTime;
 
         // update light position
         glm::vec3 currentPosition = m_lights.at(0)->getPosition();
-        GLfloat y = LIGHT_POSITION.y * sin(LIGHT_SPEED * m_currentTime);
-        GLfloat z = LIGHT_POSITION.y * cos(LIGHT_SPEED * m_currentTime);
+        GLfloat y = LIGHT_POSITION.y * sin(m_currentTime);
+        GLfloat z = LIGHT_POSITION.y * cos(m_currentTime);
         glm::vec3 newPosition{ currentPosition.x, y, z };
         m_lights.at(0)->setPosition(newPosition);
-
+        std::cout << "current time = " << m_currentTime << std::endl;
+        
         // update light color
         glm::vec4 currentColor = m_lights.at(0)->getColor();
-        GLfloat colorValue = sin(LIGHT_SPEED * m_currentTime);
-        GLfloat r = colorValue;
-        GLfloat g = colorValue;
-        GLfloat b = colorValue;
-        glm::vec4 newColor{ r, g, b, currentColor.a };
+        glm::vec4 targetColor;
+
+        // night time
+        if (m_currentTime >= glm::pi<GLfloat>()
+            && m_currentTime < 2.0f * glm::pi<GLfloat>())
+            targetColor = COLOR_LIGHT_NIGHT;
+
+        // day time
+        else if (m_currentTime >= glm::pi<GLfloat>() / 6.0f
+            && m_currentTime < glm::pi<GLfloat>() * 7.0f / 8.0f)
+            targetColor = COLOR_LIGHT_DAY;
+
+        // dawn or dusk time
+        else
+            targetColor = COLOR_LIGHT_TRANSITION;
+
+        // lerp color and assign to light
+        glm::vec4 newColor{ lerpColor(currentColor, targetColor, 0.1f) };
         m_lights.at(0)->setColor(newColor);
 
         // update shader properties
         updateLightPositionAndColor();
+
+        // reset timer after a full cycle
+        if (m_currentTime >= 2.0 * glm::pi<GLfloat>())
+            m_currentTime = 0.0f;
     }
 
     // set shader uniforms
@@ -2016,4 +2034,11 @@ void Renderer::removeFromCollisionVector(Model* model) {
     // if so, remove it
     if (it != m_collidingModels.end())
         m_collidingModels.erase(it);
+}
+
+glm::vec4 Renderer::lerpColor(const glm::vec4& start,
+    const glm::vec4& end,
+    GLfloat step) {
+    // linearly interpolate between two colors
+    return start + step * (end - start);
 }

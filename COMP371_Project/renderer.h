@@ -127,6 +127,11 @@ private:
     void detectCollisions();
     bool isInCollisionVector(Model* model);
     void removeFromCollisionVector(Model* model);
+
+    // day-night cycle
+    static glm::vec4 lerpColor(const glm::vec4& start,
+        const glm::vec4& end,
+        GLfloat step);
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };

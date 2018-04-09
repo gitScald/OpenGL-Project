@@ -199,7 +199,7 @@ const glm::vec3 LIGHT_AMBIENT{ glm::vec3(0.2f, 0.2f, 0.2f) };
 const glm::vec3 LIGHT_DIFFUSE{ glm::vec3(0.7f, 0.7f, 0.7f) };
 const glm::vec3 LIGHT_SPECULAR{ glm::vec3(1.0f, 1.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_DAY{ glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.0f, 0.0f, 0.1f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.1f, 0.2f, 0.7f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_TRANSITION{ glm::vec4(0.6f, 0.6f, 0.2f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_OBJECT_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_OBJECT_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
