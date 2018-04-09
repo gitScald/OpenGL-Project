@@ -91,6 +91,12 @@ void Model::setSpeedCurrent(GLfloat value) {
     RenderedEntity::setSpeedCurrent(value);
 }
 
+void Model::setJointRotation(GLuint joint, GLfloat angle) {
+    // set joint rotation to a specific angle
+    m_joints.at(joint)->setRotation(angle, AXIS_Z);
+    updateColliderRadius();
+}
+
 void Model::setPosition(const glm::vec3& value) {
     // set model position
     m_hierarchyRoot->setPosition(value);
@@ -117,7 +123,8 @@ void Model::reset() {
 
     // reset model orientation
     m_orientation = 0.0f;
-    updateFrontVector();
+    updateColliderRadius();
+    updateVectors();
 }
 
 void Model::rotate(GLfloat angle,
@@ -125,7 +132,7 @@ void Model::rotate(GLfloat angle,
     // rotate model
     m_hierarchyRoot->rotate(angle, axis);
     m_orientation += angle;
-    updateFrontVector();
+    updateVectors();
 }
 
 void Model::rotateJoint(GLuint id,
@@ -265,18 +272,23 @@ void Model::updateColliderRadius() {
     m_colliderRadius = std::max(m_colliderRadius, maxZ);
 }
 
-void Model::updateFrontVector() {
+void Model::updateVectors() {
     // calculate front vector using yaw angle
-    m_front.x = cos(glm::radians(m_orientation - 90.0f));
+    m_front.x = cos(glm::radians(m_orientation));
     m_front.y = 0.0f;
-    m_front.z = sin(glm::radians(m_orientation - 90.0f));
+    m_front.z = sin(glm::radians(m_orientation));
 
     // normalize front vector
     m_front = glm::normalize(m_front);
 
-    // pass front vector to hierarchy
+    // calculate right vector
+    m_right = glm::normalize(glm::cross(m_front, AXIS_Y));
+
+    // pass front and right vectors to hierarchy
     for (ModelHierarchy::iterator it{ m_hierarchy.begin() };
         it != m_hierarchy.end();
-        ++it)
+        ++it) {
         it->first->setFrontVector(m_front);
+        it->first->setRightVector(m_right);
+    }
 }

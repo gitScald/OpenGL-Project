@@ -12,6 +12,15 @@ GLfloat Joint::getRotation() const {
     return m_rotationAngle;
 }
 
+void Joint::setRotation(GLfloat angle, const glm::vec3& axis) {
+    // set joint rotation to specific angle
+    m_rotationAngle = angle;
+
+    m_rotationMatrix = glm::rotate(glm::mat4(),
+        glm::radians(m_rotationAngle),
+        axis);
+}
+
 void Joint::reset() {
     // reset rotation
     m_rotationMatrix = glm::mat4();
@@ -25,7 +34,7 @@ void Joint::rotate(GLfloat angle, const glm::vec3& axis) {
 
     m_rotationMatrix = glm::rotate(glm::mat4(),
         glm::radians(m_rotationAngle),
-        AXIS_Z);
+        axis);
 }
 
 bool Joint::contains(RenderedEntity* entity) const {

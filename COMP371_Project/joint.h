@@ -40,6 +40,9 @@ public:
     glm::mat4 getModelMatrix() const;
     GLfloat getRotation() const;
 
+    // setters
+    void setRotation(GLfloat angle, const glm::vec3& axis);
+
     // transformations
     void reset();
     void rotate(GLfloat angle, const glm::vec3& axis);

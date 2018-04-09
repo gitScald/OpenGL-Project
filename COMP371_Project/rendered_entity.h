@@ -53,6 +53,7 @@ public:
         m_scalingRelative{ entity.m_scalingRelative },
         m_pivot{ entity.m_pivot },
         m_front{ entity.m_front },
+        m_right{ entity.m_right },
         m_color{ entity.m_color },
         m_VAO{ entity.m_VAO },
         m_VBO{ entity.m_VBO },
@@ -74,6 +75,7 @@ public:
         m_scalingRelative{ std::move(entity.m_scalingRelative) },
         m_pivot{ std::move(entity.m_pivot) },
         m_front{ std::move(entity.m_front) },
+        m_right{ std::move(entity.m_right) },
         m_color{ std::move(entity.m_color) },
         m_modelEntity{ std::move(entity.m_modelEntity) },
         m_VAO{ std::move(entity.m_VAO) },
@@ -99,8 +101,9 @@ public:
     void setFrontVector(const glm::vec3& value);
     void setPivot(const glm::vec3& value);
     void setPosition(const glm::vec3& value);
-    void setRotation(bool toggle);
-    void setScaling(bool toggle);
+    void setRightVector(const glm::vec3& value);
+    void lockRotation(bool toggle);
+    void lockScaling(bool toggle);
 
     // transformations
     void move(Transform::Displacement direction);
@@ -139,6 +142,7 @@ private:
     glm::vec3 m_scalingRelative{ glm::vec3(1.0f, 1.0f, 1.0f) };
     glm::vec3 m_pivot;
     glm::vec3 m_front;
+    glm::vec3 m_right;
     glm::vec4 m_color;
     GLuint m_VAO;
     GLuint m_VBO;

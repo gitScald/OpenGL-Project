@@ -69,13 +69,18 @@ void RenderedEntity::setPosition(const glm::vec3& value) {
     m_position = value;
 }
 
-void RenderedEntity::setRotation(bool toggle) {
+void RenderedEntity::setRightVector(const glm::vec3& value) {
+    // update entity right vector
+    m_right = value;
+}
+
+void RenderedEntity::lockRotation(bool toggle) {
     // set entity rotation
     if (!m_rotationSet)
         m_rotationSet = true;
 }
 
-void RenderedEntity::setScaling(bool toggle) {
+void RenderedEntity::lockScaling(bool toggle) {
     // set entity scaling
     if (!m_scaleSet)
         m_scaleSet = true;

@@ -169,16 +169,16 @@ const glm::vec4 MODEL_COLOR_NECK{ glm::vec4(0.6f, 0.6f, 0.6f, 1.0f) };
 const glm::vec4 MODEL_COLOR_TORSO{ glm::vec4(0.8f, 0.8f, 0.8f, 1.0f) };
 
 // model maximum joint rotations
-const GLfloat MODEL_ROTATION_HEAD_MAX{ 40.0f };
-const GLfloat MODEL_ROTATION_HEAD_MIN{ -30.0f };
-const GLfloat MODEL_ROTATION_NECK_MAX{ 20.0f };
-const GLfloat MODEL_ROTATION_NECK_MIN{ -25.0f };
+const GLfloat MODEL_ROTATION_HEAD_MAX{ 90.0f };
+const GLfloat MODEL_ROTATION_HEAD_MIN{ -90.0f };
+const GLfloat MODEL_ROTATION_NECK_MAX{ 90.0f };
+const GLfloat MODEL_ROTATION_NECK_MIN{ -90.0f };
 const GLfloat MODEL_ROTATION_LEG_LOWER_MAX{ 90.0f };
 const GLfloat MODEL_ROTATION_LEG_LOWER_MIN{ -90.0f };
-const GLfloat MODEL_ROTATION_LEG_UPPER_MAX{ 85.0f };
-const GLfloat MODEL_ROTATION_LEG_UPPER_MIN{ -85.0f };
-const GLfloat MODEL_ROTATION_TORSO_MAX{ 5.0f };
-const GLfloat MODEL_ROTATION_TORSO_MIN{ -5.0f };
+const GLfloat MODEL_ROTATION_LEG_UPPER_MAX{ 90.0f };
+const GLfloat MODEL_ROTATION_LEG_UPPER_MIN{ -90.0f };
+const GLfloat MODEL_ROTATION_TORSO_MAX{ 90.0f };
+const GLfloat MODEL_ROTATION_TORSO_MIN{ -90.0f };
 
 // axis and grid constants
 const glm::vec4 COLOR_AXES[]{

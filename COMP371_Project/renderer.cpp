@@ -1253,7 +1253,7 @@ void Renderer::initializeModel() {
         MODEL_ORIENTATION_RELATIVE_HEAD.second);
     neck->rotate(MODEL_ORIENTATION_RELATIVE_NECK.first,
         MODEL_ORIENTATION_RELATIVE_NECK.second);
-    torso->setRotation(true);
+    torso->lockRotation(true);
 
     // add body parts to entities vector
     m_entities.push_back(head);
@@ -1704,7 +1704,7 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
             // compute entity model matrix
             glm::mat4 modelMatrix;
             modelMatrix *= glm::scale(modelMatrix,
-                    e_it->first->getScalingRelative())
+                e_it->first->getScalingRelative())
                 * getWorldOrientation()
                 * (*m_it)->getModelMatrix(e_it->first)
                 * e_it->first->getScalingMatrix();
