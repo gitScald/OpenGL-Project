@@ -20,12 +20,10 @@ void ShadowMap::free() const {
 }
 
 void ShadowMap::render() const {
-    // set shader uniforms
+    // set texture properties
     Shader::useProgram(m_shaderDebug.getProgramID());
     Shader::activateTextureUnit(GL_TEXTURE0);
     Shader::bindCubemapTexture(m_depthTextureID);
-    m_shaderDebug.setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
-        0);
 
     // render depth texture on debug quad
     Shader::bindVAO(m_VAO);
@@ -96,6 +94,11 @@ void ShadowMap::initialize() {
 
     // unbind framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+
+    // set shader uniform
+    Shader::useProgram(m_shaderDebug.getProgramID());
+    m_shaderDebug.setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
+        0);
 }
 
 void ShadowMap::initializeDebugQuad() {

@@ -13,7 +13,6 @@ GLenum Shader::s_activeTextureUnit = NULL;
 
 // initially bound textures
 GLuint Shader::s_bound2DTexture = NULL;
-GLuint Shader::s_boundCubemapTexture = NULL;
 
 Shader::Shader(const std::string& pathVertex,
     const std::string& pathFragment,
@@ -217,11 +216,8 @@ void Shader::bind2DTexture(GLuint texture) {
 }
 
 void Shader::bindCubemapTexture(GLuint texture) {
-    // bind cubemap texture if needed
-    if (texture != s_boundCubemapTexture) {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-        s_boundCubemapTexture = texture;
-    }
+    // bind cubemap texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 }
 
 void Shader::useProgram(GLuint programID) {

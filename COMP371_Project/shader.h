@@ -75,7 +75,6 @@ private:
     static GLuint s_program;
     static GLenum s_activeTextureUnit;
     static GLuint s_bound2DTexture;
-    static GLuint s_boundCubemapTexture;
     GLuint m_programID;
 };
 
