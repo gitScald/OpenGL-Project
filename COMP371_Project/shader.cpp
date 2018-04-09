@@ -256,60 +256,64 @@ void Shader::setColorAttributes(GLuint VAO,
     GLuint VBO,
     GLuint EBO) {
     // bind buffers
-    bindVAO(VAO);
-    bindVBO(VBO);
-    if (EBO != NULL)
-        bindEBO(EBO);
+    if (VAO != s_VAO) {
+        bindVAO(VAO);
+        bindVBO(VBO);
+        if (EBO != NULL)
+            bindEBO(EBO);
 
-    // vertex attributes
-    GLuint positionLocation = glGetAttribLocation(m_programID,
-        ATTRIBUTE_POSITION.c_str());
-    glVertexAttribPointer(positionLocation,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GLfloat),
-        (void*)0);
-    glEnableVertexAttribArray(positionLocation);
-    GLuint normalLocation = glGetAttribLocation(m_programID,
-        ATTRIBUTE_NORMAL.c_str());
-    glVertexAttribPointer(normalLocation,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GLfloat),
-        (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(normalLocation);
-    GLuint textureLocation = glGetAttribLocation(m_programID,
-        ATTRIBUTE_TEXTURE.c_str());
-    glVertexAttribPointer(textureLocation,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GLfloat),
-        (void*)(6 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(textureLocation);
+        // vertex attributes
+        GLuint positionLocation = glGetAttribLocation(m_programID,
+            ATTRIBUTE_POSITION.c_str());
+        glVertexAttribPointer(positionLocation,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GLfloat),
+            (void*)0);
+        glEnableVertexAttribArray(positionLocation);
+        GLuint normalLocation = glGetAttribLocation(m_programID,
+            ATTRIBUTE_NORMAL.c_str());
+        glVertexAttribPointer(normalLocation,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GLfloat),
+            (void*)(3 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(normalLocation);
+        GLuint textureLocation = glGetAttribLocation(m_programID,
+            ATTRIBUTE_TEXTURE.c_str());
+        glVertexAttribPointer(textureLocation,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GLfloat),
+            (void*)(6 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(textureLocation);
+    }
 }
 
 void Shader::setDepthAttributes(GLuint VAO,
     GLuint VBO,
     GLuint EBO) {
     // bind buffers
-    bindVAO(VAO);
-    bindVBO(VBO);
-    if (EBO != NULL)
-        bindEBO(EBO);
+    if (VAO != s_VAO) {
+        bindVAO(VAO);
+        bindVBO(VBO);
+        if (EBO != NULL)
+            bindEBO(EBO);
 
-    // vertex attributes
-    GLuint positionLocation = glGetAttribLocation(m_programID,
-        ATTRIBUTE_POSITION.c_str());
-    glVertexAttribPointer(positionLocation,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GLfloat),
-        (void*)0);
-    glEnableVertexAttribArray(positionLocation);
+        // vertex attributes
+        GLuint positionLocation = glGetAttribLocation(m_programID,
+            ATTRIBUTE_POSITION.c_str());
+        glVertexAttribPointer(positionLocation,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GLfloat),
+            (void*)0);
+        glEnableVertexAttribArray(positionLocation);
+    }
 }
 
 void Shader::compileShader(const std::string& shaderType,
