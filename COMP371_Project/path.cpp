@@ -16,7 +16,7 @@ void Path::setSpeed(GLfloat speed) {
 void Path::traverse(Model* model,
     GLfloat deltaTime) {
     // update current time
-    m_timeTraveled += deltaTime;
+    m_timeTraveled += m_speed * deltaTime;
 
     // update current step
     if (m_timeTraveled >= m_pathSequence.at(m_step)->m_time) {
@@ -29,7 +29,9 @@ void Path::traverse(Model* model,
     // apply current step
     GLfloat currentOrientation = model->getOrientation();
     GLfloat targetOrientation = m_pathSequence.at(m_step)->m_direction;
-    GLfloat deltaOrientation = targetOrientation - currentOrientation;
+    GLfloat deltaOrientation = (targetOrientation - currentOrientation)
+        * m_speed
+        * deltaTime;
     model->rotate(deltaOrientation, AXIS_Y);
     model->move(Transform::FRONT);
 }

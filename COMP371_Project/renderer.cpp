@@ -352,10 +352,11 @@ void Renderer::initialize() {
     initializeFrame();
     initializeGround();
     initializeMaterial();
-    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i)
+    for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
+        initializeAnimation();
         initializeModel();
+    }
     initializePaths();
-    initializeAnimation();
     initializeLight();
 
     // set initial view and projection matrices
@@ -388,328 +389,118 @@ void Renderer::initializeAnimation() {
     // create animation
     Animation* animation = new Animation();
 
-    // animation step 0
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        0,
-        2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        0,
-        1.0f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        0,
-        10.0f));
-    animation->addStep(new AnimationStep(3,
-        AXIS_Z,
-        0,
-        -15.0f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        0,
-        7.0f));
-    animation->addStep(new AnimationStep(5,
-        AXIS_Z,
-        0,
-        -10.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        0,
-        10.0f));
-    animation->addStep(new AnimationStep(7,
-        AXIS_Z,
-        0,
-        -15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        0,
-        7.0f));
-    animation->addStep(new AnimationStep(9,
-        AXIS_Z,
-        0,
-        -10.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        0,
-        1.0f));
+    // head keyframes
+    animation->addStep(new AnimationStep(JOINT_HEAD,
+        AXIS_Z, 0, 15.0f));
+    animation->addStep(new AnimationStep(JOINT_HEAD,
+        AXIS_Z, 1, -5.0f));
+    animation->addStep(new AnimationStep(JOINT_HEAD,
+        AXIS_Z, 2, 5.0f));
+    animation->addStep(new AnimationStep(JOINT_HEAD,
+        AXIS_Z, 3, -5.0f));
 
-    // animation step 1
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        1,
-        2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        1,
-        1.0f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        1,
-        10.0f));
-    animation->addStep(new AnimationStep(3,
-        AXIS_Z,
-        1,
-        -15.0f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        1,
-        7.0f));
-    animation->addStep(new AnimationStep(5,
-        AXIS_Z,
-        1,
-        -10.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        1,
-        10.0f));
-    animation->addStep(new AnimationStep(7,
-        AXIS_Z,
-        1,
-        -15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        1,
-        7.0f));
-    animation->addStep(new AnimationStep(9,
-        AXIS_Z,
-        1,
-        -10.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        1,
-        1.0f));
+    // neck keyframes
+    animation->addStep(new AnimationStep(JOINT_NECK,
+        AXIS_Z, 0, 10.0f));
+    animation->addStep(new AnimationStep(JOINT_NECK,
+        AXIS_Z, 1, 10.0f));
+    animation->addStep(new AnimationStep(JOINT_NECK,
+        AXIS_Z, 2, -5.0f));
+    animation->addStep(new AnimationStep(JOINT_NECK,
+        AXIS_Z, 3, -10.0f));
 
-    // animation step 2
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        2,
-        -2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        2,
-        -1.0f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        2,
-        -10.0f));
-    animation->addStep(new AnimationStep(3,
-        AXIS_Z,
-        2,
-        15.0f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        2,
-        -7.0f));
-    animation->addStep(new AnimationStep(5,
-        AXIS_Z,
-        2,
-        10.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        2,
-        -10.0f));
-    animation->addStep(new AnimationStep(7,
-        AXIS_Z,
-        2,
-        15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        2,
-        -7.0f));
-    animation->addStep(new AnimationStep(9,
-        AXIS_Z,
-        2,
-        10.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        2,
-        -1.0f));
+    // leg upper front right keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_RIGHT,
+        AXIS_Z, 0, 35.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_RIGHT,
+        AXIS_Z, 1, -40.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_RIGHT,
+        AXIS_Z, 2, 80.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_RIGHT,
+        AXIS_Z, 3, -20.0f));
 
-    // animation step 3
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        3,
-        -2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        3,
-        0.0f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        3,
-        -10.0f));
-    animation->addStep(new AnimationStep(3,
-        AXIS_Z,
-        3,
-        15.0f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        3,
-        -7.0f));
-    animation->addStep(new AnimationStep(5,
-        AXIS_Z,
-        3,
-        10.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        3,
-        -10.0f));
-    animation->addStep(new AnimationStep(7,
-        AXIS_Z,
-        3,
-        15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        3,
-        -7.0f));
-    animation->addStep(new AnimationStep(9,
-        AXIS_Z,
-        3,
-        10.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        3,
-        -1.0f));
+    // leg lower front right keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_RIGHT,
+        AXIS_Z, 0, -20.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_RIGHT,
+        AXIS_Z, 1, -15.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_RIGHT,
+        AXIS_Z, 2, -70.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_RIGHT,
+        AXIS_Z, 3, 40.0f));
 
-    // animation step 4
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        4,
-        -2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        4,
-        0.0f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        4,
-        -10.0f));
-    animation->addStep(new AnimationStep(3,
-        AXIS_Z,
-        4,
-        15.0f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        4,
-        -7.0f));
-    animation->addStep(new AnimationStep(5,
-        AXIS_Z,
-        4,
-        10.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        4,
-        -10.0f));
-    animation->addStep(new AnimationStep(7,
-        AXIS_Z,
-        4,
-        -15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        4,
-        -7.0f));
-    animation->addStep(new AnimationStep(9,
-        AXIS_Z,
-        4,
-        10.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        4,
-        -1.0f));
+    // leg upper back right keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_RIGHT,
+        AXIS_Z, 0, -25.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_RIGHT,
+        AXIS_Z, 1, -65.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_RIGHT,
+        AXIS_Z, 2, 20.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_RIGHT,
+        AXIS_Z, 3, -15.0f));
 
-    // animation step 5
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        5,
-        2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        5,
-        0.5f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        5,
-        10.0f));
-    animation->addStep(new AnimationStep(3,
-        AXIS_Z,
-        5,
-        -15.0f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        5,
-        7.0f));
-    animation->addStep(new AnimationStep(5,
-        AXIS_Z,
-        5,
-        -10.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        5,
-        10.0f));
-    animation->addStep(new AnimationStep(7,
-        AXIS_Z,
-        5,
-        -15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        5,
-        7.0f));
-    animation->addStep(new AnimationStep(9,
-        AXIS_Z,
-        5,
-        -10.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        5,
-        1.0f));
+    // leg lower back right keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_RIGHT,
+        AXIS_Z, 0, 15.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_RIGHT,
+        AXIS_Z, 1, 25.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_RIGHT,
+        AXIS_Z, 2, 40.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_RIGHT,
+        AXIS_Z, 3, -10.0f));
 
-    // animation step 6
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        6,
-        -2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        6,
-        0.5f));
-    animation->addStep(new AnimationStep(2,
-        AXIS_Z,
-        6,
-        -15.0f));
-    animation->addStep(new AnimationStep(8,
-        AXIS_Z,
-        6,
-        -15.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        6,
-        1.0f));
+    // leg upper front left keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_LEFT,
+        AXIS_Z, 0, 40.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_LEFT,
+        AXIS_Z, 1, -35.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_LEFT,
+        AXIS_Z, 2, 65.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_FRONT_LEFT,
+        AXIS_Z, 3, -25.0f));
 
-    // animation step 7
-    animation->addStep(new AnimationStep(0,
-        AXIS_Z,
-        7,
-        -2.0f));
-    animation->addStep(new AnimationStep(1,
-        AXIS_Z,
-        7,
-        -0.5f));
-    animation->addStep(new AnimationStep(4,
-        AXIS_Z,
-        7,
-        -15.0f));
-    animation->addStep(new AnimationStep(6,
-        AXIS_Z,
-        7,
-        -15.0f));
-    animation->addStep(new AnimationStep(10,
-        AXIS_Z,
-        7,
-        -1.0f));
+    // leg lower front left keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_LEFT,
+        AXIS_Z, 0, -25.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_LEFT,
+        AXIS_Z, 1, -20.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_LEFT,
+        AXIS_Z, 2, -55.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_FRONT_LEFT,
+        AXIS_Z, 3, 45.0f));
+
+    // leg upper back left keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_LEFT,
+        AXIS_Z, 0, -30.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_LEFT,
+        AXIS_Z, 1, -70.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_LEFT,
+        AXIS_Z, 2, 65.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_UPPER_BACK_LEFT,
+        AXIS_Z, 3, -25.0f));
+
+    // leg lower back left keyframes
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_LEFT,
+        AXIS_Z, 0, 20.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_LEFT,
+        AXIS_Z, 1, 30.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_LEFT,
+        AXIS_Z, 2, 35.0f));
+    animation->addStep(new AnimationStep(JOINT_LEG_LOWER_BACK_LEFT,
+        AXIS_Z, 3, -15.0f));
+
+    // torso keyframes
+    animation->addStep(new AnimationStep(JOINT_TORSO,
+        AXIS_Z, 0, -5.0f));
+    animation->addStep(new AnimationStep(JOINT_TORSO,
+        AXIS_Z, 1, 10.0f));
+    animation->addStep(new AnimationStep(JOINT_TORSO,
+        AXIS_Z, 2, -10.0f));
+    animation->addStep(new AnimationStep(JOINT_TORSO,
+        AXIS_Z, 3, 15.0f));
 
     // add animation to animations vector
-    m_animations.emplace_back(std::move(animation));
+    m_animations.push_back(animation);
 }
 
 void Renderer::initializeFrame() {
@@ -1877,7 +1668,7 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
     detectCollisions();
 
     // render models
-    GLuint path{ 0 };
+    GLuint modelIndex{ 0 };
     for (std::vector<Model*>::iterator m_it{ m_models.begin() };
         m_it != m_models.end();
         ++m_it) {
@@ -1889,13 +1680,13 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
                 m_collidingModels.end(),
                 (*m_it)) };
             if (it == m_collidingModels.end())
-                m_paths.at(path)->traverse((*m_it), deltaTime);
+                m_paths.at(modelIndex)->traverse((*m_it), deltaTime);
         }
 
         // play animation sequence
         if (m_animationsEnabled) {
-            m_animations.at(0)->setSpeed(m_animationSpeedCurrent);
-            m_animations.at(0)->play(*m_it, deltaTime);
+            m_animations.at(modelIndex)->setSpeed(m_animationSpeedCurrent);
+            m_animations.at(modelIndex)->play(*m_it, deltaTime);
         }
 
         // set shader attributes
@@ -1928,7 +1719,7 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
         }
 
         // update path index
-        ++path;
+        ++modelIndex;
     }
 
     // go back to culling back faces

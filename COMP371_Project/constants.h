@@ -173,10 +173,10 @@ const GLfloat MODEL_ROTATION_HEAD_MAX{ 40.0f };
 const GLfloat MODEL_ROTATION_HEAD_MIN{ -30.0f };
 const GLfloat MODEL_ROTATION_NECK_MAX{ 20.0f };
 const GLfloat MODEL_ROTATION_NECK_MIN{ -25.0f };
-const GLfloat MODEL_ROTATION_LEG_LOWER_MAX{ 25.0f };
-const GLfloat MODEL_ROTATION_LEG_LOWER_MIN{ -65.0f };
-const GLfloat MODEL_ROTATION_LEG_UPPER_MAX{ 35.0f };
-const GLfloat MODEL_ROTATION_LEG_UPPER_MIN{ -40.0f };
+const GLfloat MODEL_ROTATION_LEG_LOWER_MAX{ 90.0f };
+const GLfloat MODEL_ROTATION_LEG_LOWER_MIN{ -90.0f };
+const GLfloat MODEL_ROTATION_LEG_UPPER_MAX{ 85.0f };
+const GLfloat MODEL_ROTATION_LEG_UPPER_MIN{ -85.0f };
 const GLfloat MODEL_ROTATION_TORSO_MAX{ 5.0f };
 const GLfloat MODEL_ROTATION_TORSO_MIN{ -5.0f };
 
@@ -236,6 +236,17 @@ const GLfloat SHADOW_BORDER_COLOR[]{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 // animation-related constants
 const GLfloat ANIMATION_SPEED{ 2.0f };
+const GLuint JOINT_HEAD{ 0 };
+const GLuint JOINT_LEG_LOWER_BACK_LEFT{ 9 };
+const GLuint JOINT_LEG_LOWER_BACK_RIGHT{ 5 };
+const GLuint JOINT_LEG_LOWER_FRONT_LEFT{ 7 };
+const GLuint JOINT_LEG_LOWER_FRONT_RIGHT{ 3 };
+const GLuint JOINT_LEG_UPPER_BACK_LEFT{ 8 };
+const GLuint JOINT_LEG_UPPER_BACK_RIGHT{ 4 };
+const GLuint JOINT_LEG_UPPER_FRONT_LEFT{ 6 };
+const GLuint JOINT_LEG_UPPER_FRONT_RIGHT{ 2 };
+const GLuint JOINT_NECK{ 1 };
+const GLuint JOINT_TORSO{ 10 };
 
 // pathing-related constants
 const GLfloat MODEL_SPEED{ 1.0f };

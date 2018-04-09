@@ -14,23 +14,24 @@ void Animation::setSpeed(GLfloat speed) {
 
 void Animation::play(Model* model,
     GLfloat deltaTime) {
+    // update current frame
+    m_frame += 0.5f * m_speed * deltaTime;
+    m_keyframe = static_cast<GLuint>(m_frame) % (m_keyframeLast + 1);
+
     // play current keyframe
-    bool keyframeUpdated{ false };
     for (AnimationSequence::const_iterator it{ m_animationSequence.begin() };
         it != m_animationSequence.end();
         ++it) {
         if ((*it)->m_keyframe == m_keyframe) {
-            model->rotateJoint((*it)->m_joint,
-                (*it)->m_rotationAngle * deltaTime,
-                (*it)->m_rotationAxis);
+            GLfloat currentAngle = model->getJointRotation((*it)->m_joint);
+            GLfloat targetAngle = (*it)->m_rotationAngle;
+            GLfloat newAngle = (targetAngle - currentAngle)
+                * m_speed
+                * deltaTime;
 
-            // update current frame
-            if (!keyframeUpdated
-                && model->getJointRotation((*it)->m_joint)
-                    >= (*it)->m_rotationAngle) {
-                m_keyframe = (m_keyframe + 1) % (m_keyframeLast + 1);
-                keyframeUpdated = true;
-            }
+            model->rotateJoint((*it)->m_joint,
+                newAngle,
+                (*it)->m_rotationAxis);
         }
     }
 }
