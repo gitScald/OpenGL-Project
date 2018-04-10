@@ -75,12 +75,15 @@ void Renderer::moveModel(GLuint model,
         m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     }
+    std::cout << "after moving, position z = " << m_modelPositions[model].z << std::endl;
 
     // clamp position between min and max values (the grid)
     clampModelPosition(model);
 
     // pass position value to model
     m_models.at(model)->setPosition(m_modelPositions[model]);
+
+    std::cout << "new model position z = " << m_models.at(model)->getPosition().z << std::endl;
 }
 
 void Renderer::resetModel(GLuint model) {
@@ -1277,7 +1280,21 @@ glm::vec3 Renderer::getWorldAxis(const glm::vec3& axis) const {
 
 void Renderer::clampModelPosition(GLuint model) {
     // clamp model position
-    if (m_modelPositions[model].x > POSITION_MAX)
+    glm::vec3 actualPosition = m_modelPositions[model]
+        * m_models.at(model)->getScale();
+    std::cout << "actual position z = " << actualPosition.z << std::endl;
+
+    if (actualPosition.x > POSITION_MAX)
+        actualPosition.x = POSITION_MAX;
+    else if (actualPosition.z > POSITION_MAX)
+        actualPosition.z = POSITION_MAX;
+
+    if (actualPosition.x < POSITION_MIN)
+        actualPosition.x = POSITION_MIN;
+    else if (actualPosition.z < POSITION_MIN)
+        actualPosition.z = POSITION_MIN;
+
+    /*if (m_modelPositions[model].x > POSITION_MAX)
         m_modelPositions[model].x = POSITION_MAX;
     else if (m_modelPositions[model].z > POSITION_MAX)
         m_modelPositions[model].z = POSITION_MAX;
@@ -1285,7 +1302,7 @@ void Renderer::clampModelPosition(GLuint model) {
     if (m_modelPositions[model].x < POSITION_MIN)
         m_modelPositions[model].x = POSITION_MIN;
     else if (m_modelPositions[model].z < POSITION_MIN)
-        m_modelPositions[model].z = POSITION_MIN;
+        m_modelPositions[model].z = POSITION_MIN;*/
 }
 
 void Renderer::clampModelScale(GLuint model) {
