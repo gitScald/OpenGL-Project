@@ -1,5 +1,37 @@
 #include "shadow_map.h"
 
+// initial shadow parameters
+GLfloat ShadowMap::s_biasMax = SHADOW_BIAS_MAX;
+GLfloat ShadowMap::s_biasMin = SHADOW_BIAS_MIN;
+GLfloat ShadowMap::s_gridFactor = SHADOW_GRID_FACTOR;
+GLfloat ShadowMap::s_gridOffset = SHADOW_GRID_OFFSET;
+GLuint ShadowMap::s_gridSamples = SHADOW_GRID_SAMPLES;
+
+GLfloat ShadowMap::getBiasMax() {
+    // get max shadow map bias
+    return s_biasMax;
+}
+
+GLfloat ShadowMap::getBiasMin() {
+    // get min shadow map bias
+    return s_biasMin;
+}
+
+GLfloat ShadowMap::getGridFactor() {
+    // get grid sampling factor
+    return s_gridFactor;
+}
+
+GLfloat ShadowMap::getGridOffset() {
+    // get grid sampling offset
+    return s_gridOffset;
+}
+
+GLuint ShadowMap::getGridSamples() {
+    // get grid sample count
+    return s_gridSamples;
+}
+
 GLuint ShadowMap::getDepthTextureID() const {
     // return depth texture id
     return m_depthTextureID;
@@ -8,6 +40,76 @@ GLuint ShadowMap::getDepthTextureID() const {
 GLuint ShadowMap::getFBOID() const {
     // return FBO id
     return m_FBO;
+}
+
+void ShadowMap::adjustBiasMax(Shadows::Tweak mod) {
+    // adjust max shadow map bias
+    switch (mod) {
+    case Shadows::INCREASE:
+        s_biasMax += SHADOW_INCREMENT_BIAS;
+        break;
+    case Shadows::DECREASE:
+        s_biasMax -= SHADOW_INCREMENT_BIAS;
+        break;
+    }
+    clampBiasMax();
+    std::cout << "Shadow map bias max: " << s_biasMax << std::endl;
+}
+
+void ShadowMap::adjustBiasMin(Shadows::Tweak mod) {
+    // adjust min shadow map bias
+    switch (mod) {
+    case Shadows::INCREASE:
+        s_biasMin += SHADOW_INCREMENT_BIAS;
+        break;
+    case Shadows::DECREASE:
+        s_biasMin -= SHADOW_INCREMENT_BIAS;
+        break;
+    }
+    clampBiasMin();
+    std::cout << "Shadow map bias min: " << s_biasMin << std::endl;
+}
+
+void ShadowMap::adjustGridFactor(Shadows::Tweak mod) {
+    // adjust shadow map sampling grid factor
+    switch (mod) {
+    case Shadows::INCREASE:
+        s_gridFactor += SHADOW_INCREMENT_GRID_FACTOR;
+        break;
+    case Shadows::DECREASE:
+        s_gridFactor -= SHADOW_INCREMENT_GRID_FACTOR;
+        break;
+    }
+    clampGridFactor();
+    std::cout << "Shadow map sampling grid factor: " << s_gridFactor << std::endl;
+}
+
+void ShadowMap::adjustGridOffset(Shadows::Tweak mod) {
+    // adjust shadow map sampling grid offset
+    switch (mod) {
+    case Shadows::INCREASE:
+        s_gridOffset += SHADOW_INCREMENT_GRID_OFFSET;
+        break;
+    case Shadows::DECREASE:
+        s_gridOffset -= SHADOW_INCREMENT_GRID_OFFSET;
+        break;
+    }
+    clampGridOffset();
+    std::cout << "Shadow map sampling grid offset: " << s_gridOffset << std::endl;
+}
+
+void ShadowMap::adjustGridSamples(Shadows::Tweak mod) {
+    // adjust shadow map sampling grid samples
+    switch (mod) {
+    case Shadows::INCREASE:
+        s_gridSamples += SHADOW_INCREMENT_GRID_SAMPLES;
+        break;
+    case Shadows::DECREASE:
+        s_gridSamples -= SHADOW_INCREMENT_GRID_SAMPLES;
+        break;
+    }
+    clampGridSamples();
+    std::cout << "Shadow map grid samples: " << s_gridSamples << std::endl;
 }
 
 void ShadowMap::free() const {
@@ -155,4 +257,44 @@ void ShadowMap::initializeDebugQuad() {
         4 * sizeof(GLfloat),
         (void*)(2 * sizeof(GLfloat)));
     glEnableVertexAttribArray(textureLocation);
+}
+
+void ShadowMap::clampBiasMax() {
+    // clamp grid sample count
+    if (s_biasMax >= 5.0f)
+        s_biasMax = 5.0f;
+    if (s_biasMax < 0.0f)
+        s_biasMax = 0.0f;
+}
+
+void ShadowMap::clampBiasMin() {
+    // clamp grid sample count
+    if (s_biasMin >= s_biasMax)
+        s_biasMin = s_biasMax;
+    if (s_biasMin < 0.0f)
+        s_biasMin = 0.0f;
+}
+
+void ShadowMap::clampGridFactor() {
+    // clamp grid sample count
+    if (s_gridFactor >= 200.0f)
+        s_gridFactor = 200.0f;
+    if (s_gridFactor < 1.0f)
+        s_gridFactor = 1.0f;
+}
+
+void ShadowMap::clampGridOffset() {
+    // clamp grid sample count
+    if (s_gridOffset >= 5.0f)
+        s_gridOffset = 5.0f;
+    if (s_gridOffset < 0.0f)
+        s_gridOffset = 0.0f;
+}
+
+void ShadowMap::clampGridSamples() {
+    // clamp grid sample count
+    if (s_gridSamples >= 256)
+        s_gridSamples = 256;
+    if (s_gridSamples < 0)
+        s_gridSamples = 0;
 }

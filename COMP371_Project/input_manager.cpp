@@ -100,7 +100,7 @@ void InputManager::processKeyboard(GLFWwindow* window,
             || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::UP,
             TRANSFORMATION_INCREMENT_ROTATION);
-        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateLightPositionsAndColors();
         Renderer::get().updateViewMatrix();
     }
     if (key == GLFW_KEY_DOWN
@@ -108,7 +108,7 @@ void InputManager::processKeyboard(GLFWwindow* window,
             || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::DOWN,
             TRANSFORMATION_INCREMENT_ROTATION);
-        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateLightPositionsAndColors();
         Renderer::get().updateViewMatrix();
     }
     if (key == GLFW_KEY_LEFT
@@ -116,7 +116,7 @@ void InputManager::processKeyboard(GLFWwindow* window,
             || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::LEFT,
             TRANSFORMATION_INCREMENT_ROTATION);
-        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateLightPositionsAndColors();
         Renderer::get().updateViewMatrix();
     }
     if (key == GLFW_KEY_RIGHT
@@ -124,7 +124,7 @@ void InputManager::processKeyboard(GLFWwindow* window,
             || action == GLFW_REPEAT)) {
         Camera::get().rotate(Eye::Displacement::RIGHT,
             TRANSFORMATION_INCREMENT_ROTATION);
-        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateLightPositionsAndColors();
         Renderer::get().updateViewMatrix();
     }
 
@@ -132,7 +132,7 @@ void InputManager::processKeyboard(GLFWwindow* window,
     if (key == GLFW_KEY_HOME
         && action == GLFW_PRESS) {
         Camera::get().reset();
-        Renderer::get().updateLightPositionAndColor();
+        Renderer::get().updateLightPositionsAndColors();
         Renderer::get().updateViewMatrix();
         Renderer::get().updateProjectionMatrix();
     }
@@ -382,6 +382,53 @@ void InputManager::processKeyboard(GLFWwindow* window,
     if (key == GLFW_KEY_F
         && action == GLFW_PRESS)
         Renderer::get().toggleDayNightCycle();
+
+    // toggle fog
+    if (key == GLFW_KEY_Y
+        && action == GLFW_PRESS)
+        Renderer::get().toggleFog();
+
+    // shadow calculations parameters
+    if (key == GLFW_KEY_LEFT_BRACKET
+        && action == GLFW_PRESS) {
+        if (mods == GLFW_MOD_SHIFT)
+            ShadowMap::adjustBiasMax(Shadows::DECREASE);
+        else
+            ShadowMap::adjustBiasMax(Shadows::INCREASE);
+        Renderer::get().updateShadowProperties();
+    }
+    if (key == GLFW_KEY_RIGHT_BRACKET
+        && action == GLFW_PRESS) {
+        if (mods == GLFW_MOD_SHIFT)
+            ShadowMap::adjustBiasMin(Shadows::DECREASE);
+        else
+            ShadowMap::adjustBiasMin(Shadows::INCREASE);
+        Renderer::get().updateShadowProperties();
+    }
+    if (key == GLFW_KEY_SEMICOLON
+        && action == GLFW_PRESS) {
+        if (mods == GLFW_MOD_SHIFT)
+            ShadowMap::adjustGridFactor(Shadows::DECREASE);
+        else
+            ShadowMap::adjustGridFactor(Shadows::INCREASE);
+        Renderer::get().updateShadowProperties();
+    }
+    if (key == GLFW_KEY_APOSTROPHE
+        && action == GLFW_PRESS) {
+        if (mods == GLFW_MOD_SHIFT)
+            ShadowMap::adjustGridOffset(Shadows::DECREASE);
+        else
+            ShadowMap::adjustGridOffset(Shadows::INCREASE);
+        Renderer::get().updateShadowProperties();
+    }
+    if (key == GLFW_KEY_EQUAL
+        && action == GLFW_PRESS) {
+        if (mods == GLFW_MOD_SHIFT)
+            ShadowMap::adjustGridSamples(Shadows::DECREASE);
+        else
+            ShadowMap::adjustGridSamples(Shadows::INCREASE);
+        Renderer::get().updateShadowProperties();
+    }
 }
 
 void InputManager::processScroll(GLFWwindow* window,

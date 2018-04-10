@@ -27,7 +27,6 @@ namespace Rendering {
     };
 }
 
-
 // model transformations
 namespace Transform {
     // scaling
@@ -44,6 +43,15 @@ namespace Transform {
         DOWN,
         LEFT,
         RIGHT
+    };
+}
+
+// shadow calculations
+namespace Shadows {
+    // bias
+    enum Tweak {
+        INCREASE,
+        DECREASE
     };
 }
 

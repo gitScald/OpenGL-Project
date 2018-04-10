@@ -2,15 +2,15 @@
 
 out vec4 o_fragColor;
 
+in vec4 o_fragViewPosition;
 in vec3 o_fragPosition;
 in vec3 o_fragNormal;
 in vec2 o_textureCoordinate;
 
-struct Material {
-    sampler2D diffuse;
-    sampler2D specular;
-
-    float shininess;
+struct Fog {
+    vec4 color;
+    
+    float density;
 };
 
 struct Light {
@@ -26,6 +26,21 @@ struct Light {
     float kq;
 };
 
+struct Material {
+    sampler2D diffuse;
+    sampler2D specular;
+
+    float shininess;
+};
+
+struct RimLighting {
+    vec4 color;
+
+    float min;
+    float max;
+};
+
+uniform bool u_fogEnabled;
 uniform bool u_shadowsEnabled;
 uniform bool u_texturesEnabled;
 uniform int u_gridSamples;
@@ -36,8 +51,10 @@ uniform float u_biasMax;
 uniform vec3 u_cameraPosition;
 uniform vec4 u_color;
 uniform samplerCube u_depthTexture;
+uniform Fog u_fog;
 uniform Light u_light;
 uniform Material u_material;
+uniform RimLighting u_rim;
 
 vec3 g_gridDisk[20] = vec3[] (
     vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
@@ -48,6 +65,7 @@ vec3 g_gridDisk[20] = vec3[] (
 );
 
 float texturesEnabled() {
+    // check if textures are enabled or not
     return float(u_texturesEnabled);
 }
 
@@ -110,6 +128,21 @@ vec3 lightingSpecular() {
     return specular;
 }
 
+vec3 lightingRim() {
+    // rim lighting
+    vec3 fragNormal = normalize(o_fragNormal);
+    vec3 cameraDirection = normalize(u_cameraPosition - o_fragPosition);
+
+    float rimming = 1 - max(dot(cameraDirection, fragNormal), 0.0f);
+    rimming = smoothstep(u_rim.min, u_rim.max, rimming);
+    vec3 rim = /*u_light.color.rgb
+        */ u_rim.color.rgb
+        * rimming
+        * objectColorDiffuse();
+
+    return rim;
+}
+
 float attenuationFactor() {
     // light attenuation over distance
     float distance = length(u_light.position - o_fragPosition);
@@ -119,10 +152,12 @@ float attenuationFactor() {
 }
 
 float inShadow(float minimumDepth, float bias, float rayLength) {
+    // determine whether fragment is in shadow or not
     return max(sign(rayLength - (minimumDepth + bias)), 0.0f);
 }
 
 float shadowsEnabled() {
+    // check if shadows are enabled or not
     return float(u_shadowsEnabled);
 }
 
@@ -156,17 +191,35 @@ float shadowFactor() {
     // average samples
     shadow /= u_gridSamples;
 
-    // check whether shadows are enabled
+    // check whether shadows are enabled or not
     shadow *= shadowsEnabled();
 
     return shadow;
 }
 
+float fogEnabled() {
+    // check whether fog is enabled or not
+    return float(u_fogEnabled);
+}
+
+float fogFactor() {
+    // fog calculations
+    float distanceToCamera = length(o_fragViewPosition);
+    float fog = 1.0f /
+        exp((distanceToCamera * u_fog.density)
+            * (distanceToCamera * u_fog.density));
+    fog = clamp(fog, 0.0f, 1.0f);
+
+    return fog;
+}
+
 void main() {
     // calculate combined lighting
     vec3 fragColor = (lightingAmbient()
-        + (1.0f - shadowFactor()) * (lightingDiffuse() + lightingSpecular()));
+        + (1.0f - shadowFactor()) * (lightingDiffuse() + lightingSpecular() + lightingRim()));
     fragColor *= attenuationFactor();
+    fragColor = fogEnabled() * mix(u_fog.color.rgb, fragColor, fogFactor())
+        + (1.0f - fogEnabled()) * fragColor;
     
     o_fragColor = vec4(fragColor, 1.0f);
 }

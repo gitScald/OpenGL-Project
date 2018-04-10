@@ -66,12 +66,14 @@ public:
     void toggleAnimations();
     void toggleDayNightCycle();
     void toggleDebugging();
+    void toggleFog();
     void toggleFrame();
     void toggleLights();
     void togglePathing();
     void toggleShadows();
     void toggleTextures();
-    void updateLightPositionAndColor() const;
+    void updateFogProperties() const;
+    void updateLightPositionsAndColors();
     void updateLightProperties() const;
     void updateProjectionMatrix() const;
     void updateShadowProperties() const;
@@ -99,7 +101,7 @@ private:
     void initializeAnimation();
     void initializeFrame();
     void initializeGround();
-    void initializeLight();
+    void initializeLights();
     void initializeMaterial();
     void initializeModel();
     void initializePaths();
@@ -111,7 +113,7 @@ private:
     // rendered elements
     void renderFrame();
     void renderGround(Shader* shader);
-    void renderLight(GLfloat deltaTime);
+    void renderLights(GLfloat deltaTime);
     void renderModels(Shader* shader, GLfloat deltaTime);
 
     // rendering utilities
@@ -132,6 +134,10 @@ private:
     static glm::vec4 lerpColor(const glm::vec4& start,
         const glm::vec4& end,
         GLfloat step);
+    bool isDawnOrDusk() const;
+    bool isDay() const;
+    bool isNight() const;
+    void setLightAtZero();
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };
@@ -146,6 +152,7 @@ private:
     glm::mat4 m_modelMatrix;
     glm::vec3 m_modelPositions[TROOP_COUNT];
     glm::vec3 m_modelScales[TROOP_COUNT];
+    glm::vec3 m_moonPosition;
     Shader* m_shaderEntity;
     Shader* m_shaderFrame;
     Shader* m_shaderShadow;
@@ -163,6 +170,7 @@ private:
     bool m_animationsEnabled{ false };
     bool m_dayNightCycleEnabled{ false };
     bool m_debuggingEnabled{ false };
+    bool m_fogEnabled{ true };
     bool m_frameEnabled{ true };
     bool m_lightsEnabled{ true };
     bool m_pathingEnabled{ false };

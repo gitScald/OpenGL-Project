@@ -2,19 +2,46 @@
 
 out vec4 o_fragColor;
 
+in vec4 o_fragViewPosition;
 in vec3 o_textureCoordinate;
+
+struct Fog {
+    vec4 color;
+    
+    float density;
+};
 
 struct Light {
     vec4 color;
 };
 
+uniform bool u_fogEnabled;
 uniform samplerCube u_skybox;
+uniform Fog u_fog;
 uniform Light u_light;
+
+float fogEnabled() {
+    // check whether fog is enabled or not
+    return float(u_fogEnabled);
+}
+
+float fogFactor() {
+    // fog calculations
+    float distanceToCamera = length(o_fragViewPosition);
+    float fog = 1.0f /
+        exp((distanceToCamera * u_fog.density)
+            * (distanceToCamera * u_fog.density));
+    fog = clamp(fog, 0.0f, 1.0f);
+
+    return fog;
+}
 
 void main() {
     // sample cubemap texture
     vec4 fragColor = u_light.color
         * texture(u_skybox, o_textureCoordinate);
+    fragColor = fogEnabled() * mix(u_fog.color, fragColor, fogFactor())
+        + (1.0f - fogEnabled()) * fragColor;
     
     o_fragColor = fragColor;
 }

@@ -2,6 +2,7 @@
 
 in vec3 i_position;
 
+out vec4 o_fragViewPosition;
 out vec3 o_textureCoordinate;
 
 uniform mat4 u_modelMat;
@@ -9,6 +10,9 @@ uniform mat4 u_viewMat;
 uniform mat4 u_projectionMat;
 
 void main() {
+    // fragment position in view space
+    o_fragViewPosition = u_viewMat * u_modelMat * vec4(i_position, 1.0f);
+
     // fragment texture coordinates
     o_textureCoordinate = i_position;
 

@@ -193,6 +193,16 @@ void Renderer::toggleDebugging() {
         << (m_debuggingEnabled ? "ENABLED" : "DISABLED") << std::endl;
 }
 
+void Renderer::toggleFog() {
+    // set whether fog should be enabled or not
+    m_fogEnabled = !m_fogEnabled;
+    std::cout << "Fog: "
+        << (m_fogEnabled ? "ENABLED" : "DISABLED") << std::endl;
+
+    // update fog properties
+    updateFogProperties();
+}
+
 void Renderer::toggleFrame() {
     // set whether axes and grid should be rendered or not
     m_frameEnabled = !m_frameEnabled;
@@ -240,7 +250,21 @@ void Renderer::toggleTextures() {
     updateTextureProperties();
 }
 
-void Renderer::updateLightPositionAndColor() const {
+void Renderer::updateFogProperties() const {
+    // update fog propeties
+    Shader::useProgram(m_shaderEntity->getProgramID());
+    m_shaderEntity->setUniformVec4(UNIFORM_FOG_COLOR,
+        COLOR_FOG);
+    m_shaderEntity->setUniformFloat(UNIFORM_FOG_DENSITY,
+        FOG_DENSITY);
+    m_shaderEntity->setUniformBool(UNIFORM_FOG_ENABLED,
+        m_fogEnabled);
+
+    // do so for the skybox as well
+    m_skybox->updateFogProperties(m_fogEnabled);
+}
+
+void Renderer::updateLightPositionsAndColors() {
     // update light position and color in shaders
     Shader::useProgram(m_shaderEntity->getProgramID());
     m_shaderEntity->setUniformVec3(UNIFORM_LIGHT_POSITION,
@@ -249,7 +273,13 @@ void Renderer::updateLightPositionAndColor() const {
     m_shaderEntity->setUniformVec4(UNIFORM_LIGHT_COLOR,
         m_lights.at(0)->getColor());
 
+    // do so for the skybox as well
     m_skybox->updateLightColor(m_lights.at(0)->getColor());
+
+    // update moon position relative to the sun
+    m_moonPosition = m_lights.at(0)->getPosition();
+    m_moonPosition.y *= -1;
+    m_moonPosition.z *= -1;
 }
 
 void Renderer::updateLightProperties() const {
@@ -283,6 +313,12 @@ void Renderer::updateLightProperties() const {
         m_shaderEntity->setUniformFloat(UNIFORM_LIGHT_KQ,
             0.0f);
     }
+    m_shaderEntity->setUniformFloat(UNIFORM_RIM_LIGHT_MAX,
+        LIGHT_RIM_MAX);
+    m_shaderEntity->setUniformFloat(UNIFORM_RIM_LIGHT_MIN,
+        LIGHT_RIM_MIN);
+    m_shaderEntity->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
+        COLOR_LIGHT_RIM);
 }
 
 void Renderer::updateProjectionMatrix() const {
@@ -304,6 +340,18 @@ void Renderer::updateShadowProperties() const {
     Shader::useProgram(m_shaderEntity->getProgramID());
     m_shaderEntity->setUniformBool(UNIFORM_SHADOWS_ENABLED,
         m_shadowsEnabled);
+    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_GRID_SAMPLES,
+        ShadowMap::getGridSamples());
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_OFFSET,
+        ShadowMap::getGridOffset());
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_FACTOR,
+        ShadowMap::getGridFactor());
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MIN,
+        ShadowMap::getBiasMin());
+    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MAX,
+        ShadowMap::getBiasMax());
+    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
+        TEXTURE_INDEX_DEPTH_MAP);
 }
 
 void Renderer::updateTextureProperties() const {
@@ -357,32 +405,20 @@ void Renderer::initialize() {
         initializeModel();
     }
     initializePaths();
-    initializeLight();
+    initializeLights();
 
     // set initial view and projection matrices
     updateViewMatrix();
     updateProjectionMatrix();
 
     // set initial light properties
-    updateLightPositionAndColor();
+    updateLightPositionsAndColors();
     updateLightProperties();
 
-    // set initial boolean states for shadows and textures
+    // set initial states for fog, shadows and textures
+    updateFogProperties();
     updateShadowProperties();
     updateTextureProperties();
-
-    // set shadow map sampling and bias
-    Shader::useProgram(m_shaderEntity->getProgramID());
-    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_GRID_SAMPLES,
-        SHADOW_GRID_SAMPLES);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_OFFSET,
-        SHADOW_GRID_OFFSET);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_GRID_FACTOR,
-        SHADOW_GRID_FACTOR);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MIN,
-        SHADOW_BIAS_MIN);
-    m_shaderEntity->setUniformFloat(UNIFORM_SHADOW_BIAS_MAX,
-        SHADOW_BIAS_MAX);
 }
 
 void Renderer::initializeAnimation() {
@@ -1006,7 +1042,7 @@ void Renderer::initializeGround() {
     m_entities.at(0)->setColor(COLOR_GROUND);
 }
 
-void Renderer::initializeLight() {
+void Renderer::initializeLights() {
     // vertex data
     GLfloat vertices[] = {
         // back face
@@ -1088,7 +1124,7 @@ void Renderer::initializeLight() {
     glEnableVertexAttribArray(positionLocation);
 
     // create light source and add it to lights vector
-    m_lights.push_back(new LightSource(LIGHT_POSITION, COLOR_LIGHT_DAY));
+    m_lights.push_back(new LightSource(LIGHT_POSITION_NOON, COLOR_LIGHT_DAY));
 
     // set shader uniforms
     Shader::useProgram(m_shaderEntity->getProgramID());
@@ -1512,7 +1548,7 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
         Camera::get().getViewportHeight());
 
     // clear buffer
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(COLOR_CLEAR.r, COLOR_CLEAR.g, COLOR_CLEAR.b, COLOR_CLEAR.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // render skybox
@@ -1522,12 +1558,10 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     // shader uniforms: lighting
     Shader::useProgram(m_shaderEntity->getProgramID());
 
-    // shader uniforms: depth texture and ground material
+    // use ground material and depth texture
     m_materials.at(0)->use(m_shaderEntity);
     Shader::activateTextureUnit(TEXTURE_UNIT_DEPTH_MAP);
     Shader::bindCubemapTexture(m_shadowMap->getDepthTextureID());
-    m_shaderEntity->setUniformUInt(UNIFORM_SHADOW_DEPTH_TEXTURE,
-        TEXTURE_INDEX_DEPTH_MAP);
 
     // render ground
     renderGround(m_shaderEntity);
@@ -1539,7 +1573,7 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderModels(m_shaderEntity, deltaTime);
 
     // render light
-    renderLight(deltaTime);
+    renderLights(deltaTime);
 
     // render axes and grid
     if (m_frameEnabled)
@@ -1601,7 +1635,7 @@ void Renderer::renderGround(Shader* shader) {
     m_entities.at(0)->render(m_primitive);
 }
 
-void Renderer::renderLight(GLfloat deltaTime) {
+void Renderer::renderLights(GLfloat deltaTime) {
     // handle day-night cycle
     if (m_dayNightCycleEnabled) {
         // increment time of day
@@ -1609,24 +1643,21 @@ void Renderer::renderLight(GLfloat deltaTime) {
 
         // update light position
         glm::vec3 currentPosition = m_lights.at(0)->getPosition();
-        GLfloat y = LIGHT_POSITION.y * sin(m_currentTime);
-        GLfloat z = LIGHT_POSITION.y * cos(m_currentTime);
+        GLfloat y = LIGHT_POSITION_NOON.y * sin(m_currentTime);
+        GLfloat z = LIGHT_POSITION_NOON.y * cos(m_currentTime);
         glm::vec3 newPosition{ currentPosition.x, y, z };
         m_lights.at(0)->setPosition(newPosition);
-        std::cout << "current time = " << m_currentTime << std::endl;
         
         // update light color
         glm::vec4 currentColor = m_lights.at(0)->getColor();
         glm::vec4 targetColor;
 
         // night time
-        if (m_currentTime >= glm::pi<GLfloat>()
-            && m_currentTime < 2.0f * glm::pi<GLfloat>())
+        if (isNight())
             targetColor = COLOR_LIGHT_NIGHT;
 
         // day time
-        else if (m_currentTime >= glm::pi<GLfloat>() / 6.0f
-            && m_currentTime < glm::pi<GLfloat>() * 7.0f / 8.0f)
+        else if (isDay())
             targetColor = COLOR_LIGHT_DAY;
 
         // dawn or dusk time
@@ -1638,25 +1669,41 @@ void Renderer::renderLight(GLfloat deltaTime) {
         m_lights.at(0)->setColor(newColor);
 
         // update shader properties
-        updateLightPositionAndColor();
+        updateLightPositionsAndColors();
 
-        // reset timer after a full cycle
-        if (m_currentTime >= 2.0 * glm::pi<GLfloat>())
+        // reset timer and light source position after a full cycle
+        if (m_currentTime >= 2.0 * glm::pi<GLfloat>()) {
             m_currentTime = 0.0f;
+            //setLightAtZero();
+        }
     }
 
-    // set shader uniforms
+    // set shader uniforms for sun
     Shader::useProgram(m_shaderFrame->getProgramID());
     glm::mat4 modelMatrix = getWorldOrientation()
-        * glm::translate(glm::mat4(), m_lights.at(0)->getPosition());
+        * glm::translate(glm::mat4(), m_lights.at(0)->getPosition())
+        * glm::scale(glm::mat4(), LIGHT_SCALE);
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
     m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
         m_lightsEnabled
-        ? COLOR_LIGHT_OBJECT_ON
-        : COLOR_LIGHT_OBJECT_OFF);
+        ? COLOR_LIGHT_SUN_ON
+        : COLOR_LIGHT_SUN_OFF);
 
-    // render light
+    // render sun
     Shader::bindVAO(m_lightVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // set shader uniforms for moon
+    modelMatrix = getWorldOrientation()
+        * glm::translate(glm::mat4(), m_moonPosition)
+        * glm::scale(glm::mat4(), LIGHT_SCALE);
+    m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
+    m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
+        m_lightsEnabled
+        ? COLOR_LIGHT_MOON_ON
+        : COLOR_LIGHT_MOON_OFF);
+
+    // render moon
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
@@ -1832,4 +1879,27 @@ glm::vec4 Renderer::lerpColor(const glm::vec4& start,
     GLfloat step) {
     // linearly interpolate between two colors
     return start + step * (end - start);
+}
+
+bool Renderer::isDawnOrDusk() const {
+    // dawn or dusk
+    return !(isDay() || isNight());
+}
+
+bool Renderer::isDay() const {
+    // day time
+    return (m_currentTime >= glm::pi<GLfloat>() / 6.0f
+        && m_currentTime < glm::pi<GLfloat>() * 7.0f / 8.0f);
+}
+
+bool Renderer::isNight() const {
+    // night time
+    return (m_currentTime >= glm::pi<GLfloat>()
+        && m_currentTime < 2.0f * glm::pi<GLfloat>());
+}
+
+void Renderer::setLightAtZero() {
+    // set light at 00:00 position for the moon to cast shadows
+    m_lights.at(0)->setPosition(LIGHT_POSITION_MIDNIGHT);
+    updateLightPositionsAndColors();
 }

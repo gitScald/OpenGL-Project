@@ -37,6 +37,17 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
     glEnable(GL_DEPTH_TEST);
 }
 
+void Skybox::updateFogProperties(bool fogEnabled) const {
+    // update fog properties
+    Shader::useProgram(m_shader.getProgramID());
+    m_shader.setUniformVec4(UNIFORM_FOG_COLOR,
+        COLOR_FOG);
+    m_shader.setUniformFloat(UNIFORM_FOG_DENSITY,
+        FOG_DENSITY * 25.0f);
+    m_shader.setUniformBool(UNIFORM_FOG_ENABLED,
+        fogEnabled);
+}
+
 void Skybox::updateLightColor(const glm::vec4& value) const {
     // update light color
     Shader::useProgram(m_shader.getProgramID());

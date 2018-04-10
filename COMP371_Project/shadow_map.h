@@ -3,6 +3,7 @@
 
 // project headers
 #include "constants.h"
+#include "enums.h"
 #include "shader.h"
 
 // GLEW
@@ -16,10 +17,20 @@ public:
     }
 
     // getters
+    static GLfloat getBiasMax();
+    static GLfloat getBiasMin();
+    static GLfloat getGridFactor();
+    static GLfloat getGridOffset();
+    static GLuint getGridSamples();
     GLuint getDepthTextureID() const;
     GLuint getFBOID() const;
 
-    // utilies
+    // utilities
+    static void adjustBiasMax(Shadows::Tweak mod);
+    static void adjustBiasMin(Shadows::Tweak mod);
+    static void adjustGridFactor(Shadows::Tweak mod);
+    static void adjustGridOffset(Shadows::Tweak mod);
+    static void adjustGridSamples(Shadows::Tweak mod);
     void free() const;
     void render() const;
 
@@ -27,6 +38,18 @@ private:
     void initialize();
     void initializeDebugQuad();
 
+    // utilities
+    static void clampBiasMax();
+    static void clampBiasMin();
+    static void clampGridFactor();
+    static void clampGridOffset();
+    static void clampGridSamples();
+
+    static GLfloat s_biasMax;
+    static GLfloat s_biasMin;
+    static GLfloat s_gridFactor;
+    static GLfloat s_gridOffset;
+    static GLuint s_gridSamples;
     Shader m_shaderDebug{ PATH_VERTEX_SHADOW_QUAD,
         PATH_FRAGMENT_SHADOW_QUAD };
     GLuint m_VAO;

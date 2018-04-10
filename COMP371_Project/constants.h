@@ -79,6 +79,9 @@ const std::string UNIFORM_LIGHT_KC{ "u_light.kc" };
 const std::string UNIFORM_LIGHT_KL{ "u_light.kl" };
 const std::string UNIFORM_LIGHT_KQ{ "u_light.kq" };
 const std::string UNIFORM_LIGHT_PLANES{ "u_light.planeNearFar" };
+const std::string UNIFORM_RIM_LIGHT_COLOR{ "u_rim.color" };
+const std::string UNIFORM_RIM_LIGHT_MAX{ "u_rim.max" };
+const std::string UNIFORM_RIM_LIGHT_MIN{ "u_rim.min" };
 
 // shader uniforms: shadows
 const std::string UNIFORM_SHADOWS_ENABLED{ "u_shadowsEnabled" };
@@ -93,6 +96,11 @@ const std::string UNIFORM_SHADOW_GRID_FACTOR{ "u_gridFactor" };
 // shader uniforms: textures
 const std::string UNIFORM_TEXTURES_ENABLED{ "u_texturesEnabled" };
 const std::string UNIFORM_SKYBOX_TEXTURE{ "u_skybox" };
+
+// shadow uniforms: fog
+const std::string UNIFORM_FOG_COLOR{ "u_fog.color" };
+const std::string UNIFORM_FOG_DENSITY{ "u_fog.density" };
+const std::string UNIFORM_FOG_ENABLED{ "u_fogEnabled" };
 
 // shader file paths
 const std::string PATH_VERTEX_ENTITY{ "shaders/entity/vertex.shdr" };
@@ -193,22 +201,28 @@ const std::pair<GLfloat, glm::vec3> ROTATION_AXES[]{
     std::make_pair(-90.0f, AXIS_Y) };
 
 // light-related constants
-const glm::vec3 LIGHT_POSITION{ glm::vec3(0.0f, 65.0f, 0.0f) };
-const glm::vec3 LIGHT_SCALE{ glm::vec3(0.25f, 0.25f, 0.25f) };
+const glm::vec3 LIGHT_POSITION_NOON{ glm::vec3(0.0f, 65.0f, 0.0f) };
+const glm::vec3 LIGHT_POSITION_MIDNIGHT{ glm::vec3(0.0f, 0.0f, -LIGHT_POSITION_NOON.y) };
+const glm::vec3 LIGHT_SCALE{ glm::vec3(3.0f, 3.0f, 3.0f) };
 const glm::vec3 LIGHT_AMBIENT{ glm::vec3(0.2f, 0.2f, 0.2f) };
 const glm::vec3 LIGHT_DIFFUSE{ glm::vec3(0.7f, 0.7f, 0.7f) };
 const glm::vec3 LIGHT_SPECULAR{ glm::vec3(1.0f, 1.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_DAY{ glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.1f, 0.2f, 0.7f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_RIM{ COLOR_LIGHT_DAY };
 const glm::vec4 COLOR_LIGHT_TRANSITION{ glm::vec4(0.6f, 0.6f, 0.2f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_OBJECT_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_OBJECT_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
+const glm::vec4 COLOR_LIGHT_MOON_ON{ glm::vec4(0.8f, 0.8f, 0.8f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_MOON_OFF{ glm::vec4{ 0.2f, 0.2f, 0.2f, 1.0f } };
+const glm::vec4 COLOR_LIGHT_SUN_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_SUN_OFF{ glm::vec4{0.3f, 0.3f, 0.0f, 1.0f} };
 const GLfloat LIGHT_PLANE_NEAR{ 1.0f };
 const GLfloat LIGHT_PLANE_FAR{ 100.0f };
 const GLfloat LIGHT_KC{ 1.000000f };
 const GLfloat LIGHT_KL{ 0.001400f };
 const GLfloat LIGHT_KQ{ 0.000007f };
 const GLfloat LIGHT_SPEED{ 0.5f };
+const GLfloat LIGHT_RIM_MAX{ 1.0f };
+const GLfloat LIGHT_RIM_MIN{ 0.6f };
 
 // texture-related constants
 const GLuint TEXTURE_INDEX_DIFFUSE{ 0 };
@@ -228,10 +242,14 @@ const GLfloat SHADOW_ASPECT_RATIO{
     static_cast<GLfloat>(SHADOW_DEPTH_TEXTURE_WIDTH)
     / SHADOW_DEPTH_TEXTURE_HEIGHT };
 const GLfloat SHADOW_PROJECTION_FOV{ 90.0f };
-const GLfloat SHADOW_BIAS_MIN{ 0.015f };
 const GLfloat SHADOW_BIAS_MAX{ 0.050f };
-const GLfloat SHADOW_GRID_OFFSET{ 1.0f };
+const GLfloat SHADOW_BIAS_MIN{ 0.015f };
 const GLfloat SHADOW_GRID_FACTOR{ 80.0f };
+const GLfloat SHADOW_GRID_OFFSET{ 1.0f };
+const GLfloat SHADOW_INCREMENT_BIAS{ 0.005f };
+const GLfloat SHADOW_INCREMENT_GRID_FACTOR{ 5.0f };
+const GLfloat SHADOW_INCREMENT_GRID_OFFSET{ 0.1f };
+const GLuint SHADOW_INCREMENT_GRID_SAMPLES{ 2 };
 const GLfloat SHADOW_BORDER_COLOR[]{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 // animation-related constants
@@ -256,5 +274,10 @@ const GLfloat PATHING_DISTANCE_MIN{ 1.0f };
 const GLfloat PATHING_DISTANCE_MAX{ 3.0f };
 const GLfloat PATHING_SPEED{ 1.0f };
 const GLuint PATH_COUNT{ 15 };
+
+// fog-related constants
+const glm::vec4 COLOR_CLEAR{ glm::vec4(0.7f, 0.7f, 0.4f, 1.0f) };
+const glm::vec4 COLOR_FOG{ glm::vec4(0.7f, 0.7f, 0.4f, 1.0f) };
+const GLfloat FOG_DENSITY{ 0.025f };
 
 #endif // !CONSTANTS_H

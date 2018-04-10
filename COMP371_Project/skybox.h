@@ -43,6 +43,7 @@ public:
     void free() const;
     void render(const glm::mat4& globalModelMatrix,
         const glm::vec3& cameraPosition) const;
+    void updateFogProperties(bool fogEnabled) const;
     void updateLightColor(const glm::vec4& value) const;
     void updateViewMatrix(const glm::mat4& viewMatrix) const;
     void updateProjectionMatrix(const glm::mat4& projectionMatrix) const;
