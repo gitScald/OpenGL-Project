@@ -71,61 +71,8 @@ void Skybox::updateProjectionMatrix(const glm::mat4& projectionMatrix) const {
 
 void Skybox::initialize(const std::string (&path_textures)[6]) {
     // vertex data
-    GLfloat vertices[] = {
-        // back face
-        // position
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        // front face
-        // position
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        // left face
-        // position
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-        // right face
-        // position
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        // bottom face
-        // position
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        // top face
-        // position
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
+    GLuint verticesSize;
+    GLfloat* vertices = VertexLoader::loadCubeVertices(&verticesSize);
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_VAO);
@@ -135,7 +82,7 @@ void Skybox::initialize(const std::string (&path_textures)[6]) {
     glGenBuffers(1, &m_VBO);
     Shader::bindVBO(m_VBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(vertices),
+        verticesSize,
         vertices,
         GL_STATIC_DRAW);
 

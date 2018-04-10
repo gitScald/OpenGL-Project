@@ -16,6 +16,7 @@
 #include "shadow_map.h"
 #include "skybox.h"
 #include "texture.h"
+#include "vertex_loader.h"
 
 // GLEW
 #include <gl/glew.h>

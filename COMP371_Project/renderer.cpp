@@ -541,11 +541,8 @@ void Renderer::initializeAnimation() {
 
 void Renderer::initializeFrame() {
     // axes vertex data
-    GLfloat verticesAxes[] = {
-        // position
-        0.0f, 0.0f, 0.0f,   // line origin
-        5.0f, 0.0f, 0.0f    // line end
-    };
+    GLuint verticesSize;
+    GLfloat* verticesAxes = VertexLoader::loadAxesVertices(&verticesSize);
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_axesVAO);
@@ -555,9 +552,10 @@ void Renderer::initializeFrame() {
     glGenBuffers(1, &m_axesVBO);
     Shader::bindVBO(m_axesVBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(verticesAxes),
+        verticesSize,
         verticesAxes,
         GL_STATIC_DRAW);
+    delete[] verticesAxes;
 
     // vertex attributes
     GLuint positionLocation = glGetAttribLocation(m_shaderFrame->getProgramID(),
@@ -571,415 +569,7 @@ void Renderer::initializeFrame() {
     glEnableVertexAttribArray(positionLocation);
 
     // grid vertex data
-    GLfloat verticesGrid[] = {
-        // horizontal lines
-        -50.0f, 0.0f, -50.0f,
-         50.0f, 0.0f, -50.0f,
-        -50.0f, 0.0f, -49.0f,
-         50.0f, 0.0f, -49.0f,
-        -50.0f, 0.0f, -48.0f,
-         50.0f, 0.0f, -48.0f,
-        -50.0f, 0.0f, -47.0f,
-         50.0f, 0.0f, -47.0f,
-        -50.0f, 0.0f, -46.0f,
-         50.0f, 0.0f, -46.0f,
-        -50.0f, 0.0f, -45.0f,
-         50.0f, 0.0f, -45.0f,
-        -50.0f, 0.0f, -44.0f,
-         50.0f, 0.0f, -44.0f,
-        -50.0f, 0.0f, -43.0f,
-         50.0f, 0.0f, -43.0f,
-        -50.0f, 0.0f, -42.0f,
-         50.0f, 0.0f, -42.0f,
-        -50.0f, 0.0f, -41.0f,
-         50.0f, 0.0f, -41.0f,
-        -50.0f, 0.0f, -40.0f,
-         50.0f, 0.0f, -40.0f,
-        -50.0f, 0.0f, -39.0f,
-         50.0f, 0.0f, -39.0f,
-        -50.0f, 0.0f, -38.0f,
-         50.0f, 0.0f, -38.0f,
-        -50.0f, 0.0f, -37.0f,
-         50.0f, 0.0f, -37.0f,
-        -50.0f, 0.0f, -36.0f,
-         50.0f, 0.0f, -36.0f,
-        -50.0f, 0.0f, -35.0f,
-         50.0f, 0.0f, -35.0f,
-        -50.0f, 0.0f, -34.0f,
-         50.0f, 0.0f, -34.0f,
-        -50.0f, 0.0f, -33.0f,
-         50.0f, 0.0f, -33.0f,
-        -50.0f, 0.0f, -32.0f,
-         50.0f, 0.0f, -32.0f,
-        -50.0f, 0.0f, -31.0f,
-         50.0f, 0.0f, -31.0f,
-        -50.0f, 0.0f, -30.0f,
-         50.0f, 0.0f, -30.0f,
-        -50.0f, 0.0f, -29.0f,
-         50.0f, 0.0f, -29.0f,
-        -50.0f, 0.0f, -28.0f,
-         50.0f, 0.0f, -28.0f,
-        -50.0f, 0.0f, -27.0f,
-         50.0f, 0.0f, -27.0f,
-        -50.0f, 0.0f, -26.0f,
-         50.0f, 0.0f, -26.0f,
-        -50.0f, 0.0f, -25.0f,
-         50.0f, 0.0f, -25.0f,
-        -50.0f, 0.0f, -24.0f,
-         50.0f, 0.0f, -24.0f,
-        -50.0f, 0.0f, -23.0f,
-         50.0f, 0.0f, -23.0f,
-        -50.0f, 0.0f, -22.0f,
-         50.0f, 0.0f, -22.0f,
-        -50.0f, 0.0f, -21.0f,
-         50.0f, 0.0f, -21.0f,
-        -50.0f, 0.0f, -20.0f,
-         50.0f, 0.0f, -20.0f,
-        -50.0f, 0.0f, -19.0f,
-         50.0f, 0.0f, -19.0f,
-        -50.0f, 0.0f, -18.0f,
-         50.0f, 0.0f, -18.0f,
-        -50.0f, 0.0f, -17.0f,
-         50.0f, 0.0f, -17.0f,
-        -50.0f, 0.0f, -16.0f,
-         50.0f, 0.0f, -16.0f,
-        -50.0f, 0.0f, -15.0f,
-         50.0f, 0.0f, -15.0f,
-        -50.0f, 0.0f, -14.0f,
-         50.0f, 0.0f, -14.0f,
-        -50.0f, 0.0f, -13.0f,
-         50.0f, 0.0f, -13.0f,
-        -50.0f, 0.0f, -12.0f,
-         50.0f, 0.0f, -12.0f,
-        -50.0f, 0.0f, -11.0f,
-         50.0f, 0.0f, -11.0f,
-        -50.0f, 0.0f, -10.0f,
-         50.0f, 0.0f, -10.0f,
-        -50.0f, 0.0f, -9.0f,
-         50.0f, 0.0f, -9.0f,
-        -50.0f, 0.0f, -8.0f,
-         50.0f, 0.0f, -8.0f,
-        -50.0f, 0.0f, -7.0f,
-         50.0f, 0.0f, -7.0f,
-        -50.0f, 0.0f, -6.0f,
-         50.0f, 0.0f, -6.0f,
-        -50.0f, 0.0f, -5.0f,
-         50.0f, 0.0f, -5.0f,
-        -50.0f, 0.0f, -4.0f,
-         50.0f, 0.0f, -4.0f,
-        -50.0f, 0.0f, -3.0f,
-         50.0f, 0.0f, -3.0f,
-        -50.0f, 0.0f, -2.0f,
-         50.0f, 0.0f, -2.0f,
-        -50.0f, 0.0f, -1.0f,
-         50.0f, 0.0f, -1.0f,
-        -50.0f, 0.0f,  0.0f,
-         50.0f, 0.0f,  0.0f,
-        -50.0f, 0.0f,  1.0f,
-         50.0f, 0.0f,  1.0f,
-        -50.0f, 0.0f,  2.0f,
-         50.0f, 0.0f,  2.0f,
-        -50.0f, 0.0f,  3.0f,
-         50.0f, 0.0f,  3.0f,
-        -50.0f, 0.0f,  4.0f,
-         50.0f, 0.0f,  4.0f,
-        -50.0f, 0.0f,  5.0f,
-         50.0f, 0.0f,  5.0f,
-        -50.0f, 0.0f,  6.0f,
-         50.0f, 0.0f,  6.0f,
-        -50.0f, 0.0f,  7.0f,
-         50.0f, 0.0f,  7.0f,
-        -50.0f, 0.0f,  8.0f,
-         50.0f, 0.0f,  8.0f,
-        -50.0f, 0.0f,  9.0f,
-         50.0f, 0.0f,  9.0f,
-        -50.0f, 0.0f, 10.0f,
-         50.0f, 0.0f, 10.0f,
-        -50.0f, 0.0f, 11.0f,
-         50.0f, 0.0f, 11.0f,
-        -50.0f, 0.0f, 12.0f,
-         50.0f, 0.0f, 12.0f,
-        -50.0f, 0.0f, 13.0f,
-         50.0f, 0.0f, 13.0f,
-        -50.0f, 0.0f, 14.0f,
-         50.0f, 0.0f, 14.0f,
-        -50.0f, 0.0f, 15.0f,
-         50.0f, 0.0f, 15.0f,
-        -50.0f, 0.0f, 16.0f,
-         50.0f, 0.0f, 16.0f,
-        -50.0f, 0.0f, 17.0f,
-         50.0f, 0.0f, 17.0f,
-        -50.0f, 0.0f, 18.0f,
-         50.0f, 0.0f, 18.0f,
-        -50.0f, 0.0f, 19.0f,
-         50.0f, 0.0f, 19.0f,
-        -50.0f, 0.0f, 20.0f,
-         50.0f, 0.0f, 20.0f,
-        -50.0f, 0.0f, 21.0f,
-         50.0f, 0.0f, 21.0f,
-        -50.0f, 0.0f, 22.0f,
-         50.0f, 0.0f, 22.0f,
-        -50.0f, 0.0f, 23.0f,
-         50.0f, 0.0f, 23.0f,
-        -50.0f, 0.0f, 24.0f,
-         50.0f, 0.0f, 24.0f,
-        -50.0f, 0.0f, 25.0f,
-         50.0f, 0.0f, 25.0f,
-        -50.0f, 0.0f, 26.0f,
-         50.0f, 0.0f, 26.0f,
-        -50.0f, 0.0f, 27.0f,
-         50.0f, 0.0f, 27.0f,
-        -50.0f, 0.0f, 28.0f,
-         50.0f, 0.0f, 28.0f,
-        -50.0f, 0.0f, 29.0f,
-         50.0f, 0.0f, 29.0f,
-        -50.0f, 0.0f, 30.0f,
-         50.0f, 0.0f, 30.0f,
-        -50.0f, 0.0f, 31.0f,
-         50.0f, 0.0f, 31.0f,
-        -50.0f, 0.0f, 32.0f,
-         50.0f, 0.0f, 32.0f,
-        -50.0f, 0.0f, 33.0f,
-         50.0f, 0.0f, 33.0f,
-        -50.0f, 0.0f, 34.0f,
-         50.0f, 0.0f, 34.0f,
-        -50.0f, 0.0f, 35.0f,
-         50.0f, 0.0f, 35.0f,
-        -50.0f, 0.0f, 36.0f,
-         50.0f, 0.0f, 36.0f,
-        -50.0f, 0.0f, 37.0f,
-         50.0f, 0.0f, 37.0f,
-        -50.0f, 0.0f, 38.0f,
-         50.0f, 0.0f, 38.0f,
-        -50.0f, 0.0f, 39.0f,
-         50.0f, 0.0f, 39.0f,
-        -50.0f, 0.0f, 40.0f,
-         50.0f, 0.0f, 40.0f,
-        -50.0f, 0.0f, 41.0f,
-         50.0f, 0.0f, 41.0f,
-        -50.0f, 0.0f, 42.0f,
-         50.0f, 0.0f, 42.0f,
-        -50.0f, 0.0f, 43.0f,
-         50.0f, 0.0f, 43.0f,
-        -50.0f, 0.0f, 44.0f,
-         50.0f, 0.0f, 44.0f,
-        -50.0f, 0.0f, 45.0f,
-         50.0f, 0.0f, 45.0f,
-        -50.0f, 0.0f, 46.0f,
-         50.0f, 0.0f, 46.0f,
-        -50.0f, 0.0f, 47.0f,
-         50.0f, 0.0f, 47.0f,
-        -50.0f, 0.0f, 48.0f,
-         50.0f, 0.0f, 48.0f,
-        -50.0f, 0.0f, 49.0f,
-         50.0f, 0.0f, 49.0f,
-        -50.0f, 0.0f, 50.0f,
-         50.0f, 0.0f, 50.0f,
-
-        // vertical lines
-        -50.0f, 0.0f, -50.0f,
-        -50.0f, 0.0f,  50.0f,
-        -49.0f, 0.0f, -50.0f,
-        -49.0f, 0.0f,  50.0f,
-        -48.0f, 0.0f, -50.0f,
-        -48.0f, 0.0f,  50.0f,
-        -47.0f, 0.0f, -50.0f,
-        -47.0f, 0.0f,  50.0f,
-        -46.0f, 0.0f, -50.0f,
-        -46.0f, 0.0f,  50.0f,
-        -45.0f, 0.0f, -50.0f,
-        -45.0f, 0.0f,  50.0f,
-        -44.0f, 0.0f, -50.0f,
-        -44.0f, 0.0f,  50.0f,
-        -43.0f, 0.0f, -50.0f,
-        -43.0f, 0.0f,  50.0f,
-        -42.0f, 0.0f, -50.0f,
-        -42.0f, 0.0f,  50.0f,
-        -41.0f, 0.0f, -50.0f,
-        -41.0f, 0.0f,  50.0f,
-        -40.0f, 0.0f, -50.0f,
-        -40.0f, 0.0f,  50.0f,
-        -39.0f, 0.0f, -50.0f,
-        -39.0f, 0.0f,  50.0f,
-        -38.0f, 0.0f, -50.0f,
-        -38.0f, 0.0f,  50.0f,
-        -37.0f, 0.0f, -50.0f,
-        -37.0f, 0.0f,  50.0f,
-        -36.0f, 0.0f, -50.0f,
-        -36.0f, 0.0f,  50.0f,
-        -35.0f, 0.0f, -50.0f,
-        -35.0f, 0.0f,  50.0f,
-        -34.0f, 0.0f, -50.0f,
-        -34.0f, 0.0f,  50.0f,
-        -33.0f, 0.0f, -50.0f,
-        -33.0f, 0.0f,  50.0f,
-        -32.0f, 0.0f, -50.0f,
-        -32.0f, 0.0f,  50.0f,
-        -31.0f, 0.0f, -50.0f,
-        -31.0f, 0.0f,  50.0f,
-        -30.0f, 0.0f, -50.0f,
-        -30.0f, 0.0f,  50.0f,
-        -29.0f, 0.0f, -50.0f,
-        -29.0f, 0.0f,  50.0f,
-        -28.0f, 0.0f, -50.0f,
-        -28.0f, 0.0f,  50.0f,
-        -27.0f, 0.0f, -50.0f,
-        -27.0f, 0.0f,  50.0f,
-        -26.0f, 0.0f, -50.0f,
-        -26.0f, 0.0f,  50.0f,
-        -25.0f, 0.0f, -50.0f,
-        -25.0f, 0.0f,  50.0f,
-        -24.0f, 0.0f, -50.0f,
-        -24.0f, 0.0f,  50.0f,
-        -23.0f, 0.0f, -50.0f,
-        -23.0f, 0.0f,  50.0f,
-        -22.0f, 0.0f, -50.0f,
-        -22.0f, 0.0f,  50.0f,
-        -21.0f, 0.0f, -50.0f,
-        -21.0f, 0.0f,  50.0f,
-        -20.0f, 0.0f, -50.0f,
-        -20.0f, 0.0f,  50.0f,
-        -19.0f, 0.0f, -50.0f,
-        -19.0f, 0.0f,  50.0f,
-        -18.0f, 0.0f, -50.0f,
-        -18.0f, 0.0f,  50.0f,
-        -17.0f, 0.0f, -50.0f,
-        -17.0f, 0.0f,  50.0f,
-        -16.0f, 0.0f, -50.0f,
-        -16.0f, 0.0f,  50.0f,
-        -15.0f, 0.0f, -50.0f,
-        -15.0f, 0.0f,  50.0f,
-        -14.0f, 0.0f, -50.0f,
-        -14.0f, 0.0f,  50.0f,
-        -13.0f, 0.0f, -50.0f,
-        -13.0f, 0.0f,  50.0f,
-        -12.0f, 0.0f, -50.0f,
-        -12.0f, 0.0f,  50.0f,
-        -11.0f, 0.0f, -50.0f,
-        -11.0f, 0.0f,  50.0f,
-        -10.0f, 0.0f, -50.0f,
-        -10.0f, 0.0f,  50.0f,
-         -9.0f, 0.0f, -50.0f,
-         -9.0f, 0.0f,  50.0f,
-         -8.0f, 0.0f, -50.0f,
-         -8.0f, 0.0f,  50.0f,
-         -7.0f, 0.0f, -50.0f,
-         -7.0f, 0.0f,  50.0f,
-         -6.0f, 0.0f, -50.0f,
-         -6.0f, 0.0f,  50.0f,
-         -5.0f, 0.0f, -50.0f,
-         -5.0f, 0.0f,  50.0f,
-         -4.0f, 0.0f, -50.0f,
-         -4.0f, 0.0f,  50.0f,
-         -3.0f, 0.0f, -50.0f,
-         -3.0f, 0.0f,  50.0f,
-         -2.0f, 0.0f, -50.0f,
-         -2.0f, 0.0f,  50.0f,
-         -1.0f, 0.0f, -50.0f,
-         -1.0f, 0.0f,  50.0f,
-          0.0f, 0.0f, -50.0f,
-          0.0f, 0.0f,  50.0f,
-          1.0f, 0.0f, -50.0f,
-          1.0f, 0.0f,  50.0f,
-          2.0f, 0.0f, -50.0f,
-          2.0f, 0.0f,  50.0f,
-          3.0f, 0.0f, -50.0f,
-          3.0f, 0.0f,  50.0f,
-          4.0f, 0.0f, -50.0f,
-          4.0f, 0.0f,  50.0f,
-          5.0f, 0.0f, -50.0f,
-          5.0f, 0.0f,  50.0f,
-          6.0f, 0.0f, -50.0f,
-          6.0f, 0.0f,  50.0f,
-          7.0f, 0.0f, -50.0f,
-          7.0f, 0.0f,  50.0f,
-          8.0f, 0.0f, -50.0f,
-          8.0f, 0.0f,  50.0f,
-          9.0f, 0.0f, -50.0f,
-          9.0f, 0.0f,  50.0f,
-         10.0f, 0.0f, -50.0f,
-         10.0f, 0.0f,  50.0f,
-         11.0f, 0.0f, -50.0f,
-         11.0f, 0.0f,  50.0f,
-         12.0f, 0.0f, -50.0f,
-         12.0f, 0.0f,  50.0f,
-         13.0f, 0.0f, -50.0f,
-         13.0f, 0.0f,  50.0f,
-         14.0f, 0.0f, -50.0f,
-         14.0f, 0.0f,  50.0f,
-         15.0f, 0.0f, -50.0f,
-         15.0f, 0.0f,  50.0f,
-         16.0f, 0.0f, -50.0f,
-         16.0f, 0.0f,  50.0f,
-         17.0f, 0.0f, -50.0f,
-         17.0f, 0.0f,  50.0f,
-         18.0f, 0.0f, -50.0f,
-         18.0f, 0.0f,  50.0f,
-         19.0f, 0.0f, -50.0f,
-         19.0f, 0.0f,  50.0f,
-         20.0f, 0.0f, -50.0f,
-         20.0f, 0.0f,  50.0f,
-         21.0f, 0.0f, -50.0f,
-         21.0f, 0.0f,  50.0f,
-         22.0f, 0.0f, -50.0f,
-         22.0f, 0.0f,  50.0f,
-         23.0f, 0.0f, -50.0f,
-         23.0f, 0.0f,  50.0f,
-         24.0f, 0.0f, -50.0f,
-         24.0f, 0.0f,  50.0f,
-         25.0f, 0.0f, -50.0f,
-         25.0f, 0.0f,  50.0f,
-         26.0f, 0.0f, -50.0f,
-         26.0f, 0.0f,  50.0f,
-         27.0f, 0.0f, -50.0f,
-         27.0f, 0.0f,  50.0f,
-         28.0f, 0.0f, -50.0f,
-         28.0f, 0.0f,  50.0f,
-         29.0f, 0.0f, -50.0f,
-         29.0f, 0.0f,  50.0f,
-         30.0f, 0.0f, -50.0f,
-         30.0f, 0.0f,  50.0f,
-         31.0f, 0.0f, -50.0f,
-         31.0f, 0.0f,  50.0f,
-         32.0f, 0.0f, -50.0f,
-         32.0f, 0.0f,  50.0f,
-         33.0f, 0.0f, -50.0f,
-         33.0f, 0.0f,  50.0f,
-         34.0f, 0.0f, -50.0f,
-         34.0f, 0.0f,  50.0f,
-         35.0f, 0.0f, -50.0f,
-         35.0f, 0.0f,  50.0f,
-         36.0f, 0.0f, -50.0f,
-         36.0f, 0.0f,  50.0f,
-         37.0f, 0.0f, -50.0f,
-         37.0f, 0.0f,  50.0f,
-         38.0f, 0.0f, -50.0f,
-         38.0f, 0.0f,  50.0f,
-         39.0f, 0.0f, -50.0f,
-         39.0f, 0.0f,  50.0f,
-         40.0f, 0.0f, -50.0f,
-         40.0f, 0.0f,  50.0f,
-         41.0f, 0.0f, -50.0f,
-         41.0f, 0.0f,  50.0f,
-         42.0f, 0.0f, -50.0f,
-         42.0f, 0.0f,  50.0f,
-         43.0f, 0.0f, -50.0f,
-         43.0f, 0.0f,  50.0f,
-         44.0f, 0.0f, -50.0f,
-         44.0f, 0.0f,  50.0f,
-         45.0f, 0.0f, -50.0f,
-         45.0f, 0.0f,  50.0f,
-         46.0f, 0.0f, -50.0f,
-         46.0f, 0.0f,  50.0f,
-         47.0f, 0.0f, -50.0f,
-         47.0f, 0.0f,  50.0f,
-         48.0f, 0.0f, -50.0f,
-         48.0f, 0.0f,  50.0f,
-         49.0f, 0.0f, -50.0f,
-         49.0f, 0.0f,  50.0f,
-         50.0f, 0.0f, -50.0f,
-         50.0f, 0.0f,  50.0f
-    };
+    GLfloat* verticesGrid = VertexLoader::loadGridVertices(&verticesSize);
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_gridVAO);
@@ -989,9 +579,10 @@ void Renderer::initializeFrame() {
     glGenBuffers(1, &m_gridVBO);
     Shader::bindVBO(m_gridVBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(verticesGrid),
+        verticesSize,
         verticesGrid,
         GL_STATIC_DRAW);
+    delete[] verticesGrid;
 
     // vertex attributes
     positionLocation = glGetAttribLocation(m_shaderFrame->getProgramID(),
@@ -1007,18 +598,11 @@ void Renderer::initializeFrame() {
 
 void Renderer::initializeGround() {
     // vertex data
-    GLfloat verticesGround[] = {
-        // position             // normal           // texture
-        -50.0f, 0.0f, -50.0f,   0.0f, 1.0f, 0.0f,   0.0f, 4.0f,
-        -50.0f, 0.0f,  50.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
-         50.0f, 0.0f,  50.0f,   0.0f, 1.0f, 0.0f,   4.0f, 0.0f,
-         50.0f, 0.0f, -50.0f,   0.0f, 1.0f, 0.0f,   4.0f, 4.0f
-    };
+    GLuint verticesSize;
+    GLfloat* verticesGround = VertexLoader::loadGroundVertices(&verticesSize);
 
-    GLuint indicesGround[] = {
-        0, 1, 2,
-        0, 2, 3
-    };
+    GLuint indicesSize;
+    GLuint* indicesGround = VertexLoader::loadGroundIndices(&indicesSize);
 
     // initialize ground material
     m_materials.push_back(new Material(
@@ -1034,9 +618,11 @@ void Renderer::initializeGround() {
         POSITION_ORIGIN,
         POSITION_ORIGIN,
         verticesGround,
-        sizeof(verticesGround),
+        verticesSize,
         indicesGround,
-        sizeof(indicesGround)));
+        indicesSize));
+    delete[] verticesGround;
+    delete[] indicesGround;
 
     // set ground color
     m_entities.at(0)->setColor(COLOR_GROUND);
@@ -1044,61 +630,8 @@ void Renderer::initializeGround() {
 
 void Renderer::initializeLights() {
     // vertex data
-    GLfloat vertices[] = {
-        // back face
-        // position
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        // front face
-        // position
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        // left face
-        // position
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-        // right face
-        // position
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        // bottom face
-        // position
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        // top face
-        // position
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
+    GLuint verticesSize;
+    GLfloat* vertices = VertexLoader::loadCubeVertices(&verticesSize);
 
     // generate and bind vertex array object
     glGenVertexArrays(1, &m_lightVAO);
@@ -1108,9 +641,10 @@ void Renderer::initializeLights() {
     glGenBuffers(1, &m_lightVBO);
     Shader::bindVBO(m_lightVBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(vertices),
+        verticesSize,
         vertices,
         GL_STATIC_DRAW);
+    delete[] vertices;
 
     // vertex attributes
     GLuint positionLocation = glGetAttribLocation(m_shaderFrame->getProgramID(),
@@ -1156,71 +690,19 @@ void Renderer::initializeMaterial() {
 
 void Renderer::initializeModel() {
     // vertex data
-    GLfloat vertices[] = {
-        // back face
-        // position           // normal             // texture
-        -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        // front face
-        // position           // normal             // texture
-        -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-
-        // left face
-        // position           // normal             // texture
-        -0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-
-        // right face
-        // position           // normal             // texture
-         0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-
-        // bottom face
-        // position           // normal             // texture
-        -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-
-        // top face
-        // position           // normal             // texture
-        -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
-    };
+    GLuint verticesSize;
+    GLfloat* vertices = VertexLoader::loadCubeFullVertices(&verticesSize);
 
     // create model entities
     RenderedEntity* head = new RenderedEntity(m_shaderEntity,
         POSITION_ORIGIN,
         0.5f * MODEL_POSITION_RELATIVE_HEAD,
         vertices,
-        sizeof(vertices),
+        verticesSize,
         nullptr,
         NULL,
         true);
+    delete[] vertices;
     RenderedEntity* legLowerFrontRight = new RenderedEntity(*head);
     RenderedEntity* legLowerFrontLeft = new RenderedEntity(*head);
     RenderedEntity* legLowerBackRight = new RenderedEntity(*head);
@@ -1730,7 +1212,6 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
                 (*m_it)) };
             if (it == collidingModels.end())
                 m_paths.at(modelIndex)->traverse((*m_it), deltaTime);
-            else std::cout << (*m_it) << " cannot move" << std::endl;
         }
 
         // play animation sequence

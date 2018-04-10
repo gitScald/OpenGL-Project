@@ -3,6 +3,7 @@
 
 // project headers
 #include "shader.h"
+#include "vertex_loader.h"
 
 // GLEW
 #include <gl/glew.h>

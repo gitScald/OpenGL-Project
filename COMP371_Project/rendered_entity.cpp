@@ -20,8 +20,9 @@ glm::mat4 RenderedEntity::getModelMatrix(const glm::mat4& globalModelMatrix) {
 glm::mat4 RenderedEntity::getModelMatrixExclScaling(const glm::mat4& jointModelMatrix) {
     // return model matrix (excluding scaling)
     return glm::translate(glm::mat4(), m_position)
-        * jointModelMatrix
-        * m_rotationMatrix;
+        //* jointModelMatrix
+        * m_rotationMatrix
+        * jointModelMatrix;
 }
 
 const glm::mat4& RenderedEntity::getScalingMatrix() const {
