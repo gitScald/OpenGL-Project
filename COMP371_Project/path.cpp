@@ -21,6 +21,7 @@ void Path::traverse(Model* model,
     // update current step
     if (m_timeTraveled >= m_pathSequence.at(m_step)->m_time) {
         m_step = (m_step + 1) % (m_stepLast + 1);
+        std::cout << "updating step for " << this << std::endl;
         m_timeTraveled = 0.0f;
     }
     if (m_step >= m_stepLast)
@@ -32,6 +33,7 @@ void Path::traverse(Model* model,
     GLfloat deltaOrientation = (targetOrientation - currentOrientation)
         * m_speed
         * deltaTime;
-    model->rotate(deltaOrientation, AXIS_Y);
+    //model->rotate(deltaOrientation, AXIS_Y);
+    model->rotate(targetOrientation, AXIS_Y);
     model->move(Transform::FRONT);
 }
