@@ -4,6 +4,7 @@
 // project headers
 #include "constants.h"
 #include "enums.h"
+#include "light_source.h"
 #include "shader.h"
 
 // GLEW
@@ -32,7 +33,7 @@ public:
     static void adjustGridOffset(Shadows::Tweak mod);
     static void adjustGridSamples(Shadows::Tweak mod);
     void free() const;
-    void render() const;
+    void render(LightSource* light) const;
 
 private:
     void initialize();

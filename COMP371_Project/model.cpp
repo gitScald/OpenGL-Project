@@ -131,7 +131,7 @@ void Model::rotate(GLfloat angle,
     const glm::vec3& axis) {
     // rotate model
     m_hierarchyRoot->rotate(angle, axis);
-    m_orientation -= angle;
+    m_orientation += angle;
     updateVectors();
 }
 

@@ -58,25 +58,21 @@ void Renderer::moveModel(GLuint model,
     switch (direction) {
     case Transform::Displacement::RANDOM:
         m_modelPositions[model].x = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX) / m_models.at(0)->getScale();
+            % GRID_SIZE - POSITION_MAX);
         m_modelPositions[model].z = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX / m_models.at(0)->getScale());
+            % GRID_SIZE - POSITION_MAX);
         break;
     case Transform::Displacement::UP:
-        m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION
-            / m_models.at(0)->getScale();
+        m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::DOWN:
-        m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION
-            / m_models.at(0)->getScale();
+        m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::LEFT:
-        m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION
-            / m_models.at(0)->getScale();
+        m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     case Transform::Displacement::RIGHT:
-        m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION
-            / m_models.at(0)->getScale();
+        m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION;
         break;
     }
 
@@ -169,7 +165,7 @@ void Renderer::render(GLfloat deltaTime) {
 
     // optionally render shadow map debug quad
     if (m_debuggingEnabled)
-        m_shadowMap->render();
+        m_shadowMap->render(m_lights.at(0));
 }
 
 void Renderer::toggleAnimations() {
@@ -276,10 +272,22 @@ void Renderer::updateLightPositionsAndColors() {
     // do so for the skybox as well
     m_skybox->updateLightColor(m_lights.at(0)->getColor());
 
-    // update moon position relative to the sun
-    m_moonPosition = m_lights.at(0)->getPosition();
-    m_moonPosition.y *= -1;
-    m_moonPosition.z *= -1;
+    // update sun and moon positions
+    if (isNight()) {
+        m_moonPosition = m_lights.at(0)->getPosition();
+        m_sunPosition = m_moonPosition;
+        m_sunPosition.y *= -1;
+        m_sunPosition.z *= -1;
+    }
+    else {
+        m_sunPosition = m_lights.at(0)->getPosition();
+        m_moonPosition = m_sunPosition;
+        m_moonPosition.y *= -1;
+        m_moonPosition.z *= -1;
+    }
+
+    // finally, update fog properties
+    updateFogProperties();
 }
 
 void Renderer::updateLightProperties() const {
@@ -1034,6 +1042,7 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // render skybox
+    if (m_texturesEnabled)
     m_skybox->render(Camera::get().getWorldOrientation(),
         Camera::get().getPosition());
 
@@ -1125,8 +1134,9 @@ void Renderer::renderLights(GLfloat deltaTime) {
 
         // update light position
         glm::vec3 currentPosition = m_lights.at(0)->getPosition();
-        GLfloat y = LIGHT_POSITION_NOON.y * sin(m_currentTime);
-        GLfloat z = LIGHT_POSITION_NOON.y * cos(m_currentTime);
+        GLfloat nightTime = isNight() ? -1.0f : 1.0f;
+        GLfloat y = LIGHT_POSITION_NOON.y * sin(nightTime * m_currentTime);
+        GLfloat z = LIGHT_POSITION_NOON.y * nightTime * cos(m_currentTime);
         glm::vec3 newPosition{ currentPosition.x, y, z };
         m_lights.at(0)->setPosition(newPosition);
         
@@ -1154,17 +1164,15 @@ void Renderer::renderLights(GLfloat deltaTime) {
         // update shader properties
         updateLightPositionsAndColors();
 
-        // reset timer and light source position after a full cycle
-        if (m_currentTime >= 2.0 * glm::pi<GLfloat>()) {
+        // reset timer after a full cycle
+        if (m_currentTime >= 2.0 * glm::pi<GLfloat>())
             m_currentTime = 0.0f;
-            //setLightAtZero();
-        }
     }
 
     // set shader uniforms for sun
     Shader::useProgram(m_shaderFrame->getProgramID());
     glm::mat4 modelMatrix = getWorldOrientation()
-        * glm::translate(glm::mat4(), m_lights.at(0)->getPosition())
+        * glm::translate(glm::mat4(), m_sunPosition)
         * glm::scale(glm::mat4(), LIGHT_SCALE);
     m_shaderFrame->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
     m_shaderFrame->setUniformVec4(UNIFORM_COLOR,
@@ -1235,7 +1243,7 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
             // compute entity model matrix
             glm::mat4 modelMatrix;
             modelMatrix *= glm::scale(modelMatrix,
-                e_it->first->getScalingRelative())
+                    e_it->first->getScalingRelative())
                 * getWorldOrientation()
                 * (*m_it)->getModelMatrix(e_it->first)
                 * e_it->first->getScalingMatrix();
@@ -1303,17 +1311,11 @@ bool Renderer::isDawnOrDusk() const {
 bool Renderer::isDay() const {
     // day time
     return (m_currentTime >= glm::pi<GLfloat>() / 6.0f
-        && m_currentTime < glm::pi<GLfloat>() * 7.0f / 8.0f);
+        && m_currentTime < glm::pi<GLfloat>() * 5.0f / 6.0f);
 }
 
 bool Renderer::isNight() const {
     // night time
     return (m_currentTime >= glm::pi<GLfloat>()
         && m_currentTime < 2.0f * glm::pi<GLfloat>());
-}
-
-void Renderer::setLightAtZero() {
-    // set light at 00:00 position for the moon to cast shadows
-    m_lights.at(0)->setPosition(LIGHT_POSITION_MIDNIGHT);
-    updateLightPositionsAndColors();
 }

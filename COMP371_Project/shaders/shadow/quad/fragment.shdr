@@ -4,14 +4,29 @@ out vec4 o_fragColor;
 
 in vec2 o_textureCoordinate;
 
-uniform samplerCube u_depthTexture;
+struct Light {
+    vec2 planeNearFar;
+};
 
-void main() {
-    // texture coordinates, normalized to NDC
+uniform samplerCube u_depthTexture;
+uniform Light u_light;
+
+float linearizedDepth() {
+    // normalize to NDC
     vec2 textureCoord = 2.0f * o_textureCoordinate - 1.0f;
 
-    // depth value sampled from texture
-    float fragDepth = texture(u_depthTexture, vec3(textureCoord.x, -1.0f, textureCoord.y)).r;
+    // sample depth texture
+    float depth = texture(u_depthTexture, vec3(textureCoord.x, -1.0f, textureCoord.y)).r;
+
+    // linearize depth
+    return (2.0f * u_light.planeNearFar.x)
+        / (u_light.planeNearFar.y + u_light.planeNearFar.x
+            - depth * (u_light.planeNearFar.y - u_light.planeNearFar.x));
+}
+
+void main() {
+    // linearized depth value sampled from depth texture
+    float fragDepth = linearizedDepth();
 
     o_fragColor = vec4(vec3(fragDepth), 1.0f);
 }

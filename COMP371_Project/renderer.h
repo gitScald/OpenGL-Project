@@ -132,7 +132,6 @@ private:
     bool isDawnOrDusk() const;
     bool isDay() const;
     bool isNight() const;
-    void setLightAtZero();
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };
@@ -147,6 +146,7 @@ private:
     glm::vec3 m_modelPositions[TROOP_COUNT];
     glm::vec3 m_modelScales[TROOP_COUNT];
     glm::vec3 m_moonPosition;
+    glm::vec3 m_sunPosition;
     glm::vec4 m_rimLightColor{ COLOR_LIGHT_DAY };
     Shader* m_shaderEntity;
     Shader* m_shaderFrame;

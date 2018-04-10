@@ -121,9 +121,13 @@ void ShadowMap::free() const {
     glDeleteTextures(1, &m_depthTextureID);
 }
 
-void ShadowMap::render() const {
-    // set texture properties
+void ShadowMap::render(LightSource* light) const {
+    // set light planes
     Shader::useProgram(m_shaderDebug.getProgramID());
+    m_shaderDebug.setUniformVec2(UNIFORM_LIGHT_PLANES,
+        glm::vec2(light->getPlaneNear(), light->getPlaneFar()));
+
+    // set texture properties
     Shader::activateTextureUnit(GL_TEXTURE0);
     Shader::bindCubemapTexture(m_depthTextureID);
 
@@ -143,7 +147,7 @@ void ShadowMap::initialize() {
     for (GLuint face{ 0 }; face != 6; ++face)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
             0,
-            GL_DEPTH_COMPONENT,
+            GL_DEPTH_COMPONENT24,
             SHADOW_DEPTH_TEXTURE_WIDTH,
             SHADOW_DEPTH_TEXTURE_HEIGHT,
             0,

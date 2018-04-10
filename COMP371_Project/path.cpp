@@ -32,7 +32,7 @@ void Path::traverse(Model* model,
     GLfloat deltaOrientation = (targetOrientation - currentOrientation)
         * m_speed
         * deltaTime;
-    //model->rotate(deltaOrientation, AXIS_Y);
-    model->rotate(targetOrientation, AXIS_Y);
+    model->rotate(deltaOrientation, AXIS_Y);
+    //model->rotate(targetOrientation, AXIS_Y);
     model->move(Transform::FRONT);
 }

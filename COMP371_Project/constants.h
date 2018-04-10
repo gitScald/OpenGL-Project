@@ -242,8 +242,8 @@ const GLfloat SHADOW_ASPECT_RATIO{
     static_cast<GLfloat>(SHADOW_DEPTH_TEXTURE_WIDTH)
     / SHADOW_DEPTH_TEXTURE_HEIGHT };
 const GLfloat SHADOW_PROJECTION_FOV{ 90.0f };
-const GLfloat SHADOW_BIAS_MAX{ 0.050f };
-const GLfloat SHADOW_BIAS_MIN{ 0.015f };
+const GLfloat SHADOW_BIAS_MAX{ 0.090f };
+const GLfloat SHADOW_BIAS_MIN{ 0.050f };
 const GLfloat SHADOW_GRID_FACTOR{ 80.0f };
 const GLfloat SHADOW_GRID_OFFSET{ 1.0f };
 const GLfloat SHADOW_INCREMENT_BIAS{ 0.005f };
@@ -268,10 +268,10 @@ const GLuint JOINT_TORSO{ 10 };
 
 // pathing-related constants
 const GLfloat MODEL_SPEED{ 1.0f };
-const GLfloat PATHING_DIRECTION_MIN{ 15.0f };
-const GLfloat PATHING_DIRECTION_MAX{ 65.0f };
-const GLfloat PATHING_DISTANCE_MIN{ 1.0f };
-const GLfloat PATHING_DISTANCE_MAX{ 3.0f };
+const GLfloat PATHING_DIRECTION_MIN{ 0.0f };
+const GLfloat PATHING_DIRECTION_MAX{ 15.0f };
+const GLfloat PATHING_DISTANCE_MIN{ 2.0f };
+const GLfloat PATHING_DISTANCE_MAX{ 4.0f };
 const GLfloat PATHING_SPEED{ 1.0f };
 const GLuint PATH_COUNT{ 15 };
 
