@@ -21,7 +21,6 @@ void Path::traverse(Model* model,
     // update current step
     if (m_timeTraveled >= m_pathSequence.at(m_step)->m_time) {
         m_step = (m_step + 1) % (m_stepLast + 1);
-        std::cout << "updating step for " << this << std::endl;
         m_timeTraveled = 0.0f;
     }
     if (m_step >= m_stepLast)

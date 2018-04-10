@@ -4,10 +4,10 @@
 // project headers
 #include "animation.h"
 #include "camera.h"
+#include "collision.h"
 #include "constants.h"
 #include "enums.h"
 #include "light_source.h"
-//#include "loader.h"
 #include "material.h"
 #include "model.h"
 #include "path.h"
@@ -124,12 +124,6 @@ private:
     void clampModelPosition(GLuint model);
     void clampModelScale(GLuint model);
 
-    // collision detection
-    void addToCollisionVector(Model* model);
-    void detectCollisions();
-    bool isInCollisionVector(Model* model);
-    void removeFromCollisionVector(Model* model);
-
     // day-night cycle
     static glm::vec4 lerpColor(const glm::vec4& start,
         const glm::vec4& end,
@@ -145,7 +139,6 @@ private:
     std::vector<Joint*> m_joints;
     std::vector<LightSource*> m_lights;
     std::vector<Material*> m_materials;
-    std::vector<Model*> m_collidingModels;
     std::vector<Model*> m_models;
     std::vector<Path*> m_paths;
     std::vector<RenderedEntity*> m_entities;
@@ -153,6 +146,7 @@ private:
     glm::vec3 m_modelPositions[TROOP_COUNT];
     glm::vec3 m_modelScales[TROOP_COUNT];
     glm::vec3 m_moonPosition;
+    glm::vec4 m_rimLightColor{ COLOR_LIGHT_DAY };
     Shader* m_shaderEntity;
     Shader* m_shaderFrame;
     Shader* m_shaderShadow;

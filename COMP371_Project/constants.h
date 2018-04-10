@@ -116,7 +116,8 @@ const std::string PATH_VERTEX_SKYBOX{ "shaders/skybox/vertex.shdr" };
 const std::string PATH_FRAGMENT_SKYBOX{ "shaders/skybox/fragment.shdr" };
 
 // texture file paths
-const std::string PATH_TEXTURE_GROUND{ "textures/ground/grass.png" };
+//const std::string PATH_TEXTURE_GROUND{ "textures/ground/grass.png" };
+const std::string PATH_TEXTURE_GROUND{ "textures/skybox/negy.jpg" };
 const std::string PATH_TEXTURE_HORSE{ "textures/horse/zebra.jpg" };
 const std::string PATH_TEXTURE_SKYBOX[] = {
     "textures/skybox/posx.jpg",
@@ -208,9 +209,8 @@ const glm::vec3 LIGHT_AMBIENT{ glm::vec3(0.2f, 0.2f, 0.2f) };
 const glm::vec3 LIGHT_DIFFUSE{ glm::vec3(0.7f, 0.7f, 0.7f) };
 const glm::vec3 LIGHT_SPECULAR{ glm::vec3(1.0f, 1.0f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_DAY{ glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.1f, 0.2f, 0.7f, 1.0f) };
-const glm::vec4 COLOR_LIGHT_RIM{ COLOR_LIGHT_DAY };
-const glm::vec4 COLOR_LIGHT_TRANSITION{ glm::vec4(0.6f, 0.6f, 0.2f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_NIGHT{ glm::vec4(0.1f, 0.2f, 0.6f, 1.0f) };
+const glm::vec4 COLOR_LIGHT_TRANSITION{ glm::vec4(0.96f, 0.65f, 0.32f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_MOON_ON{ glm::vec4(0.8f, 0.8f, 0.8f, 1.0f) };
 const glm::vec4 COLOR_LIGHT_MOON_OFF{ glm::vec4{ 0.2f, 0.2f, 0.2f, 1.0f } };
 const glm::vec4 COLOR_LIGHT_SUN_ON{ glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
@@ -276,8 +276,8 @@ const GLfloat PATHING_SPEED{ 1.0f };
 const GLuint PATH_COUNT{ 15 };
 
 // fog-related constants
-const glm::vec4 COLOR_CLEAR{ glm::vec4(0.7f, 0.7f, 0.4f, 1.0f) };
-const glm::vec4 COLOR_FOG{ glm::vec4(0.7f, 0.7f, 0.4f, 1.0f) };
+const glm::vec4 COLOR_CLEAR{ glm::vec4(0.90f, 0.94f, 0.98f, 1.0f) };
+const glm::vec4 COLOR_FOG{ COLOR_CLEAR };
 const GLfloat FOG_DENSITY{ 0.025f };
 
 #endif // !CONSTANTS_H

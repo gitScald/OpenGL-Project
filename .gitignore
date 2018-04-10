@@ -1,5 +1,6 @@
 # Ignore project-specific folders
-COMP371_A2/!new/
+COMP371_Project/data/
+COMP371_Project/wip/
 
 # Ignore configuration folders
 Debug/
@@ -10,3 +11,6 @@ Release/
 *.sln
 *.vcxproj
 *.vcxproj.*
+
+# Ignore MS Word temporary files
+~$*

@@ -318,7 +318,7 @@ void Renderer::updateLightProperties() const {
     m_shaderEntity->setUniformFloat(UNIFORM_RIM_LIGHT_MIN,
         LIGHT_RIM_MIN);
     m_shaderEntity->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
-        COLOR_LIGHT_RIM);
+        m_rimLightColor);
 }
 
 void Renderer::updateProjectionMatrix() const {
@@ -1009,10 +1009,10 @@ void Renderer::initializeGround() {
     // vertex data
     GLfloat verticesGround[] = {
         // position             // normal           // texture
-        -50.0f, 0.0f, -50.0f,   0.0f, 1.0f, 0.0f,    0.0f, 64.0f,
-        -50.0f, 0.0f,  50.0f,   0.0f, 1.0f, 0.0f,    0.0f,  0.0f,
-         50.0f, 0.0f,  50.0f,   0.0f, 1.0f, 0.0f,   64.0f,  0.0f,
-         50.0f, 0.0f, -50.0f,   0.0f, 1.0f, 0.0f,   64.0f, 64.0f
+        -50.0f, 0.0f, -50.0f,   0.0f, 1.0f, 0.0f,   0.0f, 4.0f,
+        -50.0f, 0.0f,  50.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+         50.0f, 0.0f,  50.0f,   0.0f, 1.0f, 0.0f,   4.0f, 0.0f,
+         50.0f, 0.0f, -50.0f,   0.0f, 1.0f, 0.0f,   4.0f, 4.0f
     };
 
     GLuint indicesGround[] = {
@@ -1023,7 +1023,7 @@ void Renderer::initializeGround() {
     // initialize ground material
     m_materials.push_back(new Material(
         Texture(PATH_TEXTURE_GROUND,
-        GL_RGBA,
+        GL_RGB,
         GL_REPEAT,
         GL_LINEAR).getID(),
         MATERIAL_SHININESS_GROUND));
@@ -1193,23 +1193,23 @@ void Renderer::initializeModel() {
          0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
          0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
 
-         // bottom face
-         // position           // normal             // texture
-         -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-          0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-          0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-          0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-         -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        // bottom face
+        // position           // normal             // texture
+        -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
 
-         // top face
-         // position           // normal             // texture
-         -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-          0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-          0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-          0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-         -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
+        // top face
+        // position           // normal             // texture
+        -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,  0.0f, 0.0f
     };
 
     // create model entities
@@ -1664,9 +1664,10 @@ void Renderer::renderLights(GLfloat deltaTime) {
         else
             targetColor = COLOR_LIGHT_TRANSITION;
 
-        // lerp color and assign to light
+        // lerp color and assign to light and rim lighting
         glm::vec4 newColor{ lerpColor(currentColor, targetColor, 0.1f) };
         m_lights.at(0)->setColor(newColor);
+        m_rimLightColor = newColor;
 
         // update shader properties
         updateLightPositionsAndColors();
@@ -1712,7 +1713,8 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
     glCullFace(GL_FRONT);
 
     // collision detection
-    detectCollisions();
+    std::vector<Model*> collidingModels
+        = Collision::detectCollisions(m_models);
 
     // render models
     GLuint modelIndex{ 0 };
@@ -1723,11 +1725,12 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
         // follow path sequence if model is not currently colliding
         if (m_pathingEnabled) {
             std::vector<Model*>::iterator it{ std::find(
-                m_collidingModels.begin(),
-                m_collidingModels.end(),
+                collidingModels.begin(),
+                collidingModels.end(),
                 (*m_it)) };
-            if (it == m_collidingModels.end())
+            if (it == collidingModels.end())
                 m_paths.at(modelIndex)->traverse((*m_it), deltaTime);
+            else std::cout << (*m_it) << " cannot move" << std::endl;
         }
 
         // play animation sequence
@@ -1802,76 +1805,6 @@ void Renderer::clampModelScale(GLuint model) {
         m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MAX);
     else if (m_modelScales[model].x < TRANSFORMATION_SCALE_MIN)
         m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MIN);
-}
-
-void Renderer::addToCollisionVector(Model* model) {
-    // check whether model is already colliding
-    std::vector<Model*>::iterator it = std::find(
-        m_collidingModels.begin(),
-        m_collidingModels.end(),
-        model);
-
-    // if not, add it
-    if (it == m_collidingModels.end())
-        m_collidingModels.push_back(model);
-}
-
-void Renderer::detectCollisions() {
-    // check for collision between pairs of models
-    for (GLuint i{ 0 }; i != m_models.size(); ++i) {
-            glm::vec3 iPosition = m_models.at(i)->getPosition();
-            GLfloat iColliderRadius = m_models.at(i)->getColliderRadius();
-            bool colliding{ false };
-
-            for (GLuint j{ 0 }; j != m_models.size(); ++j) {
-                // check if two distinct models are being checked
-                if (j != i
-                    && !isInCollisionVector(m_models.at(j))) {
-                    glm::vec3 jPosition = m_models.at(j)->getPosition();
-                    GLfloat jCollidersRadius = m_models.at(j)->getColliderRadius();
-
-                    // evaluate metrics to determine if collision occurred
-                    glm::vec3 delta = iPosition - jPosition;
-                    GLfloat dist = glm::dot(delta, delta);
-                    GLfloat sumRadii = (iColliderRadius + jCollidersRadius)
-                        * (iColliderRadius + jCollidersRadius);
-
-                    // check if model is colliding
-                    if (dist <= sumRadii) {
-                        colliding = true;
-                        break;
-                    }
-                }
-            }
-
-            // update collision vector accordingly
-            if (colliding)
-                addToCollisionVector(m_models.at(i));
-            else
-                removeFromCollisionVector(m_models.at(i));
-    }
-}
-
-bool Renderer::isInCollisionVector(Model* model) {
-    // get whether model is colliding
-    std::vector<Model*>::iterator it = std::find(
-        m_collidingModels.begin(),
-        m_collidingModels.end(),
-        model);
-
-    return it != m_collidingModels.end();
-}
-
-void Renderer::removeFromCollisionVector(Model* model) {
-    // check whether model is already colliding
-    std::vector<Model*>::iterator it = std::find(
-        m_collidingModels.begin(),
-        m_collidingModels.end(),
-        model);
-
-    // if so, remove it
-    if (it != m_collidingModels.end())
-        m_collidingModels.erase(it);
 }
 
 glm::vec4 Renderer::lerpColor(const glm::vec4& start,

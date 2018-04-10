@@ -135,8 +135,8 @@ vec3 lightingRim() {
 
     float rimming = 1 - max(dot(cameraDirection, fragNormal), 0.0f);
     rimming = smoothstep(u_rim.min, u_rim.max, rimming);
-    vec3 rim = /*u_light.color.rgb
-        */ u_rim.color.rgb
+    vec3 rim = u_light.color.rgb
+        * u_rim.color.rgb
         * rimming
         * objectColorDiffuse();
 
