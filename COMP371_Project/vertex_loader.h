@@ -15,10 +15,12 @@ public:
     static GLfloat* loadAxesVertices(GLuint* size);
     static GLfloat* loadCubeVertices(GLuint* size);
     static GLfloat* loadCubeFullVertices(GLuint* size);
+    static GLfloat* loadGrassVertices(GLuint* size);
     static GLfloat* loadGridVertices(GLuint* size);
     static GLfloat* loadGroundVertices(GLuint* size);
 
     // index loading
+    static GLuint* loadGrassIndices(GLuint* size);
     static GLuint* loadGroundIndices(GLuint* size);
 };
 

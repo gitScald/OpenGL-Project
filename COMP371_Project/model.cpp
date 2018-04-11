@@ -101,11 +101,56 @@ void Model::setPosition(const glm::vec3& value) {
     // set model position
     m_hierarchyRoot->setPosition(value);
     m_position = value;
+    clampPosition();
+}
+
+void Model::setRotation(GLfloat value) {
+    // set model position
+    m_hierarchyRoot->setRotation(value);
+    m_orientation = value;
 }
 
 void Model::move(Transform::Displacement direction) {
     // move model around the grid
-    m_hierarchyRoot->move(direction);
+    //m_hierarchyRoot->move(direction);
+    switch (direction) {
+    case Transform::Displacement::RANDOM:
+        m_position.x = static_cast<GLfloat>(rand()
+            % TRANSFORMATION_RANDOM_DISPLACEMENT)
+            * m_scale;
+        m_position.z = static_cast<GLfloat>(rand()
+            % TRANSFORMATION_RANDOM_DISPLACEMENT)
+            * m_scale;
+        break;
+    case Transform::Displacement::FRONT:
+        m_position.x += m_front.x
+            * s_speedCurrent
+            * TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scale;
+        m_position.z += m_front.z
+            * s_speedCurrent
+            * TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scale;
+        break;
+    case Transform::Displacement::UP:
+        m_position.x += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scale;
+        break;
+    case Transform::Displacement::DOWN:
+        m_position.x -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scale;
+        break;
+    case Transform::Displacement::LEFT:
+        m_position.z -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scale;
+        break;
+    case Transform::Displacement::RIGHT:
+        m_position.z += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scale;
+        break;
+    }
+    m_hierarchyRoot->setPosition(m_position);
+    clampPosition();
 }
 
 void Model::reset() {
@@ -125,6 +170,9 @@ void Model::reset() {
     m_orientation = 0.0f;
     updateColliderRadius();
     updateVectors();
+
+    // reset model position
+    m_position = MODEL_POSITION_RELATIVE_TORSO;
 }
 
 void Model::rotate(GLfloat angle,
@@ -239,6 +287,19 @@ void Model::setDepthShaderAttributes(Shader* shader) const {
         it != m_hierarchy.end();
         ++it)
         it->first->setDepthShaderAttributes(shader);
+}
+
+void Model::clampPosition() {
+    // clamp model position
+    if (m_position.x > POSITION_MAX)
+        m_position.x = POSITION_MAX;
+    else if (m_position.z > POSITION_MAX)
+        m_position.z = POSITION_MAX;
+
+    if (m_position.x < POSITION_MIN)
+        m_position.x = POSITION_MIN;
+    else if (m_position.z < POSITION_MIN)
+        m_position.z = POSITION_MIN;
 }
 
 void Model::updateColliderRadius() {

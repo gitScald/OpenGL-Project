@@ -136,6 +136,35 @@ GLfloat* VertexLoader::loadCubeFullVertices(GLuint* size) {
     return verticesCube;
 }
 
+GLfloat* VertexLoader::loadGrassVertices(GLuint* size) {
+    GLfloat* verticesGrass = new GLfloat[96] {
+        // quad 1
+        // position             // normal           // texture
+        -0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 
+         0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+         0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+
+         // quad 2
+        // position             // normal           // texture
+         0.0f,  1.0f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+         0.0f,  0.0f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+        -0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+        -0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+
+         // quad 3
+        // position             // normal           // texture
+         0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+         0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+         0.0f,  0.0f, -0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+         0.0f,  1.0f, -0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+    };
+
+    *size = 96 * sizeof(GLfloat);
+
+    return verticesGrass;
+}
+
 GLfloat* VertexLoader::loadGridVertices(GLuint* size) {
     GLfloat* verticesGrid = new GLfloat[1212] {
         // horizontal lines
@@ -564,6 +593,26 @@ GLfloat* VertexLoader::loadGroundVertices(GLuint* size) {
     *size = 32 * sizeof(GLfloat);
 
     return verticesGround;
+}
+
+GLuint* VertexLoader::loadGrassIndices(GLuint* size) {
+    GLuint* indicesGrass = new GLuint[18] {
+        // quad 1
+        0, 1, 2,
+        2, 3, 0,
+
+        // quad 2
+        4, 5, 6,
+        6, 7, 4,
+
+        // quad 3
+        8, 9, 10,
+        10, 11, 8
+    };
+
+    *size = 18 * sizeof(GLuint);
+
+    return indicesGrass;
 }
 
 GLuint* VertexLoader::loadGroundIndices(GLuint* size) {

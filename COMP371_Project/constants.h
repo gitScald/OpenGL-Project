@@ -116,6 +116,7 @@ const std::string PATH_VERTEX_SKYBOX{ "shaders/skybox/vertex.shdr" };
 const std::string PATH_FRAGMENT_SKYBOX{ "shaders/skybox/fragment.shdr" };
 
 // texture file paths
+const std::string PATH_TEXTURE_GRASS{ "textures/grass/grass.png" };
 //const std::string PATH_TEXTURE_GROUND{ "textures/ground/grass.png" };
 const std::string PATH_TEXTURE_GROUND{ "textures/skybox/negy.jpg" };
 const std::string PATH_TEXTURE_HORSE{ "textures/horse/zebra.jpg" };
@@ -129,8 +130,9 @@ const std::string PATH_TEXTURE_SKYBOX[] = {
 };
 
 // material-related constants
-const GLfloat MATERIAL_SHININESS_HORSE{ 8.0f };
+const GLfloat MATERIAL_SHININESS_GRASS{ 16.0f };
 const GLfloat MATERIAL_SHININESS_GROUND{ 16.0f };
+const GLfloat MATERIAL_SHININESS_HORSE{ 8.0f };
 
 // rendering constants
 const GLfloat RENDERING_LINE_WIDTH{ 2.0f };
@@ -194,6 +196,7 @@ const glm::vec4 COLOR_AXES[]{
     glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
     glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
     glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) };
+const glm::vec4 COLOR_GRASS{ glm::vec4(0.5f, 0.7f, 0.1f, 1.0f) };
 const glm::vec4 COLOR_GRID{ glm::vec4(0.7f, 0.7f, 0.7f, 1.0f) };
 const glm::vec4 COLOR_GROUND{ glm::vec4(0.9f, 0.9f, 0.9f, 1.0f) };
 const std::pair<GLfloat, glm::vec3> ROTATION_AXES[]{
@@ -268,9 +271,9 @@ const GLuint JOINT_TORSO{ 10 };
 
 // pathing-related constants
 const GLfloat MODEL_SPEED{ 1.0f };
-const GLfloat PATHING_DIRECTION_MIN{ 0.0f };
-const GLfloat PATHING_DIRECTION_MAX{ 15.0f };
-const GLfloat PATHING_DISTANCE_MIN{ 2.0f };
+const GLfloat PATHING_DIRECTION_MIN{ 10.0f };
+const GLfloat PATHING_DIRECTION_MAX{ 45.0f };
+const GLfloat PATHING_DISTANCE_MIN{ 1.0f };
 const GLfloat PATHING_DISTANCE_MAX{ 4.0f };
 const GLfloat PATHING_SPEED{ 1.0f };
 const GLuint PATH_COUNT{ 15 };

@@ -69,6 +69,13 @@ void RenderedEntity::setPosition(const glm::vec3& value) {
     m_position = value;
 }
 
+void RenderedEntity::setRotation(GLfloat value) {
+    // set entity position
+    m_rotationMatrix = glm::rotate(glm::mat4(),
+        glm::radians(value),
+        AXIS_Y);
+}
+
 void RenderedEntity::setRightVector(const glm::vec3& value) {
     // update entity right vector
     m_right = value;
@@ -91,28 +98,41 @@ void RenderedEntity::move(Transform::Displacement direction) {
     switch (direction) {
     case Transform::Displacement::RANDOM:
         m_position.x = static_cast<GLfloat>(rand()
-            % TRANSFORMATION_RANDOM_DISPLACEMENT);
+            % TRANSFORMATION_RANDOM_DISPLACEMENT)
+            * m_scalingRelative.x;
         m_position.z = static_cast<GLfloat>(rand()
-            % TRANSFORMATION_RANDOM_DISPLACEMENT);
+            % TRANSFORMATION_RANDOM_DISPLACEMENT)
+            * m_scalingRelative.x;
         break;
     case Transform::Displacement::FRONT:
-        m_position += m_front
+        m_position.x += m_front.x
             * s_speedCurrent
-            * TRANSFORMATION_INCREMENT_TRANSLATION;
+            * TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scalingRelative.x;
+        m_position.z += m_front.z
+            * s_speedCurrent
+            * TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scalingRelative.x;
         break;
     case Transform::Displacement::UP:
-        m_position.x += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_position.x += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scalingRelative.x;
         break;
     case Transform::Displacement::DOWN:
-        m_position.x -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_position.x -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scalingRelative.x;
         break;
     case Transform::Displacement::LEFT:
-        m_position.z -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_position.z -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scalingRelative.x;
         break;
     case Transform::Displacement::RIGHT:
-        m_position.z += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_position.z += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_scalingRelative.x;
         break;
     }
+
+    clampPosition();
 }
 
 void RenderedEntity::reset() {
@@ -217,6 +237,19 @@ void RenderedEntity::setColorShaderAttributes(Shader* shader) const {
 void RenderedEntity::setDepthShaderAttributes(Shader* shader) const {
     // set shader attributes
     shader->setDepthAttributes(m_VAO, m_VBO, m_EBO);
+}
+
+void RenderedEntity::clampPosition() {
+    // clamp entity position
+    if (m_position.x > POSITION_MAX)
+        m_position.x = POSITION_MAX;
+    else if (m_position.z > POSITION_MAX)
+        m_position.z = POSITION_MAX;
+
+    if (m_position.x < POSITION_MIN)
+        m_position.x = POSITION_MIN;
+    else if (m_position.z < POSITION_MIN)
+        m_position.z = POSITION_MIN;
 }
 
 void RenderedEntity::initializeModelEntity(GLfloat vertices[],

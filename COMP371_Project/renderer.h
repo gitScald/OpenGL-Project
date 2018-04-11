@@ -101,6 +101,7 @@ private:
     void initialize();
     void initializeAnimation();
     void initializeFrame();
+    void initializeGrass();
     void initializeGround();
     void initializeLights();
     void initializeMaterial();
@@ -113,6 +114,7 @@ private:
 
     // rendered elements
     void renderFrame();
+    void renderGrass(Shader* shader, GLfloat deltaTime);
     void renderGround(Shader* shader);
     void renderLights(GLfloat deltaTime);
     void renderModels(Shader* shader, GLfloat deltaTime);
@@ -142,9 +144,9 @@ private:
     std::vector<Model*> m_models;
     std::vector<Path*> m_paths;
     std::vector<RenderedEntity*> m_entities;
+    std::vector<glm::vec3> m_modelPositions;
+    std::vector<glm::vec3> m_modelScales;
     glm::mat4 m_modelMatrix;
-    glm::vec3 m_modelPositions[TROOP_COUNT];
-    glm::vec3 m_modelScales[TROOP_COUNT];
     glm::vec3 m_moonPosition;
     glm::vec3 m_sunPosition;
     glm::vec4 m_rimLightColor{ COLOR_LIGHT_DAY };

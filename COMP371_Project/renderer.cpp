@@ -57,39 +57,46 @@ void Renderer::moveModel(GLuint model,
     // move model around the grid
     switch (direction) {
     case Transform::Displacement::RANDOM:
-        m_modelPositions[model].x = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX);
-        m_modelPositions[model].z = static_cast<GLfloat>(rand()
-            % GRID_SIZE - POSITION_MAX);
+        m_modelPositions.at(model).x = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX)
+            * m_models.at(model)->getScale();
+        m_modelPositions.at(model).z = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX)
+            * m_models.at(model)->getScale();
         break;
     case Transform::Displacement::UP:
-        m_modelPositions[model].x += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions.at(model).x += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(model)->getScale();
         break;
     case Transform::Displacement::DOWN:
-        m_modelPositions[model].x -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions.at(model).x -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(model)->getScale();
         break;
     case Transform::Displacement::LEFT:
-        m_modelPositions[model].z -= TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions.at(model).z -= TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(model)->getScale();
         break;
     case Transform::Displacement::RIGHT:
-        m_modelPositions[model].z += TRANSFORMATION_INCREMENT_TRANSLATION;
+        m_modelPositions.at(model).z += TRANSFORMATION_INCREMENT_TRANSLATION
+            * m_models.at(model)->getScale();
         break;
     }
-    std::cout << "after moving, position z = " << m_modelPositions[model].z << std::endl;
 
     // clamp position between min and max values (the grid)
     clampModelPosition(model);
 
     // pass position value to model
-    m_models.at(model)->setPosition(m_modelPositions[model]);
-
-    std::cout << "new model position z = " << m_models.at(model)->getPosition().z << std::endl;
+    m_models.at(model)->setPosition(glm::vec3(m_modelPositions.at(model).x
+            / m_models.at(model)->getScale(),
+        m_modelPositions.at(model).y,
+        m_modelPositions.at(model).z
+            / m_models.at(model)->getScale()));
 }
 
 void Renderer::resetModel(GLuint model) {
     // reset model
-    m_modelPositions[model] = MODEL_POSITION_RELATIVE_TORSO;
-    m_modelScales[model] = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_modelPositions.at(model) = MODEL_POSITION_RELATIVE_TORSO;
+    m_modelScales.at(model) = glm::vec3(1.0f, 1.0f, 1.0f);
     m_models.at(model)->reset();
 }
 
@@ -148,10 +155,10 @@ void Renderer::scaleModel(GLuint model,
     // scale model up or down
     switch (value) {
     case Transform::Scale::INCREASE:
-        m_modelScales[model] += TRANSFORMATION_INCREMENT_SCALING;
+        m_modelScales.at(model) += TRANSFORMATION_INCREMENT_SCALING;
         break;
     case Transform::Scale::DECREASE:
-        m_modelScales[model] -= TRANSFORMATION_INCREMENT_SCALING;
+        m_modelScales.at(model) -= TRANSFORMATION_INCREMENT_SCALING;
         break;
     }
 
@@ -159,7 +166,7 @@ void Renderer::scaleModel(GLuint model,
     clampModelScale(model);
 
     // pass scale value to model
-    m_models.at(model)->scale(m_modelScales[model]);
+    m_models.at(model)->scale(m_modelScales.at(model));
 }
 
 void Renderer::render(GLfloat deltaTime) {
@@ -394,8 +401,8 @@ void Renderer::initialize() {
 
     // initialize model positions and scales
     for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
-        m_modelPositions[i] = MODEL_POSITION_RELATIVE_TORSO;
-        m_modelScales[i] = glm::vec3(1.0f, 1.0f, 1.0f);
+        m_modelPositions.push_back(MODEL_POSITION_RELATIVE_TORSO);
+        m_modelScales.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
     // reserve capacity for entities vector
@@ -410,6 +417,7 @@ void Renderer::initialize() {
     // call separate initialization methods
     initializeFrame();
     initializeGround();
+    initializeGrass();
     initializeMaterial();
     for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
         initializeAnimation();
@@ -607,6 +615,39 @@ void Renderer::initializeFrame() {
     glEnableVertexAttribArray(positionLocation);
 }
 
+void Renderer::initializeGrass() {
+    // vertex data
+    GLuint verticesSize;
+    GLfloat* verticesGrass = VertexLoader::loadGrassVertices(&verticesSize);
+
+    GLuint indicesSize;
+    GLuint* indicesGrass = VertexLoader::loadGrassIndices(&indicesSize);
+
+    // initialize ground material
+    m_materials.push_back(new Material(
+        Texture(PATH_TEXTURE_GRASS,
+            GL_RGBA,
+            GL_RGBA,
+            GL_REPEAT,
+            GL_LINEAR).getID(),
+        MATERIAL_SHININESS_GROUND));
+
+    // add ground entity to entities vector
+    m_entities.push_back(new RenderedEntity(
+        m_shaderEntity,
+        POSITION_ORIGIN,
+        POSITION_ORIGIN,
+        verticesGrass,
+        verticesSize,
+        indicesGrass,
+        indicesSize));
+    delete[] verticesGrass;
+    delete[] indicesGrass;
+
+    // set ground color
+    m_entities.at(1)->setColor(COLOR_GRASS);
+}
+
 void Renderer::initializeGround() {
     // vertex data
     GLuint verticesSize;
@@ -618,10 +659,11 @@ void Renderer::initializeGround() {
     // initialize ground material
     m_materials.push_back(new Material(
         Texture(PATH_TEXTURE_GROUND,
-        GL_RGB,
-        GL_REPEAT,
-        GL_LINEAR).getID(),
-        MATERIAL_SHININESS_GROUND));
+            GL_RGB,
+            GL_RGB,
+            GL_REPEAT,
+            GL_LINEAR).getID(),
+            MATERIAL_SHININESS_GRASS));
 
     // add ground entity to entities vector
     m_entities.push_back(new RenderedEntity(
@@ -693,10 +735,11 @@ void Renderer::initializeMaterial() {
     // initialize model material
     m_materials.push_back(new Material(
         Texture(PATH_TEXTURE_HORSE,
-        GL_RGB,
-        GL_CLAMP_TO_EDGE,
-        GL_LINEAR).getID(),
-        MATERIAL_SHININESS_HORSE));
+            GL_RGB,
+            GL_RGB,
+            GL_CLAMP_TO_EDGE,
+            GL_LINEAR).getID(),
+            MATERIAL_SHININESS_HORSE));
 }
 
 void Renderer::initializeModel() {
@@ -802,7 +845,7 @@ void Renderer::initializeModel() {
     GLuint modelIndex = m_models.size() - 1;
 
     // get indices of above entities
-    GLuint entitiesHead = modelIndex * 11 + 1;
+    GLuint entitiesHead = modelIndex * 11 + 2;
     GLuint entitiesLegLowerFrontRight = entitiesHead + 1;
     GLuint entitiesLegLowerFrontLeft = entitiesHead + 2;
     GLuint entitiesLegLowerBackRight = entitiesHead + 3;
@@ -1029,6 +1072,9 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
     // render models to depth texture
     renderModels(m_shaderShadow, deltaTime);
 
+    // render grass to depth texture
+    renderGrass(m_shaderShadow, deltaTime);
+
     // unbind shadow map framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 }
@@ -1052,19 +1098,19 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     // shader uniforms: lighting
     Shader::useProgram(m_shaderEntity->getProgramID());
 
-    // use ground material and depth texture
+    // render ground
     m_materials.at(0)->use(m_shaderEntity);
     Shader::activateTextureUnit(TEXTURE_UNIT_DEPTH_MAP);
     Shader::bindCubemapTexture(m_shadowMap->getDepthTextureID());
-
-    // render ground
     renderGround(m_shaderEntity);
 
-    // shader uniforms: entity material
-    m_materials.at(1)->use(m_shaderEntity);
-
     // render models
+    m_materials.at(2)->use(m_shaderEntity);
     renderModels(m_shaderEntity, deltaTime);
+
+    // render grass
+    m_materials.at(1)->use(m_shaderEntity);
+    renderGrass(m_shaderEntity, deltaTime);
 
     // render light
     renderLights(deltaTime);
@@ -1113,6 +1159,26 @@ void Renderer::renderFrame() {
 
     // revert line width to normal
     glLineWidth(1.0f);
+}
+
+void Renderer::renderGrass(Shader* shader, GLfloat deltaTime) {
+    // disable back face culling
+    //glDisable(GL_CULL_FACE);
+
+    // set shader attributes
+    if (shader == m_shaderShadow)
+        m_entities.at(1)->setDepthShaderAttributes(shader);
+    else if (shader == m_shaderEntity)
+        m_entities.at(1)->setColorShaderAttributes(shader);
+
+    // pass model matrix to shader and render
+    glm::mat4 modelMatrix = m_entities.at(1)->getModelMatrix(
+        getWorldOrientation());
+    shader->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
+    m_entities.at(1)->render(m_primitive);
+
+    // re-enable back face culling
+    //glEnable(GL_CULL_FACE);
 }
 
 void Renderer::renderGround(Shader* shader) {
@@ -1280,37 +1346,23 @@ glm::vec3 Renderer::getWorldAxis(const glm::vec3& axis) const {
 
 void Renderer::clampModelPosition(GLuint model) {
     // clamp model position
-    glm::vec3 actualPosition = m_modelPositions[model]
-        * m_models.at(model)->getScale();
-    std::cout << "actual position z = " << actualPosition.z << std::endl;
+    if (m_modelPositions.at(model).x > POSITION_MAX)
+        m_modelPositions.at(model).x = POSITION_MAX;
+    else if (m_modelPositions.at(model).z > POSITION_MAX)
+        m_modelPositions.at(model).z = POSITION_MAX;
 
-    if (actualPosition.x > POSITION_MAX)
-        actualPosition.x = POSITION_MAX;
-    else if (actualPosition.z > POSITION_MAX)
-        actualPosition.z = POSITION_MAX;
-
-    if (actualPosition.x < POSITION_MIN)
-        actualPosition.x = POSITION_MIN;
-    else if (actualPosition.z < POSITION_MIN)
-        actualPosition.z = POSITION_MIN;
-
-    /*if (m_modelPositions[model].x > POSITION_MAX)
-        m_modelPositions[model].x = POSITION_MAX;
-    else if (m_modelPositions[model].z > POSITION_MAX)
-        m_modelPositions[model].z = POSITION_MAX;
-
-    if (m_modelPositions[model].x < POSITION_MIN)
-        m_modelPositions[model].x = POSITION_MIN;
-    else if (m_modelPositions[model].z < POSITION_MIN)
-        m_modelPositions[model].z = POSITION_MIN;*/
+    if (m_modelPositions.at(model).x < POSITION_MIN)
+        m_modelPositions.at(model).x = POSITION_MIN;
+    else if (m_modelPositions.at(model).z < POSITION_MIN)
+        m_modelPositions.at(model).z = POSITION_MIN;
 }
 
 void Renderer::clampModelScale(GLuint model) {
     // clamp model scale
-    if (m_modelScales[model].x > TRANSFORMATION_SCALE_MAX)
-        m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MAX);
-    else if (m_modelScales[model].x < TRANSFORMATION_SCALE_MIN)
-        m_modelScales[model] = glm::vec3(TRANSFORMATION_SCALE_MIN);
+    if (m_modelScales.at(model).x > TRANSFORMATION_SCALE_MAX)
+        m_modelScales.at(model) = glm::vec3(TRANSFORMATION_SCALE_MAX);
+    else if (m_modelScales.at(model).x < TRANSFORMATION_SCALE_MIN)
+        m_modelScales.at(model) = glm::vec3(TRANSFORMATION_SCALE_MIN);
 }
 
 glm::vec4 Renderer::lerpColor(const glm::vec4& start,

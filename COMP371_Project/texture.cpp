@@ -11,6 +11,7 @@ void Texture::free() const {
 }
 
 void Texture::initialize(const std::string& path,
+    GLenum internal,
     GLenum format,
     GLenum wrapping,
     GLenum filtering) {    
@@ -30,11 +31,12 @@ void Texture::initialize(const std::string& path,
     std::cout << "Loading texture from file: \"" << path
         << "\"..." << std::endl;
     int width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
     stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D,
             0,
-            GL_RGB,
+            internal,
             width,
             height,
             0,

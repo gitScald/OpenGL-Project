@@ -56,6 +56,7 @@ public:
     static void setSpeedCurrent(GLfloat value);
     void setJointRotation(GLuint joint, GLfloat angle);
     void setPosition(const glm::vec3& value);
+    void setRotation(GLfloat value);
 
     // transformations
     void move(Transform::Displacement direction);
@@ -85,6 +86,7 @@ public:
     void setDepthShaderAttributes(Shader* shader) const;
 
 private:
+    void clampPosition();
     void updateColliderRadius();
     void updateVectors();
 

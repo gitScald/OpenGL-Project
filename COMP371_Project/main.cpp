@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
     while (!glfwWindowShouldClose(window)) {
         // get delta time since last frame
         frameCurrent = static_cast<GLfloat>(glfwGetTime());
-        deltaTime = frameCurrent - frameLast;
+        deltaTime = std::min(frameCurrent - frameLast, 1.0f/60.0f);
         frameLast = frameCurrent;
 
         // display framerate in window title

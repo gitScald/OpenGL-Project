@@ -101,6 +101,7 @@ public:
     void setFrontVector(const glm::vec3& value);
     void setPivot(const glm::vec3& value);
     void setPosition(const glm::vec3& value);
+    void setRotation(GLfloat value);
     void setRightVector(const glm::vec3& value);
     void lockRotation(bool toggle);
     void lockScaling(bool toggle);
@@ -120,6 +121,7 @@ public:
     void setDepthShaderAttributes(Shader* shader) const;
 
 private:
+    void clampPosition();
     void initializeModelEntity(GLfloat vertices[],
         GLuint verticesSize);
     void initializeRegularEntity(GLfloat vertices[],

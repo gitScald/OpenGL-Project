@@ -17,10 +17,11 @@
 class Texture {
 public:
     Texture(const std::string& path,
+        GLenum internal,
         GLenum format,
         GLenum wrapping,
         GLenum filtering) {
-        initialize(path, format, wrapping, filtering);
+        initialize(path, internal, format, wrapping, filtering);
     }
     Texture(const Texture& texture)
         : m_ID{ texture.m_ID } {}
@@ -36,6 +37,7 @@ public:
 
 private:
     void initialize(const std::string& path,
+        GLenum internal,
         GLenum format,
         GLenum wrapping,
         GLenum filtering);
