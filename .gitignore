@@ -1,6 +1,7 @@
 # Ignore project-specific folders
 COMP371_Project/data/
 COMP371_Project/wip/
+submission/
 
 # Ignore configuration folders
 Debug/

@@ -13,3 +13,7 @@ Retrieved from [https://opengameart.org/content/grass-texture]
 SKYBOX TEXTURE:
 Emil Persson ("Humus")
 Retrieved from [http://www.humus.name/Textures/Meadow.zip]
+
+RAINDROP TEXTURE:
+Moses Scott
+Retrieved from [http://mosesbydesign.com/assets/textures/particles/raindrop-3.png]

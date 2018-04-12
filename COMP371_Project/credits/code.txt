@@ -1,0 +1,9 @@
+POINT SHADOWS:
+Inspired by (but never copied from!):
+[https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows]
+[http://www.sunandblackcat.com/tipFullView.php?topicid=36]
+
+PARTICLE EFFECTS:
+Inspired by (but never copied from!):
+[https://learnopengl.com/In-Practice/2D-Game/Particles]
+[http://www.opengl-tutorial.org/intermediate-tutorials/billbards-particles/particles-instancing/]
