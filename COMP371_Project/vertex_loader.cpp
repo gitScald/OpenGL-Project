@@ -143,24 +143,24 @@ GLfloat* VertexLoader::loadGrassVertices(GLuint* size) {
     GLfloat* verticesGrass = new GLfloat[96] {
         // quad 1
         // position             // normal           // texture
-        -0.5f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -0.5f,  2.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
         -0.5f,  0.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 
          0.5f,  0.0f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-         0.5f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+         0.5f,  2.0f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
 
          // quad 2
         // position             // normal           // texture
-        -hypo,  1.0f,  vert,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -hypo,  2.0f,  vert,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
         -hypo,  0.0f,  vert,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
          hypo,  0.0f, -vert,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-         hypo,  1.0f, -vert,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+         hypo,  2.0f, -vert,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
 
          // quad 3
         // position             // normal           // texture
-        -hypo,  1.0f, -vert,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -hypo,  2.0f, -vert,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
         -hypo,  0.0f, -vert,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
          hypo,  0.0f,  vert,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-         hypo,  1.0f,  vert,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+         hypo,  2.0f,  vert,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
     };
 
     *size = 96 * sizeof(GLfloat);

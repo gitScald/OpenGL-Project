@@ -10,6 +10,9 @@ out vec3 o_fragPosition;
 out vec3 o_fragNormal;
 out vec2 o_textureCoordinate;
 
+uniform float u_time;
+uniform float u_windStrength;
+uniform vec3 u_windDirection;
 uniform mat4 u_modelMat;
 uniform mat4 u_viewMat;
 uniform mat4 u_projectionMat;
@@ -18,14 +21,26 @@ void main() {
     // fragment position in world space
     o_fragPosition = vec3(u_modelMat * vec4(i_position + i_offset, 1.0f));
 
+    vec3 displacement = u_windDirection
+        * u_windStrength
+        * sin(u_time)
+        * cos(o_fragPosition.x)
+        * i_position.y;
+
+    vec3 newPosition = i_position + displacement;
+    vec3 newNormal = normalize(i_normal + displacement);
+
+    // fragment position in world space
+    o_fragPosition = vec3(u_modelMat * vec4(newPosition + i_offset, 1.0f));
+
     // fragment position in view space
-    o_fragViewPosition = u_viewMat * u_modelMat * vec4(i_position + i_offset, 1.0f);
+    o_fragViewPosition = u_viewMat * u_modelMat * vec4(newPosition + i_offset, 1.0f);
 
     // fragment normal with scaling effects discarded
-    o_fragNormal = transpose(inverse(mat3(u_modelMat))) * i_normal;
+    o_fragNormal = transpose(inverse(mat3(u_modelMat))) * newNormal;
 
     // fragment texture coordinates
     o_textureCoordinate = i_texture;
 
-    gl_Position = u_projectionMat * u_viewMat * u_modelMat * vec4(i_position + i_offset, 1.0f);
+    gl_Position = u_projectionMat * u_viewMat * u_modelMat * vec4(newPosition + i_offset, 1.0f);
 }

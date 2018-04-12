@@ -687,6 +687,23 @@ void Renderer::initializeGrass() {
         GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    offset[GRASS_COUNT];
+    for (GLuint i{ 0 }; i != GRASS_COUNT; ++i) {
+        offset[i].x = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX);
+        offset[i].y = 0.0f;
+        offset[i].z = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX);
+    }
+
+    glGenBuffers(1, &m_grassVBOPos2);
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBOPos2);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(glm::vec3) * GRASS_COUNT,
+        &offset[0],
+        GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     // vertex data
     GLuint verticesSize;
     GLfloat* verticesGrass = VertexLoader::loadGrassVertices(&verticesSize);
@@ -746,17 +763,34 @@ void Renderer::initializeGrass() {
         (void*)0);
     glVertexAttribDivisor(3, 1);
 
-    // initialize ground material
+    // initialize grass materials
+    Shader::useProgram(m_shaderGrass->getProgramID());
+    m_shaderGrass->setUniformVec4(UNIFORM_COLOR,
+        COLOR_GRASS);
     m_materials.push_back(new Material(
-        Texture(PATH_TEXTURE_GRASS,
+        Texture(PATH_TEXTURE_GRASS_0,
             GL_RGBA,
             GL_RGBA,
             GL_REPEAT,
             GL_LINEAR).getID(),
         MATERIAL_SHININESS_GRASS));
-    Shader::useProgram(m_shaderGrass->getProgramID());
-    m_shaderGrass->setUniformVec4(UNIFORM_COLOR,
-        COLOR_GRASS);
+    m_materials.push_back(new Material(
+        Texture(PATH_TEXTURE_GRASS_1,
+            GL_RGBA,
+            GL_RGBA,
+            GL_REPEAT,
+            GL_LINEAR).getID(),
+        MATERIAL_SHININESS_GRASS));
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBOPos2);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(GLfloat),
+        (void*)0);
+    glVertexAttribDivisor(3, 1);
 }
 
 void Renderer::initializeGround() {
@@ -1213,12 +1247,14 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderGround(m_shaderEntity);
 
     // render models
-    m_materials.at(2)->use(m_shaderEntity);
+    m_materials.at(3)->use(m_shaderEntity);
     renderModels(m_shaderEntity, deltaTime);
 
     // render grass
     m_materials.at(1)->use(m_shaderGrass);
-    renderGrass(deltaTime);
+    renderGrass(deltaTime, 0);
+    m_materials.at(2)->use(m_shaderGrass);
+    renderGrass(deltaTime, 1);
 
     // render light
     renderLights(deltaTime);
@@ -1269,7 +1305,8 @@ void Renderer::renderFrame() {
     glLineWidth(1.0f);
 }
 
-void Renderer::renderGrass(GLfloat deltaTime) {
+void Renderer::renderGrass(GLfloat deltaTime,
+    GLuint grassVersion) {
     Shader::useProgram(m_shaderGrass->getProgramID());
     m_shaderGrass->setUniformMat4(UNIFORM_MATRIX_MODEL,
         getWorldOrientation());
@@ -1277,6 +1314,13 @@ void Renderer::renderGrass(GLfloat deltaTime) {
         Camera::get().getViewMatrix());
     m_shaderGrass->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
         Camera::get().getProjectionMatrix());
+    m_shaderGrass->setUniformFloat(UNIFORM_WIND_TIME,
+        m_currentTime);
+    m_shaderGrass->setUniformFloat(UNIFORM_WIND_STRENGTH,
+        WIND_STRENGTH * sin(m_currentTime));
+    m_shaderGrass->setUniformVec3(UNIFORM_WIND_DIRECTION,
+        glm::normalize(
+            glm::vec3(sin(m_currentTime), 0.0f, cos(m_currentTime))));
 
     glBindVertexArray(m_grassVAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_grassVBO);
@@ -1303,7 +1347,9 @@ void Renderer::renderGrass(GLfloat deltaTime) {
         8 * sizeof(GLfloat),
         (void*)(6 * sizeof(GLfloat)));
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBOPos);
+    glBindBuffer(GL_ARRAY_BUFFER, grassVersion == 0
+        ? m_grassVBOPos
+        : m_grassVBOPos2);
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3,
         3,

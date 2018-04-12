@@ -103,6 +103,11 @@ const std::string UNIFORM_FOG_COLOR{ "u_fog.color" };
 const std::string UNIFORM_FOG_DENSITY{ "u_fog.density" };
 const std::string UNIFORM_FOG_ENABLED{ "u_fogEnabled" };
 
+// shadow uniforms: grass
+const std::string UNIFORM_WIND_TIME{ "u_time" };
+const std::string UNIFORM_WIND_DIRECTION{ "u_windDirection" };
+const std::string UNIFORM_WIND_STRENGTH{ "u_windStrength" };
+
 // shader file paths
 const std::string PATH_VERTEX_ENTITY{ "shaders/entity/vertex.shdr" };
 const std::string PATH_FRAGMENT_ENTITY{ "shaders/entity/fragment.shdr" };
@@ -119,7 +124,8 @@ const std::string PATH_VERTEX_SKYBOX{ "shaders/skybox/vertex.shdr" };
 const std::string PATH_FRAGMENT_SKYBOX{ "shaders/skybox/fragment.shdr" };
 
 // texture file paths
-const std::string PATH_TEXTURE_GRASS{ "textures/grass/grass.png" };
+const std::string PATH_TEXTURE_GRASS_0{ "textures/grass/grass.png" };
+const std::string PATH_TEXTURE_GRASS_1{ "textures/grass/_grass.png" };
 //const std::string PATH_TEXTURE_GROUND{ "textures/ground/grass.png" };
 const std::string PATH_TEXTURE_GROUND{ "textures/skybox/negy.jpg" };
 const std::string PATH_TEXTURE_HORSE{ "textures/horse/zebra.jpg" };
@@ -290,6 +296,7 @@ const GLfloat FOG_DENSITY{ 0.025f };
 const GLuint GRASS_COUNT{ 512 };
 const glm::vec3 GRASS_SCALE_MAX{ glm::vec3(1.0f, 1.0f, 1.0f) };
 const glm::vec3 GRASS_SCALE_MIN{ glm::vec3(0.7f, 0.7f, 0.7f) };
+const GLfloat WIND_STRENGTH{ 0.5f };
 
 // particle-related constants
 const GLuint PARTICLE_COUNT{ 10 };

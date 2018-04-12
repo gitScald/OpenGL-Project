@@ -160,19 +160,20 @@ float fogFactor() {
 void main() {
     // discard fragment if in alpha channel
     vec4 textureColor = texture(u_material.diffuse, o_textureCoordinate);
-    if (textureColor.a < 0.1f)
+    if (textureColor.a < 0.3f)
         discard;
 
     // calculate combined lighting
-    vec3 fragColor = lightingAmbient()
-        + lightingDiffuse();
-        + lightingSpecular()
-        + lightingRim();
+    vec3 fragColor = //lightingAmbient()
+        //+ lightingDiffuse()
+        //+ lightingSpecular()
+        textureColor.rgb;
+        //+ lightingRim();
 
-    fragColor *= attenuationFactor();
+    //fragColor *= attenuationFactor();
 
     fragColor = fogEnabled() * mix(u_fog.color.rgb, fragColor, fogFactor())
-        + (1.0f - fogEnabled()) * fragColor;
+        + (1.0f - fogEnabled()) * fragColor * lightingRim();
     
     o_fragColor = vec4(fragColor, 1.0f);
 }

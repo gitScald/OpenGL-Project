@@ -117,7 +117,7 @@ private:
 
     // rendered elements
     void renderFrame();
-    void renderGrass(GLfloat deltaTime);
+    void renderGrass(GLfloat deltaTime, GLuint grassVersion);
     void renderGround(Shader* shader);
     void renderLights(GLfloat deltaTime);
     void renderModels(Shader* shader, GLfloat deltaTime);
@@ -169,6 +169,7 @@ private:
     GLuint m_grassVAO;
     GLuint m_grassVBO;
     GLuint m_grassVBOPos;
+    GLuint m_grassVBOPos2;
     GLuint m_grassEBO;
     GLfloat m_animationSpeed{ ANIMATION_SPEED };
     GLfloat m_animationSpeedCurrent{ ANIMATION_SPEED };
