@@ -26,6 +26,8 @@ public:
     glm::mat4 getViewMatrix();
     glm::mat4 getProjectionMatrix();
     const glm::vec3& getPosition() const;
+    const glm::vec3& getRightVector() const;
+    const glm::vec3& getUpVector() const;
     GLuint getViewportWidth() const;
     GLuint getViewportHeight() const;
     GLfloat getMouseX() const;

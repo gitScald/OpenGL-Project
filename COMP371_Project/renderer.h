@@ -10,6 +10,7 @@
 #include "light_source.h"
 #include "material.h"
 #include "model.h"
+#include "particle.h"
 #include "path.h"
 #include "rendered_entity.h"
 #include "shader.h"
@@ -83,7 +84,9 @@ public:
 
 private:
     Renderer()
-        : m_shaderEntity{ new Shader(PATH_VERTEX_ENTITY,
+        : m_shaderBlade{ new Shader(PATH_VERTEX_BLADE,
+            PATH_FRAGMENT_BLADE) },
+        m_shaderEntity { new Shader(PATH_VERTEX_ENTITY,
             PATH_FRAGMENT_ENTITY) },
         m_shaderFrame{ new Shader(PATH_VERTEX_FRAME,
             PATH_FRAGMENT_FRAME) },
@@ -121,6 +124,8 @@ private:
     void renderGround(Shader* shader);
     void renderLights(GLfloat deltaTime);
     void renderModels(Shader* shader, GLfloat deltaTime);
+    void renderParticles(GLfloat deltaTime,
+        const glm::vec3& origin);
 
     // rendering utilities
     const glm::mat4& getWorldOrientation() const;
@@ -137,6 +142,10 @@ private:
     bool isDawnOrDusk() const;
     bool isDay() const;
     bool isNight() const;
+
+    // particles
+    GLuint findParticle();
+    void sortParticles();
     
     static Renderer& s_instance;
     Rendering::Primitive m_primitive{ Rendering::TRIANGLES };
@@ -154,12 +163,14 @@ private:
     glm::vec3 m_sunPosition;
 	glm::vec4 m_fogColor{ COLOR_FOG };
     glm::vec4 m_rimLightColor{ COLOR_LIGHT_DAY };
+    Shader* m_shaderBlade;
     Shader* m_shaderEntity;
     Shader* m_shaderFrame;
     Shader* m_shaderGrass;
     Shader* m_shaderShadow;
     ShadowMap* m_shadowMap;
     Skybox* m_skybox;
+    Particle m_particles[PARTICLE_COUNT];
     GLuint m_axesVAO;
     GLuint m_axesVBO;
     GLuint m_gridVAO;
@@ -171,6 +182,11 @@ private:
     GLuint m_grassVBOPos;
     GLuint m_grassVBOPos2;
     GLuint m_grassEBO;
+    GLuint m_particleVAO;
+    GLuint m_particleVBO;
+    GLuint m_particleVBOPos;
+    GLuint m_particleEBO;
+    GLuint m_lastParticle{ 0 };
     GLfloat m_animationSpeed{ ANIMATION_SPEED };
     GLfloat m_animationSpeedCurrent{ ANIMATION_SPEED };
     GLfloat m_currentTime{ 0.0f };

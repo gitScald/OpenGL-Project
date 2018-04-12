@@ -50,6 +50,14 @@ const glm::vec3& Camera::getPosition() const {
     return m_position;
 }
 
+const glm::vec3& Camera::getRightVector() const {
+    return m_right;
+}
+
+const glm::vec3& Camera::getUpVector() const {
+    return m_upCamera;
+}
+
 GLuint Camera::getViewportWidth() const {
     // return current viewport width
     return m_viewportWidth;

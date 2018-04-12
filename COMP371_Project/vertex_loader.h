@@ -21,10 +21,12 @@ public:
     static GLfloat* loadGrassVertices(GLuint* size);
     static GLfloat* loadGridVertices(GLuint* size);
     static GLfloat* loadGroundVertices(GLuint* size);
+    static GLfloat* loadParticleVertices(GLuint* size);
 
     // index loading
     static GLuint* loadGrassIndices(GLuint* size);
     static GLuint* loadGroundIndices(GLuint* size);
+    static GLuint* loadParticleIndices(GLuint* size);
 };
 
 #endif // !VERTEX_LOADER_H

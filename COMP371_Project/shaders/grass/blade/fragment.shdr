@@ -4,8 +4,22 @@ out vec4 o_fragColor;
 
 in vec2 o_textureCoordinate;
 
+struct RimLighting {
+    vec4 color;
+};
+
 uniform sampler2D u_texture;
+uniform RimLighting u_rim;
+
+vec4 lightingRim() {
+    // rim lighting (simplified)
+    vec4 rim = u_rim.color
+        * texture(u_texture, o_textureCoordinate);
+
+    return rim;
+}
 
 void main() {
-    o_fragColor = texture(u_texture, o_textureCoordinate);
+    o_fragColor = lightingRim();
+    //o_fragColor = vec4(1.0f, 0.0f, 0.0f, 1.0);
 }

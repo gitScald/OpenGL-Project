@@ -391,6 +391,11 @@ void Renderer::updateLightProperties() const {
         LIGHT_RIM_MIN);
     m_shaderGrass->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
         m_rimLightColor);
+
+    // and for the particles
+    Shader::useProgram(m_shaderBlade->getProgramID());
+    m_shaderBlade->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
+        m_rimLightColor);
 }
 
 void Renderer::updateProjectionMatrix() const {
@@ -472,6 +477,7 @@ void Renderer::initialize() {
     initializeFrame();
     initializeGround();
     initializeGrass();
+    initializeParticles();
     initializeMaterial();
     for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
         initializeAnimation();
@@ -1116,6 +1122,55 @@ void Renderer::initializeModel() {
     }
 }
 
+void Renderer::initializeParticles() {
+    for (GLuint i{ 0 }; i != PARTICLE_COUNT; ++i) {
+        m_particles[i].m_life = -1.0f;
+        m_particles[i].m_distanceToCamera = -1.0f;
+    }
+
+    // vertex data
+    GLuint verticesSize;
+    GLfloat* verticesParticle = VertexLoader::loadParticleVertices(&verticesSize);
+
+    // buffers
+    glGenVertexArrays(1, &m_particleVAO);
+    glBindVertexArray(m_particleVAO);
+
+    glGenBuffers(1, &m_particleVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+        verticesSize,
+        verticesParticle,
+        GL_STREAM_DRAW);
+    delete[] verticesParticle;
+
+    GLuint indicesSize;
+    GLuint* indicesParticle = VertexLoader::loadParticleIndices(&indicesSize);
+
+    glGenBuffers(1, &m_particleEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_particleEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        indicesSize,
+        indicesParticle,
+        GL_STREAM_DRAW);
+    delete[] indicesParticle;
+
+    glGenBuffers(1, &m_particleVBOPos);
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleVBOPos);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(glm::vec3) * PARTICLE_COUNT,
+        NULL,
+        GL_STREAM_DRAW);
+
+    m_materials.push_back(new Material(
+        Texture(PATH_TEXTURE_BLADE,
+            GL_RGBA,
+            GL_RGBA,
+            GL_REPEAT,
+            GL_LINEAR).getID(),
+        MATERIAL_SHININESS_GRASS));
+}
+
 void Renderer::initializePaths() {
     // create a sequence of random paths for each horse to follow
     for (GLuint i{ 0 }; i != TROOP_COUNT; ++i) {
@@ -1247,7 +1302,7 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderGround(m_shaderEntity);
 
     // render models
-    m_materials.at(3)->use(m_shaderEntity);
+    m_materials.at(4)->use(m_shaderEntity);
     renderModels(m_shaderEntity, deltaTime);
 
     // render grass
@@ -1255,6 +1310,10 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderGrass(deltaTime, 0);
     m_materials.at(2)->use(m_shaderGrass);
     renderGrass(deltaTime, 1);
+
+    // render particles
+    m_materials.at(3)->use(m_shaderBlade);
+    renderParticles(deltaTime, POSITION_ORIGIN);
 
     // render light
     renderLights(deltaTime);
@@ -1357,6 +1416,9 @@ void Renderer::renderGrass(GLfloat deltaTime,
         GL_FALSE,
         3 * sizeof(GLfloat),
         (void*)0);
+    glVertexAttribDivisor(0, 0);
+    glVertexAttribDivisor(1, 0);
+    glVertexAttribDivisor(2, 0);
     glVertexAttribDivisor(3, 1);
 
     glDrawArraysInstanced(GL_TRIANGLE_STRIP,
@@ -1521,6 +1583,110 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
     glCullFace(GL_BACK);
 }
 
+void Renderer::renderParticles(GLfloat deltaTime,
+    const glm::vec3& origin) {
+    GLuint particleCount = static_cast<GLuint>(deltaTime * 100.0f);
+
+    for (GLuint i{ 0 }; i != particleCount; ++i) {
+        GLuint particle = findParticle();
+        m_particles[particle].m_life = 5.0f;
+        m_particles[particle].m_position = glm::vec3(
+            static_cast<GLfloat>(rand() % GRID_SIZE - POSITION_MAX),
+            LIGHT_POSITION_NOON.y,
+            static_cast<GLfloat>(rand() % GRID_SIZE - POSITION_MAX));
+    }
+
+    glm::vec3 particleData[PARTICLE_COUNT];
+    particleCount = 0;
+    for (GLuint i{ 0 }; i != PARTICLE_COUNT; ++i) {
+        Particle* p = &m_particles[i];
+
+        if (p->m_life > 0.0f) {
+            p->m_life -= deltaTime;
+
+            if (p->m_life > 0.0f) {
+                p->m_velocity += glm::vec3(glm::cos(deltaTime),
+                    -9.81f,
+                    glm::cos(deltaTime))
+                    * 1000.0f
+                    * deltaTime;
+                p->m_position = p->m_velocity * deltaTime;
+                p->m_distanceToCamera = glm::length(p->m_position
+                    - Camera::get().getPosition());
+
+                particleData[particleCount].x = p->m_position.x;
+                particleData[particleCount].y = p->m_position.y;
+                particleData[particleCount].z = p->m_position.z;
+            }
+
+            else
+                p->m_distanceToCamera = -1.0f;
+
+            ++particleCount;
+        }
+    }
+
+    sortParticles();
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleVBOPos);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(glm::vec3) * PARTICLE_COUNT,
+        particleData,
+        GL_STREAM_DRAW);
+    /*glBufferSubData(GL_ARRAY_BUFFER,
+        0,
+        sizeof(glm::vec3) * 3 * particleCount,
+        particleData);*/
+
+    Shader::useProgram(m_shaderBlade->getProgramID());
+    m_materials.at(3)->use(m_shaderBlade);
+    m_shaderBlade->setUniformVec3(UNIFORM_CAMERA_RIGHT,
+        Camera::get().getRightVector());
+    m_shaderBlade->setUniformVec3(UNIFORM_CAMERA_UP,
+        Camera::get().getUpVector());
+    m_shaderBlade->setUniformMat4(UNIFORM_MATRIX_MODEL,
+        Camera::get().getWorldOrientation());
+    m_shaderBlade->setUniformMat4(UNIFORM_MATRIX_VIEW,
+        Camera::get().getViewMatrix());
+    m_shaderBlade->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+        Camera::get().getProjectionMatrix());
+
+    glBindVertexArray(m_particleVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_particleEBO);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(GLfloat),
+        (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(GLfloat),
+        (void*)(3 * sizeof(GLfloat)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleVBOPos);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(GLfloat),
+        (void*)0);
+    glVertexAttribDivisor(0, 0);
+    glVertexAttribDivisor(1, 0);
+    glVertexAttribDivisor(2, 1);
+
+    glDrawArraysInstanced(GL_TRIANGLES,
+        0,
+        6,
+        particleCount);
+}
+
 const glm::mat4& Renderer::getWorldOrientation() const {
     // return world orientation
     return Camera::get().getWorldOrientation();
@@ -1574,4 +1740,26 @@ bool Renderer::isNight() const {
     // night time
     return (m_currentTime >= glm::pi<GLfloat>()
         && m_currentTime < 2.0f * glm::pi<GLfloat>());
+}
+
+GLuint Renderer::findParticle() {
+    for (GLuint i{ m_lastParticle }; i != PARTICLE_COUNT; ++i) {
+        if (m_particles[i].m_life < 0.0f) {
+            m_lastParticle = i;
+            return i;
+        }
+    }
+
+    for (GLuint i{ 0 }; i != m_lastParticle; ++i) {
+        if (m_particles[i].m_life < 0) {
+            m_lastParticle = i;
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+void Renderer::sortParticles() {
+    std::sort(&m_particles[0], &m_particles[PARTICLE_COUNT - 1]);
 }
