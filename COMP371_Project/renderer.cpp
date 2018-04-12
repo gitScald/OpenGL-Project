@@ -260,7 +260,7 @@ void Renderer::updateFogProperties() const {
     // update fog propeties
     Shader::useProgram(m_shaderEntity->getProgramID());
     m_shaderEntity->setUniformVec4(UNIFORM_FOG_COLOR,
-        COLOR_FOG);
+        m_fogColor);
     m_shaderEntity->setUniformFloat(UNIFORM_FOG_DENSITY,
         FOG_DENSITY);
     m_shaderEntity->setUniformBool(UNIFORM_FOG_ENABLED,
@@ -268,6 +268,15 @@ void Renderer::updateFogProperties() const {
 
     // do so for the skybox as well
     m_skybox->updateFogProperties(m_fogEnabled);
+
+    // and for the grass
+    Shader::useProgram(m_shaderGrass->getProgramID());
+    m_shaderGrass->setUniformVec4(UNIFORM_FOG_COLOR,
+        m_fogColor);
+    m_shaderGrass->setUniformFloat(UNIFORM_FOG_DENSITY,
+        FOG_DENSITY);
+    m_shaderGrass->setUniformBool(UNIFORM_FOG_ENABLED,
+        m_fogEnabled);
 }
 
 void Renderer::updateLightPositionsAndColors() {
@@ -281,6 +290,14 @@ void Renderer::updateLightPositionsAndColors() {
 
     // do so for the skybox as well
     m_skybox->updateLightColor(m_lights.at(0)->getColor());
+
+    // and for the grass
+    Shader::useProgram(m_shaderGrass->getProgramID());
+    m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_POSITION,
+        m_lights.at(0)->getWorldPosition(
+            getWorldOrientation()));
+    m_shaderGrass->setUniformVec4(UNIFORM_LIGHT_COLOR,
+        m_lights.at(0)->getColor());
 
     // update sun and moon positions
     if (isNight()) {
@@ -336,6 +353,43 @@ void Renderer::updateLightProperties() const {
     m_shaderEntity->setUniformFloat(UNIFORM_RIM_LIGHT_MIN,
         LIGHT_RIM_MIN);
     m_shaderEntity->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
+        m_rimLightColor);
+
+    // and for the grass
+    Shader::useProgram(m_shaderGrass->getProgramID());
+    if (m_lightsEnabled) {
+        m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
+            m_lights.at(0)->getAmbient());
+        m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
+            m_lights.at(0)->getDiffuse());
+        m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
+            m_lights.at(0)->getSpecular());
+        m_shaderGrass->setUniformFloat(UNIFORM_LIGHT_KC,
+            m_lights.at(0)->getKC());
+        m_shaderGrass->setUniformFloat(UNIFORM_LIGHT_KL,
+            m_lights.at(0)->getKL());
+        m_shaderGrass->setUniformFloat(UNIFORM_LIGHT_KQ,
+            m_lights.at(0)->getKQ());
+    }
+    else {
+        m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_AMBIENT,
+            glm::vec3(1.0f, 1.0f, 1.0f));
+        m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_DIFFUSE,
+            glm::vec3(0.0f, 0.0f, 0.0f));
+        m_shaderGrass->setUniformVec3(UNIFORM_LIGHT_SPECULAR,
+            glm::vec3(0.0f, 0.0f, 0.0f));
+        m_shaderGrass->setUniformFloat(UNIFORM_LIGHT_KC,
+            1.0f);
+        m_shaderGrass->setUniformFloat(UNIFORM_LIGHT_KL,
+            0.0f);
+        m_shaderGrass->setUniformFloat(UNIFORM_LIGHT_KQ,
+            0.0f);
+    }
+    m_shaderGrass->setUniformFloat(UNIFORM_RIM_LIGHT_MAX,
+        LIGHT_RIM_MAX);
+    m_shaderGrass->setUniformFloat(UNIFORM_RIM_LIGHT_MIN,
+        LIGHT_RIM_MIN);
+    m_shaderGrass->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
         m_rimLightColor);
 }
 
@@ -616,12 +670,81 @@ void Renderer::initializeFrame() {
 }
 
 void Renderer::initializeGrass() {
+    glm::vec3 offset[GRASS_COUNT];
+    for (GLuint i{ 0 }; i != GRASS_COUNT; ++i) {
+        offset[i].x = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX);
+        offset[i].y = 0.0f;
+        offset[i].z = static_cast<GLfloat>(rand()
+            % GRID_SIZE - POSITION_MAX);
+    }
+
+    glGenBuffers(1, &m_grassVBOPos);
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBOPos);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(glm::vec3) * GRASS_COUNT,
+        &offset[0],
+        GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     // vertex data
     GLuint verticesSize;
     GLfloat* verticesGrass = VertexLoader::loadGrassVertices(&verticesSize);
 
+    // buffers
+    glGenVertexArrays(1, &m_grassVAO);
+    glBindVertexArray(m_grassVAO);
+
+    glGenBuffers(1, &m_grassVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+        verticesSize,
+        verticesGrass,
+        GL_STATIC_DRAW);
+    delete[] verticesGrass;
+
     GLuint indicesSize;
     GLuint* indicesGrass = VertexLoader::loadGrassIndices(&indicesSize);
+
+    glGenBuffers(1, &m_grassEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_grassEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        indicesSize,
+        indicesGrass,
+        GL_STATIC_DRAW);
+    delete[] indicesGrass;
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)(6 * sizeof(GLfloat)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBOPos);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(GLfloat),
+        (void*)0);
+    glVertexAttribDivisor(3, 1);
 
     // initialize ground material
     m_materials.push_back(new Material(
@@ -630,22 +753,10 @@ void Renderer::initializeGrass() {
             GL_RGBA,
             GL_REPEAT,
             GL_LINEAR).getID(),
-        MATERIAL_SHININESS_GROUND));
-
-    // add ground entity to entities vector
-    m_entities.push_back(new RenderedEntity(
-        m_shaderEntity,
-        POSITION_ORIGIN,
-        POSITION_ORIGIN,
-        verticesGrass,
-        verticesSize,
-        indicesGrass,
-        indicesSize));
-    delete[] verticesGrass;
-    delete[] indicesGrass;
-
-    // set ground color
-    m_entities.at(1)->setColor(COLOR_GRASS);
+        MATERIAL_SHININESS_GRASS));
+    Shader::useProgram(m_shaderGrass->getProgramID());
+    m_shaderGrass->setUniformVec4(UNIFORM_COLOR,
+        COLOR_GRASS);
 }
 
 void Renderer::initializeGround() {
@@ -663,7 +774,7 @@ void Renderer::initializeGround() {
             GL_RGB,
             GL_REPEAT,
             GL_LINEAR).getID(),
-            MATERIAL_SHININESS_GRASS));
+            MATERIAL_SHININESS_GROUND));
 
     // add ground entity to entities vector
     m_entities.push_back(new RenderedEntity(
@@ -845,7 +956,7 @@ void Renderer::initializeModel() {
     GLuint modelIndex = m_models.size() - 1;
 
     // get indices of above entities
-    GLuint entitiesHead = modelIndex * 11 + 2;
+    GLuint entitiesHead = modelIndex * 11 + 1;
     GLuint entitiesLegLowerFrontRight = entitiesHead + 1;
     GLuint entitiesLegLowerFrontLeft = entitiesHead + 2;
     GLuint entitiesLegLowerBackRight = entitiesHead + 3;
@@ -1072,9 +1183,6 @@ void Renderer::renderFirstPass(GLfloat deltaTime) {
     // render models to depth texture
     renderModels(m_shaderShadow, deltaTime);
 
-    // render grass to depth texture
-    renderGrass(m_shaderShadow, deltaTime);
-
     // unbind shadow map framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 }
@@ -1109,8 +1217,8 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderModels(m_shaderEntity, deltaTime);
 
     // render grass
-    m_materials.at(1)->use(m_shaderEntity);
-    renderGrass(m_shaderEntity, deltaTime);
+    m_materials.at(1)->use(m_shaderGrass);
+    renderGrass(deltaTime);
 
     // render light
     renderLights(deltaTime);
@@ -1161,24 +1269,54 @@ void Renderer::renderFrame() {
     glLineWidth(1.0f);
 }
 
-void Renderer::renderGrass(Shader* shader, GLfloat deltaTime) {
-    // disable back face culling
-    //glDisable(GL_CULL_FACE);
-
-    // set shader attributes
-    if (shader == m_shaderShadow)
-        m_entities.at(1)->setDepthShaderAttributes(shader);
-    else if (shader == m_shaderEntity)
-        m_entities.at(1)->setColorShaderAttributes(shader);
-
-    // pass model matrix to shader and render
-    glm::mat4 modelMatrix = m_entities.at(1)->getModelMatrix(
+void Renderer::renderGrass(GLfloat deltaTime) {
+    Shader::useProgram(m_shaderGrass->getProgramID());
+    m_shaderGrass->setUniformMat4(UNIFORM_MATRIX_MODEL,
         getWorldOrientation());
-    shader->setUniformMat4(UNIFORM_MATRIX_MODEL, modelMatrix);
-    m_entities.at(1)->render(m_primitive);
+    m_shaderGrass->setUniformMat4(UNIFORM_MATRIX_VIEW,
+        Camera::get().getViewMatrix());
+    m_shaderGrass->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+        Camera::get().getProjectionMatrix());
 
-    // re-enable back face culling
-    //glEnable(GL_CULL_FACE);
+    glBindVertexArray(m_grassVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_grassEBO);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)(6 * sizeof(GLfloat)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_grassVBOPos);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(GLfloat),
+        (void*)0);
+    glVertexAttribDivisor(3, 1);
+
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP,
+        0,
+        12,
+        GRASS_COUNT);
 }
 
 void Renderer::renderGround(Shader* shader) {
@@ -1229,6 +1367,9 @@ void Renderer::renderLights(GLfloat deltaTime) {
         glm::vec4 newColor{ lerpColor(currentColor, targetColor, 0.1f) };
         m_lights.at(0)->setColor(newColor);
         m_rimLightColor = newColor;
+
+		// lerp between fog color and rim lighting color
+		m_fogColor = lerpColor(m_fogColor, m_rimLightColor, 0.6f);
 
         // update shader properties
         updateLightPositionsAndColors();

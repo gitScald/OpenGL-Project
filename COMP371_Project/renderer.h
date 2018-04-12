@@ -87,6 +87,8 @@ private:
             PATH_FRAGMENT_ENTITY) },
         m_shaderFrame{ new Shader(PATH_VERTEX_FRAME,
             PATH_FRAGMENT_FRAME) },
+        m_shaderGrass{ new Shader(PATH_VERTEX_GRASS,
+            PATH_FRAGMENT_GRASS) },
         m_shaderShadow{ new Shader(PATH_VERTEX_SHADOW,
             PATH_FRAGMENT_SHADOW,
             PATH_GEOMETRY_SHADOW) },
@@ -106,6 +108,7 @@ private:
     void initializeLights();
     void initializeMaterial();
     void initializeModel();
+    void initializeParticles();
     void initializePaths();
 
     // rendering passes
@@ -114,7 +117,7 @@ private:
 
     // rendered elements
     void renderFrame();
-    void renderGrass(Shader* shader, GLfloat deltaTime);
+    void renderGrass(GLfloat deltaTime);
     void renderGround(Shader* shader);
     void renderLights(GLfloat deltaTime);
     void renderModels(Shader* shader, GLfloat deltaTime);
@@ -149,9 +152,11 @@ private:
     glm::mat4 m_modelMatrix;
     glm::vec3 m_moonPosition;
     glm::vec3 m_sunPosition;
+	glm::vec4 m_fogColor{ COLOR_FOG };
     glm::vec4 m_rimLightColor{ COLOR_LIGHT_DAY };
     Shader* m_shaderEntity;
     Shader* m_shaderFrame;
+    Shader* m_shaderGrass;
     Shader* m_shaderShadow;
     ShadowMap* m_shadowMap;
     Skybox* m_skybox;
@@ -161,6 +166,10 @@ private:
     GLuint m_gridVBO;
     GLuint m_lightVAO;
     GLuint m_lightVBO;
+    GLuint m_grassVAO;
+    GLuint m_grassVBO;
+    GLuint m_grassVBOPos;
+    GLuint m_grassEBO;
     GLfloat m_animationSpeed{ ANIMATION_SPEED };
     GLfloat m_animationSpeedCurrent{ ANIMATION_SPEED };
     GLfloat m_currentTime{ 0.0f };

@@ -137,27 +137,30 @@ GLfloat* VertexLoader::loadCubeFullVertices(GLuint* size) {
 }
 
 GLfloat* VertexLoader::loadGrassVertices(GLuint* size) {
+    GLfloat hypo = 0.5f / glm::cos(glm::radians(45.0f));
+    GLfloat vert = hypo * glm::cos(glm::radians(45.0f));
+    
     GLfloat* verticesGrass = new GLfloat[96] {
         // quad 1
         // position             // normal           // texture
-        -0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-        -0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 
-         0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-         0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+        -0.5f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -0.5f,  0.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 
+         0.5f,  0.0f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+         0.5f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
 
          // quad 2
         // position             // normal           // texture
-         0.0f,  1.0f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-         0.0f,  0.0f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
-        -0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-        -0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+        -hypo,  1.0f,  vert,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -hypo,  0.0f,  vert,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+         hypo,  0.0f, -vert,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+         hypo,  1.0f, -vert,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
 
          // quad 3
         // position             // normal           // texture
-         0.5f,  1.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-         0.5f,  0.0f,  0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
-         0.0f,  0.0f, -0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-         0.0f,  1.0f, -0.5f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+        -hypo,  1.0f, -vert,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -hypo,  0.0f, -vert,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+         hypo,  0.0f,  vert,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+         hypo,  1.0f,  vert,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
     };
 
     *size = 96 * sizeof(GLfloat);

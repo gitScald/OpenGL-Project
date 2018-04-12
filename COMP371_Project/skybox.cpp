@@ -24,10 +24,8 @@ void Skybox::render(const glm::mat4& globalModelMatrix,
         modelMatrix);
 
     // activate and bind cubemap texture
-    Shader::activateTextureUnit(m_textureIndex);
+    Shader::activateTextureUnit(m_textureUnit);
     Shader::bindCubemapTexture(m_texture);
-    m_shader.setUniformUInt(UNIFORM_SKYBOX_TEXTURE,
-        m_textureUnit);
 
     // bind vertex array object and render
     Shader::bindVAO(m_VAO);
@@ -144,4 +142,9 @@ void Skybox::initialize(const std::string (&path_textures)[6]) {
     if (successCount == 6)
         std::cout << "Skybox texture loading successful." << std::endl;
     std::cout << std::endl;
+
+    // set shader uniforms
+    Shader::useProgram(m_shader.getProgramID());
+    m_shader.setUniformUInt(UNIFORM_SKYBOX_TEXTURE,
+        m_textureUnit);
 }

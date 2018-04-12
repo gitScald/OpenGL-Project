@@ -56,6 +56,7 @@ const std::string DATA_VERTICES_MODEL;
 const std::string ATTRIBUTE_POSITION{ "i_position" };
 const std::string ATTRIBUTE_NORMAL{ "i_normal" };
 const std::string ATTRIBUTE_TEXTURE{ "i_texture" };
+const std::string ATTRIBUTE_OFFSET{ "i_offset" };
 
 // shader uniforms: general
 const std::string UNIFORM_COLOR{ "u_color" };
@@ -107,6 +108,8 @@ const std::string PATH_VERTEX_ENTITY{ "shaders/entity/vertex.shdr" };
 const std::string PATH_FRAGMENT_ENTITY{ "shaders/entity/fragment.shdr" };
 const std::string PATH_VERTEX_FRAME{ "shaders/frame/vertex.shdr" };
 const std::string PATH_FRAGMENT_FRAME{ "shaders/frame/fragment.shdr" };
+const std::string PATH_VERTEX_GRASS{ "shaders/grass/vertex.shdr" };
+const std::string PATH_FRAGMENT_GRASS{ "shaders/grass/fragment.shdr" };
 const std::string PATH_VERTEX_SHADOW{ "shaders/shadow/vertex.shdr" };
 const std::string PATH_GEOMETRY_SHADOW{ "shaders/shadow/geometry.shdr" };
 const std::string PATH_FRAGMENT_SHADOW{ "shaders/shadow/fragment.shdr" };
@@ -130,8 +133,8 @@ const std::string PATH_TEXTURE_SKYBOX[] = {
 };
 
 // material-related constants
-const GLfloat MATERIAL_SHININESS_GRASS{ 16.0f };
-const GLfloat MATERIAL_SHININESS_GROUND{ 16.0f };
+const GLfloat MATERIAL_SHININESS_GRASS{ 8.0f };
+const GLfloat MATERIAL_SHININESS_GROUND{ 0.0f };
 const GLfloat MATERIAL_SHININESS_HORSE{ 8.0f };
 
 // rendering constants
@@ -282,5 +285,13 @@ const GLuint PATH_COUNT{ 15 };
 const glm::vec4 COLOR_CLEAR{ glm::vec4(0.90f, 0.94f, 0.98f, 1.0f) };
 const glm::vec4 COLOR_FOG{ COLOR_CLEAR };
 const GLfloat FOG_DENSITY{ 0.025f };
+
+// grass-related constants
+const GLuint GRASS_COUNT{ 512 };
+const glm::vec3 GRASS_SCALE_MAX{ glm::vec3(1.0f, 1.0f, 1.0f) };
+const glm::vec3 GRASS_SCALE_MIN{ glm::vec3(0.7f, 0.7f, 0.7f) };
+
+// particle-related constants
+const GLuint PARTICLE_COUNT{ 10 };
 
 #endif // !CONSTANTS_H

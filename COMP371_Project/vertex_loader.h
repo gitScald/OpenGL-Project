@@ -4,6 +4,9 @@
 // GLEW
 #include <gl/glew.h>
 
+// GLM
+#include <glm/glm.hpp>
+
 class VertexLoader {
 public:
     VertexLoader() = delete;

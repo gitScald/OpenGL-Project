@@ -41,28 +41,13 @@ struct RimLighting {
 };
 
 uniform bool u_fogEnabled;
-uniform bool u_shadowsEnabled;
 uniform bool u_texturesEnabled;
-uniform int u_gridSamples;
-uniform float u_gridOffset;
-uniform float u_gridFactor;
-uniform float u_biasMin;
-uniform float u_biasMax;
 uniform vec3 u_cameraPosition;
 uniform vec4 u_color;
-uniform samplerCube u_depthTexture;
 uniform Fog u_fog;
 uniform Light u_light;
 uniform Material u_material;
 uniform RimLighting u_rim;
-
-vec3 g_gridDisk[20] = vec3[] (
-    vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
-    vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
-    vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
-    vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
-    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
-);
 
 bool colorIsAlpha(vec4 color) {
     // alpha blending
@@ -156,52 +141,6 @@ float attenuationFactor() {
     return attenuation;
 }
 
-float inShadow(float minimumDepth, float bias, float rayLength) {
-    // determine whether fragment is in shadow or not
-    return max(sign(rayLength - (minimumDepth + bias)), 0.0f);
-}
-
-float shadowsEnabled() {
-    // check if shadows are enabled or not
-    return float(u_shadowsEnabled);
-}
-
-float shadowFactor() {
-    // shadow mapping calculations
-    vec3 lightDirection = normalize(u_light.position - o_fragPosition);
-
-    // vector between light and fragment
-    vec3 fragToLight = o_fragPosition - u_light.position;
-    float rayLength = length(fragToLight);
-
-    // distance between camera and fragment
-    float cameraToFrag = length(u_cameraPosition - o_fragPosition);
-
-    // take samples around fragment to produce softer shadows (PCF)
-    float shadow = 0.0f;
-    float gridRadius = (u_gridOffset + (cameraToFrag / u_light.planeNearFar.y)) / u_gridFactor;
-    for (int i = 0; i != u_gridSamples; ++i) {
-        float minimumDepth = texture(u_depthTexture, fragToLight + g_gridDisk[i] * gridRadius).r;
-
-        // bring depth value back to (0, u_light.planeNearFar.y) range
-        minimumDepth *= u_light.planeNearFar.y;
-
-        // add offset to limit z-fighting
-        float bias = max(u_biasMax * (1.0f - dot(o_fragNormal, lightDirection)), u_biasMin);
-
-        // increase shadow factor accordingly
-        shadow += inShadow(minimumDepth, bias, rayLength);
-    }
-
-    // average samples
-    shadow /= u_gridSamples;
-
-    // check whether shadows are enabled or not
-    shadow *= shadowsEnabled();
-
-    return shadow;
-}
-
 float fogEnabled() {
     // check whether fog is enabled or not
     return float(u_fogEnabled);
@@ -225,9 +164,13 @@ void main() {
         discard;
 
     // calculate combined lighting
-    vec3 fragColor = (lightingAmbient()
-        + (1.0f - shadowFactor()) * (lightingDiffuse() + lightingSpecular() + lightingRim()));
+    vec3 fragColor = lightingAmbient()
+        + lightingDiffuse();
+        + lightingSpecular()
+        + lightingRim();
+
     fragColor *= attenuationFactor();
+
     fragColor = fogEnabled() * mix(u_fog.color.rgb, fragColor, fogFactor())
         + (1.0f - fogEnabled()) * fragColor;
     
