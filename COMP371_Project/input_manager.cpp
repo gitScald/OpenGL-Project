@@ -388,6 +388,11 @@ void InputManager::processKeyboard(GLFWwindow* window,
         && action == GLFW_PRESS)
         Renderer::get().toggleFog();
 
+    // toggle rain
+    if (key == GLFW_KEY_I
+        && action == GLFW_PRESS)
+        Renderer::get().toggleRain();
+
     // shadow calculations parameters
     if (key == GLFW_KEY_LEFT_BRACKET
         && action == GLFW_PRESS) {

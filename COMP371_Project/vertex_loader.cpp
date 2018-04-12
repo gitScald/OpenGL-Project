@@ -600,11 +600,11 @@ GLfloat* VertexLoader::loadGroundVertices(GLuint* size) {
 
 GLfloat* VertexLoader::loadParticleVertices(GLuint* size) {
     GLfloat* verticesParticle = new GLfloat[20]{
-        // position             // texture
-        -0.5f,  0.5f,  0.0f,    0.0f, 1.0f,
-        -0.5f, -0.5f,  0.0f,    0.0f, 0.0f, 
-         0.5f, -0.5f,  0.0f,    1.0f, 0.0f,
+        // position              // texture
+        -0.5f, -0.5f,  0.0f,    0.0f, 0.0f,
+        -0.5f,  0.5f,  0.0f,    0.0f, 1.0f, 
          0.5f,  0.5f,  0.0f,    1.0f, 1.0f,
+         0.5f, -0.5f,  0.0f,    1.0f, 0.0f,
     };
 
     *size = 20 * sizeof(GLfloat);
@@ -645,8 +645,8 @@ GLuint* VertexLoader::loadGroundIndices(GLuint* size) {
 
 GLuint* VertexLoader::loadParticleIndices(GLuint* size) {
     GLuint* indicesParticle = new GLuint[6] {
-        0, 1, 2,
-        2, 3, 0,
+        1, 0, 3,
+        1, 3, 2
     };
 
     *size = 6 * sizeof(GLuint);

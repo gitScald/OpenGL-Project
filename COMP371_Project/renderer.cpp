@@ -256,6 +256,13 @@ void Renderer::toggleTextures() {
     updateTextureProperties();
 }
 
+void Renderer::toggleRain() {
+    // set whether rain
+    m_rainEnabled = !m_rainEnabled;
+    std::cout << "Rain: "
+        << (m_rainEnabled ? "ENABLED" : "DISABLED") << std::endl;
+}
+
 void Renderer::updateFogProperties() const {
     // update fog propeties
     Shader::useProgram(m_shaderEntity->getProgramID());
@@ -393,8 +400,8 @@ void Renderer::updateLightProperties() const {
         m_rimLightColor);
 
     // and for the particles
-    Shader::useProgram(m_shaderBlade->getProgramID());
-    m_shaderBlade->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
+    Shader::useProgram(m_shaderRain->getProgramID());
+    m_shaderRain->setUniformVec4(UNIFORM_RIM_LIGHT_COLOR,
         m_rimLightColor);
 }
 
@@ -1124,8 +1131,10 @@ void Renderer::initializeModel() {
 
 void Renderer::initializeParticles() {
     for (GLuint i{ 0 }; i != PARTICLE_COUNT; ++i) {
-        m_particles[i].m_life = -1.0f;
-        m_particles[i].m_distanceToCamera = -1.0f;
+        m_particles.push_back(new Particle());
+        m_particles.at(i)->m_life = -1.0f;
+        m_particles.at(i)->m_position.y = -1000.0f;
+        m_particles.at(i)->m_distanceToCamera = -1.0f;
     }
 
     // vertex data
@@ -1163,12 +1172,12 @@ void Renderer::initializeParticles() {
         GL_STREAM_DRAW);
 
     m_materials.push_back(new Material(
-        Texture(PATH_TEXTURE_BLADE,
+        Texture(PATH_TEXTURE_RAIN,
             GL_RGBA,
             GL_RGBA,
             GL_REPEAT,
             GL_LINEAR).getID(),
-        MATERIAL_SHININESS_GRASS));
+        16.0f));
 }
 
 void Renderer::initializePaths() {
@@ -1305,6 +1314,13 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     m_materials.at(4)->use(m_shaderEntity);
     renderModels(m_shaderEntity, deltaTime);
 
+    // render light
+    renderLights(deltaTime);
+
+    // render axes and grid
+    if (m_frameEnabled)
+        renderFrame();
+
     // render grass
     m_materials.at(1)->use(m_shaderGrass);
     renderGrass(deltaTime, 0);
@@ -1312,15 +1328,10 @@ void Renderer::renderSecondPass(GLfloat deltaTime) {
     renderGrass(deltaTime, 1);
 
     // render particles
-    m_materials.at(3)->use(m_shaderBlade);
-    renderParticles(deltaTime, POSITION_ORIGIN);
-
-    // render light
-    renderLights(deltaTime);
-
-    // render axes and grid
-    if (m_frameEnabled)
-        renderFrame();
+    if (m_rainEnabled) {
+        m_materials.at(3)->use(m_shaderRain);
+        renderParticles(deltaTime, POSITION_ORIGIN);
+    }
 }
 
 void Renderer::renderFrame() {
@@ -1585,32 +1596,34 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
 
 void Renderer::renderParticles(GLfloat deltaTime,
     const glm::vec3& origin) {
-    GLuint particleCount = static_cast<GLuint>(deltaTime * 100.0f);
 
-    for (GLuint i{ 0 }; i != particleCount; ++i) {
-        GLuint particle = findParticle();
-        m_particles[particle].m_life = 5.0f;
-        m_particles[particle].m_position = glm::vec3(
-            static_cast<GLfloat>(rand() % GRID_SIZE - POSITION_MAX),
-            LIGHT_POSITION_NOON.y,
-            static_cast<GLfloat>(rand() % GRID_SIZE - POSITION_MAX));
+    for (GLuint i{ 0 }; i != PARTICLE_COUNT; ++i) {
+        if (m_particles.at(i)->m_life < 0.0f
+            || m_particles.at(i)->m_position.y < 0.0f) {
+            m_particles.at(i)->m_life = 10.0f;
+            m_particles.at(i)->m_position = glm::vec3(
+                static_cast<GLfloat>(rand() % GRID_SIZE - POSITION_MAX),
+                LIGHT_POSITION_NOON.y + static_cast<GLfloat>(rand() % 65),
+                static_cast<GLfloat>(rand() % GRID_SIZE - POSITION_MAX));
+        }
     }
 
     glm::vec3 particleData[PARTICLE_COUNT];
-    particleCount = 0;
+    GLuint particleCount = 0;
     for (GLuint i{ 0 }; i != PARTICLE_COUNT; ++i) {
-        Particle* p = &m_particles[i];
+        Particle* p = m_particles.at(i);
 
         if (p->m_life > 0.0f) {
             p->m_life -= deltaTime;
 
             if (p->m_life > 0.0f) {
-                p->m_velocity += glm::vec3(glm::cos(deltaTime),
+                p->m_velocity = glm::vec3(0.0f,
                     -9.81f,
-                    glm::cos(deltaTime))
-                    * 1000.0f
+                    0.0f)
+                    * 100.0f
                     * deltaTime;
-                p->m_position = p->m_velocity * deltaTime;
+                p->m_position.y += p->m_velocity.y * deltaTime;
+
                 p->m_distanceToCamera = glm::length(p->m_position
                     - Camera::get().getPosition());
 
@@ -1633,22 +1646,18 @@ void Renderer::renderParticles(GLfloat deltaTime,
         sizeof(glm::vec3) * PARTICLE_COUNT,
         particleData,
         GL_STREAM_DRAW);
-    /*glBufferSubData(GL_ARRAY_BUFFER,
-        0,
-        sizeof(glm::vec3) * 3 * particleCount,
-        particleData);*/
 
-    Shader::useProgram(m_shaderBlade->getProgramID());
-    m_materials.at(3)->use(m_shaderBlade);
-    m_shaderBlade->setUniformVec3(UNIFORM_CAMERA_RIGHT,
+    Shader::useProgram(m_shaderRain->getProgramID());
+    m_materials.at(3)->use(m_shaderRain);
+    m_shaderRain->setUniformVec3(UNIFORM_CAMERA_RIGHT,
         Camera::get().getRightVector());
-    m_shaderBlade->setUniformVec3(UNIFORM_CAMERA_UP,
+    m_shaderRain->setUniformVec3(UNIFORM_CAMERA_UP,
         Camera::get().getUpVector());
-    m_shaderBlade->setUniformMat4(UNIFORM_MATRIX_MODEL,
+    m_shaderRain->setUniformMat4(UNIFORM_MATRIX_MODEL,
         Camera::get().getWorldOrientation());
-    m_shaderBlade->setUniformMat4(UNIFORM_MATRIX_VIEW,
+    m_shaderRain->setUniformMat4(UNIFORM_MATRIX_VIEW,
         Camera::get().getViewMatrix());
-    m_shaderBlade->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
+    m_shaderRain->setUniformMat4(UNIFORM_MATRIX_PROJECTION,
         Camera::get().getProjectionMatrix());
 
     glBindVertexArray(m_particleVAO);
@@ -1681,9 +1690,10 @@ void Renderer::renderParticles(GLfloat deltaTime,
     glVertexAttribDivisor(1, 0);
     glVertexAttribDivisor(2, 1);
 
-    glDrawArraysInstanced(GL_TRIANGLES,
-        0,
+    glDrawElementsInstanced(GL_TRIANGLES,
         6,
+        GL_UNSIGNED_INT,
+        0,
         particleCount);
 }
 
@@ -1742,24 +1752,15 @@ bool Renderer::isNight() const {
         && m_currentTime < 2.0f * glm::pi<GLfloat>());
 }
 
-GLuint Renderer::findParticle() {
-    for (GLuint i{ m_lastParticle }; i != PARTICLE_COUNT; ++i) {
-        if (m_particles[i].m_life < 0.0f) {
-            m_lastParticle = i;
+GLint Renderer::findParticle() {
+    for (GLuint i{ 0 }; i != PARTICLE_COUNT; ++i) {
+        if (m_particles.at(i)->m_life < 0.0f)
             return i;
-        }
     }
 
-    for (GLuint i{ 0 }; i != m_lastParticle; ++i) {
-        if (m_particles[i].m_life < 0) {
-            m_lastParticle = i;
-            return i;
-        }
-    }
-
-    return 0;
+    return -1;
 }
 
 void Renderer::sortParticles() {
-    std::sort(&m_particles[0], &m_particles[PARTICLE_COUNT - 1]);
+    std::sort(m_particles.begin(), m_particles.end());
 }

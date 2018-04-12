@@ -74,6 +74,7 @@ public:
     void togglePathing();
     void toggleShadows();
     void toggleTextures();
+    void toggleRain();
     void updateFogProperties() const;
     void updateLightPositionsAndColors();
     void updateLightProperties() const;
@@ -84,8 +85,8 @@ public:
 
 private:
     Renderer()
-        : m_shaderBlade{ new Shader(PATH_VERTEX_BLADE,
-            PATH_FRAGMENT_BLADE) },
+        : m_shaderRain{ new Shader(PATH_VERTEX_RAIN,
+            PATH_FRAGMENT_RAIN) },
         m_shaderEntity { new Shader(PATH_VERTEX_ENTITY,
             PATH_FRAGMENT_ENTITY) },
         m_shaderFrame{ new Shader(PATH_VERTEX_FRAME,
@@ -144,7 +145,7 @@ private:
     bool isNight() const;
 
     // particles
-    GLuint findParticle();
+    GLint findParticle();
     void sortParticles();
     
     static Renderer& s_instance;
@@ -163,14 +164,14 @@ private:
     glm::vec3 m_sunPosition;
 	glm::vec4 m_fogColor{ COLOR_FOG };
     glm::vec4 m_rimLightColor{ COLOR_LIGHT_DAY };
-    Shader* m_shaderBlade;
+    Shader* m_shaderRain;
     Shader* m_shaderEntity;
     Shader* m_shaderFrame;
     Shader* m_shaderGrass;
     Shader* m_shaderShadow;
     ShadowMap* m_shadowMap;
     Skybox* m_skybox;
-    Particle m_particles[PARTICLE_COUNT];
+    std::vector<Particle*> m_particles;
     GLuint m_axesVAO;
     GLuint m_axesVBO;
     GLuint m_gridVAO;
@@ -186,7 +187,6 @@ private:
     GLuint m_particleVBO;
     GLuint m_particleVBOPos;
     GLuint m_particleEBO;
-    GLuint m_lastParticle{ 0 };
     GLfloat m_animationSpeed{ ANIMATION_SPEED };
     GLfloat m_animationSpeedCurrent{ ANIMATION_SPEED };
     GLfloat m_currentTime{ 0.0f };
@@ -199,6 +199,7 @@ private:
     bool m_pathingEnabled{ false };
     bool m_shadowsEnabled{ true };
     bool m_texturesEnabled{ true };
+    bool m_rainEnabled{ false };
 };
 
 #endif // !RENDERER_H

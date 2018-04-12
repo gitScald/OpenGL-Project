@@ -15,8 +15,7 @@ public:
     GLfloat m_distanceToCamera;
 
     bool operator<(const Particle& particle) const {
-        return this->m_distanceToCamera > particle.m_distanceToCamera
-            || this->m_position.y < particle.m_position.y;
+        return this->m_distanceToCamera > particle.m_distanceToCamera;
     }
 };
 
