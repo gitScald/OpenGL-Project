@@ -108,6 +108,7 @@ void Model::setRotation(GLfloat value) {
     // set model position
     m_hierarchyRoot->setRotation(value);
     m_orientation = value;
+    updateVectors();
 }
 
 void Model::move(Transform::Displacement direction) {
@@ -290,16 +291,16 @@ void Model::setDepthShaderAttributes(Shader* shader) const {
 }
 
 void Model::clampPosition() {
-    // clamp model position
-    if (m_position.x > POSITION_MAX)
-        m_position.x = POSITION_MAX;
-    else if (m_position.z > POSITION_MAX)
-        m_position.z = POSITION_MAX;
+    // clamp model position (restrain for collisions)
+    if (m_position.x > (POSITION_MAX - 5.0f) / m_scale)
+        m_position.x = (POSITION_MAX - 5.0f) / m_scale;
+    else if (m_position.z > (POSITION_MAX - 5.0f) / m_scale)
+        m_position.z = (POSITION_MAX - 5.0f) / m_scale;
 
-    if (m_position.x < POSITION_MIN)
-        m_position.x = POSITION_MIN;
-    else if (m_position.z < POSITION_MIN)
-        m_position.z = POSITION_MIN;
+    if (m_position.x < (POSITION_MIN + 5.0f) / m_scale)
+        m_position.x = (POSITION_MIN + 5.0f) / m_scale;
+    else if (m_position.z < (POSITION_MIN + 5.0f) / m_scale)
+        m_position.z = (POSITION_MIN + 5.0f) / m_scale;
 }
 
 void Model::updateColliderRadius() {
@@ -335,9 +336,9 @@ void Model::updateColliderRadius() {
 
 void Model::updateVectors() {
     // calculate front vector using yaw angle
-    m_front.x = cos(glm::radians(m_orientation));
+    m_front.x = cos(glm::radians(-m_orientation));
     m_front.y = 0.0f;
-    m_front.z = sin(glm::radians(m_orientation));
+    m_front.z = sin(glm::radians(-m_orientation));
 
     // normalize front vector
     m_front = glm::normalize(m_front);

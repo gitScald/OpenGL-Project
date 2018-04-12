@@ -5,7 +5,6 @@
 #include "constants.h"
 #include "enums.h"
 #include "material.h"
-#include "shader.h"
 
 // GLEW
 #include <gl/glew.h>
@@ -55,6 +54,7 @@ public:
         m_front{ entity.m_front },
         m_right{ entity.m_right },
         m_color{ entity.m_color },
+        m_colorOriginal{ entity.m_colorOriginal },
         m_VAO{ entity.m_VAO },
         m_VBO{ entity.m_VBO },
         m_EBO{ entity.m_EBO },
@@ -77,6 +77,7 @@ public:
         m_front{ std::move(entity.m_front) },
         m_right{ std::move(entity.m_right) },
         m_color{ std::move(entity.m_color) },
+        m_colorOriginal{ std::move(entity.m_colorOriginal) },
         m_modelEntity{ std::move(entity.m_modelEntity) },
         m_VAO{ std::move(entity.m_VAO) },
         m_VBO{ std::move(entity.m_VBO) },
@@ -94,6 +95,7 @@ public:
     const glm::vec3& getScalingRelative() const;
     const glm::vec3& getPivot() const;
     const glm::vec3& getPosition() const;
+    const glm::vec4& getColorOriginal() const;
 
     // setters
     static void setSpeedCurrent(GLfloat value);
@@ -146,6 +148,7 @@ private:
     glm::vec3 m_front;
     glm::vec3 m_right;
     glm::vec4 m_color;
+    glm::vec4 m_colorOriginal;
     GLuint m_VAO;
     GLuint m_VBO;
     GLuint m_EBO{ NULL };
@@ -154,6 +157,7 @@ private:
     bool m_rotationSet{ false };
     bool m_scaleSet{ false };
     bool m_translationSet{ false };
+    bool m_colorSet{ false };
 };
 
 #endif // !RENDERED_ENTITY_H

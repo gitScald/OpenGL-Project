@@ -1119,7 +1119,7 @@ void Renderer::initializeModel() {
         m_models.at(modelIndex)->addJoint(m_joints.at(j));
 
     // scale model
-    for (GLuint i{ 0 }; i != 5; ++i)
+    for (GLuint i{ 0 }; i != 10; ++i)
         scaleModel(modelIndex, Transform::INCREASE);
 
     // place horse at random location and rotate it randomly
@@ -1191,7 +1191,7 @@ void Renderer::initializePaths() {
                     % static_cast<GLuint>(
                         (PATHING_DIRECTION_MAX - PATHING_DIRECTION_MIN + 1))
                     + PATHING_DIRECTION_MIN);
-            //GLfloat orientation = 45.0f;
+            //GLfloat orientation = 10.0f;
             GLfloat travelTime = (rand()
                 % static_cast<GLuint>(
                     (PATHING_DISTANCE_MAX - PATHING_DISTANCE_MIN + 1))
@@ -1547,8 +1547,30 @@ void Renderer::renderModels(Shader* shader, GLfloat deltaTime) {
                 collidingModels.begin(),
                 collidingModels.end(),
                 (*m_it)) };
-            if (it == collidingModels.end())
+            if (it == collidingModels.end()) {
                 m_paths.at(modelIndex)->traverse((*m_it), deltaTime);
+
+                Model::ModelHierarchy* hierarchy = (*m_it)->getHierarchy();
+                for (Model::ModelHierarchy::const_iterator e_it{ hierarchy->begin() };
+                    e_it != hierarchy->end();
+                    ++e_it)
+                    e_it->first->setColor(e_it->first->getColorOriginal());
+            }
+
+            // visual queue to identify "losing" models
+            else {
+                Model::ModelHierarchy* hierarchy = (*m_it)->getHierarchy();
+                for (Model::ModelHierarchy::const_iterator e_it{ hierarchy->begin() };
+                    e_it != hierarchy->end();
+                    ++e_it)
+                    e_it->first->setColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+            }
+
+            if ((*m_it) == m_models.at(0)) {
+                glm::vec3 pos = (*m_it)->getPosition();
+                pos.y = MODEL_POSITION_RELATIVE_TORSO.y;
+                (*m_it)->setPosition(pos);
+            }
         }
 
         // play animation sequence

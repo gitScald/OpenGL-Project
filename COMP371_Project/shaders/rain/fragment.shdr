@@ -20,6 +20,8 @@ vec4 lightingRim() {
 }
 
 void main() {
+    if (texture(u_texture, o_textureCoordinate).a < 0.3f)
+        discard;
+
     o_fragColor = lightingRim();
-    //o_fragColor = vec4(1.0f, 0.0f, 0.0f, 1.0);
 }

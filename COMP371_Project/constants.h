@@ -273,7 +273,7 @@ const GLuint SHADOW_INCREMENT_GRID_SAMPLES{ 2 };
 const GLfloat SHADOW_BORDER_COLOR[]{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 // animation-related constants
-const GLfloat ANIMATION_SPEED{ 2.0f };
+const GLfloat ANIMATION_SPEED{ 4.0f };
 const GLuint JOINT_HEAD{ 0 };
 const GLuint JOINT_LEG_LOWER_BACK_LEFT{ 9 };
 const GLuint JOINT_LEG_LOWER_BACK_RIGHT{ 5 };
@@ -287,12 +287,12 @@ const GLuint JOINT_NECK{ 1 };
 const GLuint JOINT_TORSO{ 10 };
 
 // pathing-related constants
-const GLfloat MODEL_SPEED{ 1.0f };
-const GLfloat PATHING_DIRECTION_MIN{ 10.0f };
+const GLfloat MODEL_SPEED{ 0.5f };
+const GLfloat PATHING_DIRECTION_MIN{ 20.0f };
 const GLfloat PATHING_DIRECTION_MAX{ 45.0f };
 const GLfloat PATHING_DISTANCE_MIN{ 1.0f };
 const GLfloat PATHING_DISTANCE_MAX{ 4.0f };
-const GLfloat PATHING_SPEED{ 1.0f };
+const GLfloat PATHING_SPEED{ 2.0f };
 const GLuint PATH_COUNT{ 15 };
 
 // fog-related constants

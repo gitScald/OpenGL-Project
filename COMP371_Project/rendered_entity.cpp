@@ -44,6 +44,10 @@ const glm::vec3& RenderedEntity::getPosition() const {
     return m_position;
 }
 
+const glm::vec4& RenderedEntity::getColorOriginal() const {
+    return m_colorOriginal;
+}
+
 void RenderedEntity::setSpeedCurrent(GLfloat value) {
     // set movement speed
     s_speedCurrent = value;
@@ -52,6 +56,11 @@ void RenderedEntity::setSpeedCurrent(GLfloat value) {
 void RenderedEntity::setColor(const glm::vec4& value) {
     // set entity color
     m_color = value;
+
+    if (!m_colorSet) {
+        m_colorOriginal = m_color;
+        m_colorSet = true;
+    }
 }
 
 void RenderedEntity::setFrontVector(const glm::vec3& value) {

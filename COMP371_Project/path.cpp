@@ -20,8 +20,7 @@ void Path::traverse(Model* model,
 
     // get angles
     GLfloat currentOrientation = model->getOrientation();
-    GLfloat targetOrientation = m_pathSequence.at(m_step)->m_direction;
-    GLfloat deltaOrientation = (targetOrientation - currentOrientation)
+    GLfloat targetOrientation = m_pathSequence.at(m_step)->m_direction
         * m_speed
         * deltaTime;
 
@@ -34,7 +33,6 @@ void Path::traverse(Model* model,
         m_step = 0;
 
     // apply current step
-    model->setRotation(deltaOrientation);
-    model->rotate(deltaOrientation, AXIS_Y);
+    model->setRotation(currentOrientation + targetOrientation);
     model->move(Transform::FRONT);
 }

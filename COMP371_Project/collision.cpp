@@ -22,6 +22,7 @@ const std::vector<Model*> Collision::detectCollisions(
         GLfloat iColliderRadius = models.at(i)->getColliderRadius();
         bool colliding{ false };
 
+        GLint winner = -1;
         for (GLuint j{ 0 }; j != models.size(); ++j) {
             // check if two distinct models are being checked
             if (j != i
@@ -38,14 +39,16 @@ const std::vector<Model*> Collision::detectCollisions(
                 // check if model is colliding
                 if (dist <= sumRadii) {
                     colliding = true;
+                    winner = j;
                     break;
                 }
             }
         }
 
         // update collision vector accordingly
-        if (colliding)
+        if (colliding) {
             addToCollisionVector(models.at(i));
+        }
         else
             removeFromCollisionVector(models.at(i));
     }

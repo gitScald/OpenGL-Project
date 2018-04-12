@@ -78,6 +78,7 @@ vec3 objectColorDiffuse() {
     // object color to use
     vec3 color = texturesEnabled()
         * texture(u_material.diffuse, o_textureCoordinate).rgb
+        * u_color.rgb
         + (1.0f - texturesEnabled())
         * u_color.rgb;
 
@@ -88,6 +89,7 @@ vec3 objectColorSpecular() {
     // object color to use
     vec3 color = texturesEnabled()
         * texture(u_material.specular, o_textureCoordinate).rgb
+        * u_color.rgb
         + (1.0f - texturesEnabled())
         * u_color.rgb;
 
